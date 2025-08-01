@@ -9,6 +9,7 @@ Sistema Web para Gestão de Orçamentos Voltado a Pequenos Negócios
 - Shadcn
 - PrismaORM
 - PostgreSQL
+- BetterAuth
 
 ## ✅ Rodar projeto
 
