@@ -38,14 +38,14 @@ export function LoginForm() {
     await authClient.signIn.email({
       email: formData.email,
       password: formData.password,
-      callbackURL: "/dashboard",
+      callbackURL: "/workspace-management",
     }, {
       onRequest: (ctx) => {
         
       },
       onSuccess: (ctx) => {
         console.log("Login bem-sucedido:", ctx)
-        router.replace("/dashboard")
+        router.replace("/workspace-management")
       },
       onError: (ctx) => {
         console.error("Erro ao fazer login:", ctx)
@@ -57,7 +57,7 @@ export function LoginForm() {
   async function signInWithGoogle() {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: "/workspace-management",
     })
   }
 

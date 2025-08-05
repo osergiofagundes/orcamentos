@@ -48,14 +48,14 @@ export function SignupForm() {
       name: formData.name,
       email: formData.email,
       password: formData.password,
-      callbackURL: "/dashboard",
+      callbackURL: "/workspace-management",
     }, {
       onRequest: (ctx) => {
 
       },
       onSuccess: (ctx) => {
         console.log("Usuário cadastrado com sucesso:", CarTaxiFrontIcon)
-        router.replace("/dashboard")
+        router.replace("/workspace-management")
       },
       onError: (ctx) => {
         console.error("Erro ao cadastrar:", ctx)
