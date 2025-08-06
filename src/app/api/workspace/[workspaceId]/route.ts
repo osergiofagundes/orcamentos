@@ -6,7 +6,7 @@ import { headers } from 'next/headers'
 // GET /api/workspaces/[workspaceId] - Detalhes do workspace
 export async function GET(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -16,10 +16,12 @@ export async function GET(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { workspaceId } = await params
+
     try {
         const workspace = await prisma.areaTrabalho.findUnique({
             where: {
-                id: parseInt(params.workspaceId),
+                id: parseInt(workspaceId),
                 usuariosAreas: {
                     some: {
                         usuario_id: session.user.id
@@ -51,7 +53,7 @@ export async function GET(
 // PUT /api/workspaces/[workspaceId] - Atualizar workspace
 export async function PUT(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -62,12 +64,14 @@ export async function PUT(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { workspaceId } = await params
+
     try {
         // Verifica se usuário tem permissão de owner
         const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
-                area_trabalho_id: parseInt(params.workspaceId),
+                area_trabalho_id: parseInt(workspaceId),
                 nivel_permissao: 3 // Nível de dono
             }
         })
@@ -77,12 +81,13 @@ export async function PUT(
         }
 
         const updatedWorkspace = await prisma.areaTrabalho.update({
-            where: { id: parseInt(params.workspaceId) },
+            where: { id: parseInt(workspaceId) },
             data: { nome, descricao, cpf_cnpj }
         })
 
         return NextResponse.json(updatedWorkspace)
     } catch (error) {
+        console.error('Error updating workspace:', error)
         return NextResponse.json(
             { error: 'Failed to update workspace' },
             { status: 500 }
@@ -93,7 +98,7 @@ export async function PUT(
 // DELETE /api/workspaces/[workspaceId] - Deletar workspace
 export async function DELETE(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -103,12 +108,14 @@ export async function DELETE(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { workspaceId } = await params
+
     try {
         // Verifica se usuário tem permissão de owner
         const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
-                area_trabalho_id: parseInt(params.workspaceId),
+                area_trabalho_id: parseInt(workspaceId),
                 nivel_permissao: 3 // Nível de dono
             }
         })
@@ -117,12 +124,14 @@ export async function DELETE(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
+        // Com cascade delete configurado, a exclusão dos registros relacionados acontece automaticamente
         await prisma.areaTrabalho.delete({
-            where: { id: parseInt(params.workspaceId) }
+            where: { id: parseInt(workspaceId) }
         })
 
         return NextResponse.json({ success: true })
     } catch (error) {
+        console.error('Error deleting workspace:', error)
         return NextResponse.json(
             { error: 'Failed to delete workspace' },
             { status: 500 }

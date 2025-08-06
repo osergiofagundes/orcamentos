@@ -104,8 +104,8 @@ model UsuarioAreaTrabalho {
   nivel_permissao     Int
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
-  usuario             User           @relation(fields: [usuario_id], references: [id])
-  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
+  usuario             User           @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
 
   @@unique([usuario_id, area_trabalho_id])
   @@map("usuario_area_trabalho")
