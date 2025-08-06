@@ -1,7 +1,5 @@
-import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import { Button } from '@/components/ui/button'
-import { WorkspaceCard } from './_components/workspace-card'
+import { WorkspaceListClient } from './_components/workspace-list-client'
 import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
 
@@ -38,35 +36,5 @@ export default async function WorkspaceManagementPage() {
     }
   })
 
-  return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Minhas Áreas de Trabalho</h1>
-        <Link href="/workspace-management/new">
-          <Button variant="default">
-            Nova Área de Trabalho
-          </Button>
-        </Link>
-      </div>
-
-      {workspaces.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">Você ainda não tem nenhuma área de trabalho</p>
-          <Link href="/workspace-management/new">
-            <Button>Criar primeira área</Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workspaces.map((workspace) => (
-            <WorkspaceCard 
-              key={workspace.id}
-              workspace={workspace}
-              userPermissionLevel={workspace.usuariosAreas[0]?.nivel_permissao || 1}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  return <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
 }

@@ -24,10 +24,16 @@ export async function GET() {
             },
             include: {
                 usuariosAreas: {
-                    include: {
-                        usuario: true
+                    where: {
+                        usuario_id: session.user.id
+                    },
+                    select: {
+                        nivel_permissao: true
                     }
                 }
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         })
 
