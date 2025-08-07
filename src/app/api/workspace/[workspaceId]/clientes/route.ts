@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth"
 import { headers } from 'next/headers'
 
-// GET /api/workspaces/[workspaceId]/members - Listar membros
+// GET /api/workspace/[workspaceId]/clientes - Listar clientes
 export async function GET(
     req: Request,
     { params }: { params: Promise<{ workspaceId: string }> }
@@ -12,7 +12,7 @@ export async function GET(
     
     const session = await auth.api.getSession({
         headers: await headers(),
-    });
+    })
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -31,25 +31,27 @@ export async function GET(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const members = await prisma.usuarioAreaTrabalho.findMany({
+        const clientes = await prisma.cliente.findMany({
             where: {
-                area_trabalho_id: parseInt(workspaceId)
+                area_trabalho_id: parseInt(workspaceId),
+                deletedAt: null
             },
-            include: {
-                usuario: true
+            orderBy: {
+                createdAt: 'desc'
             }
         })
 
-        return NextResponse.json(members)
+        return NextResponse.json(clientes)
     } catch (error) {
+        console.error('Failed to fetch clients:', error)
         return NextResponse.json(
-            { error: 'Failed to fetch members' },
+            { error: 'Failed to fetch clients' },
             { status: 500 }
         )
     }
 }
 
-// POST /api/workspaces/[workspaceId]/members - Adicionar membro
+// POST /api/workspace/[workspaceId]/clientes - Criar cliente
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ workspaceId: string }> }
@@ -58,52 +60,59 @@ export async function POST(
     
     const session = await auth.api.getSession({
         headers: await headers(),
-    });
-    const { email, nivel_permissao } = await req.json()
+    })
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     try {
-        // Verifica se usuário tem permissão para adicionar membros (admin ou owner)
-        const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
+        // Verifica se usuário tem acesso ao workspace
+        const hasAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
-                area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao: { gte: 2 } // Nível de admin ou owner
+                area_trabalho_id: parseInt(workspaceId)
             }
         })
 
-        if (!userAccess) {
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        // Busca usuário pelo email
-        const userToAdd = await prisma.user.findUnique({
-            where: { email }
-        })
+        const { nome, cpf_cnpj, telefone, email, endereco } = await req.json()
 
-        if (!userToAdd) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 })
-        }
-
-        // Adiciona usuário ao workspace
-        const newMember = await prisma.usuarioAreaTrabalho.create({
-            data: {
-                usuario_id: userToAdd.id,
+        // Verificar se CPF/CNPJ já existe no workspace
+        const existingClient = await prisma.cliente.findFirst({
+            where: {
+                cpf_cnpj,
                 area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao
-            },
-            include: {
-                usuario: true
+                deletedAt: null
             }
         })
 
-        return NextResponse.json(newMember, { status: 201 })
+        if (existingClient) {
+            return NextResponse.json(
+                { error: 'Cliente com este CPF/CNPJ já existe' },
+                { status: 400 }
+            )
+        }
+
+        const cliente = await prisma.cliente.create({
+            data: {
+                nome,
+                cpf_cnpj,
+                telefone,
+                email,
+                endereco,
+                area_trabalho_id: parseInt(workspaceId)
+            }
+        })
+
+        return NextResponse.json(cliente, { status: 201 })
     } catch (error) {
+        console.error('Failed to create client:', error)
         return NextResponse.json(
-            { error: 'Failed to add member' },
+            { error: 'Failed to create client' },
             { status: 500 }
         )
     }
