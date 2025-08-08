@@ -9,25 +9,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react"
-import { EditClientModal } from "./edit-client-modal"
-import { DeleteClientModal } from "./delete-client-modal"
+import { EditProductModal } from "./edit-product-modal"
+import { DeleteProductModal } from "./delete-product-modal"
 
-interface Client {
+interface Product {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone: string | null
-  email: string | null
-  endereco: string | null
+  descricao?: string | null
+  valor?: number | null
+  categoria_id: number
+  categoria: {
+    id: number
+    nome: string
+  }
 }
 
-interface ClientActionsProps {
-  client: Client
+interface ProductActionsProps {
+  product: Product
   workspaceId: string
-  onUpdate?: () => void
 }
 
-export function ClientActions({ client, workspaceId, onUpdate }: ClientActionsProps) {
+export function ProductActions({ product, workspaceId }: ProductActionsProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -35,7 +37,7 @@ export function ClientActions({ client, workspaceId, onUpdate }: ClientActionsPr
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="sr-only">Abrir menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
@@ -55,20 +57,18 @@ export function ClientActions({ client, workspaceId, onUpdate }: ClientActionsPr
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditClientModal
+      <EditProductModal
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
-        client={client}
+        product={product}
         workspaceId={workspaceId}
-        onSuccess={onUpdate}
       />
 
-      <DeleteClientModal
+      <DeleteProductModal
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        client={client}
+        product={product}
         workspaceId={workspaceId}
-        onSuccess={onUpdate}
       />
     </>
   )
