@@ -13,7 +13,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { ClientsStats, ClientsList, CreateClientButton } from "./_components"
+import { ClientsStats } from "./_components/clients-stats-client"
+import { ClientsList } from "./_components/clients-list-client"
+import { CreateClientButton } from "./_components"
 
 interface PageProps {
   params: Promise<{ workspaceId: string }>
@@ -48,10 +50,10 @@ export default async function ClientesPage({ params }: PageProps) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
           <div className="flex items-center justify-between">
-            <div className="grid gap-1">
-              <h1 className="text-2xl font-semibold">Clientes</h1>
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
               <p className="text-muted-foreground">
                 Gerencie seus clientes e acompanhe estatísticas importantes
               </p>
@@ -59,8 +61,10 @@ export default async function ClientesPage({ params }: PageProps) {
             <CreateClientButton workspaceId={workspaceId} />
           </div>
 
-          <ClientsStats workspaceId={workspaceId} />
-          <ClientsList workspaceId={workspaceId} />
+          <div className="space-y-6">
+            <ClientsStats workspaceId={workspaceId} />
+            <ClientsList workspaceId={workspaceId} />
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

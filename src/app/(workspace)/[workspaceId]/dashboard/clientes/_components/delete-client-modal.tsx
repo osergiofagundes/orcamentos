@@ -27,9 +27,10 @@ interface DeleteClientModalProps {
   onClose: () => void
   client: Client
   workspaceId: string
+  onSuccess?: () => void
 }
 
-export function DeleteClientModal({ isOpen, onClose, client, workspaceId }: DeleteClientModalProps) {
+export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSuccess }: DeleteClientModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -47,6 +48,7 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId }: Dele
 
       toast.success("Cliente excluído com sucesso!")
       onClose()
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao excluir cliente")

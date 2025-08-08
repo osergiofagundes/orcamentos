@@ -50,9 +50,10 @@ interface EditClientModalProps {
   onClose: () => void
   client: Client
   workspaceId: string
+  onSuccess?: () => void
 }
 
-export function EditClientModal({ isOpen, onClose, client, workspaceId }: EditClientModalProps) {
+export function EditClientModal({ isOpen, onClose, client, workspaceId, onSuccess }: EditClientModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -85,6 +86,7 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId }: EditCl
 
       toast.success("Cliente atualizado com sucesso!")
       onClose()
+      onSuccess?.()
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao atualizar cliente")
