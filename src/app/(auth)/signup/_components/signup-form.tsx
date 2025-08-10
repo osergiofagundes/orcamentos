@@ -64,6 +64,13 @@ export function SignupForm() {
 
   }
 
+  async function signInWithGoogle() {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/workspace-management",
+    })
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -176,6 +183,24 @@ export function SignupForm() {
           ) : (
             "Cadastrar"
           )}
+        </Button>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Ou continue com</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+          onClick={signInWithGoogle}
+        >
+          Entrar com Google
         </Button>
       </form>
     </Form>
