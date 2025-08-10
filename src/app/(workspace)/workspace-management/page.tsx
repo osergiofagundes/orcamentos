@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { WorkspaceListClient } from './_components/workspace-list-client'
 import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
+import { WorkspaceManagementNavbar } from '@/components/workspace-management-navbar'
+import { Separator } from '@/components/ui/separator'
 
 export default async function WorkspaceManagementPage() {
   const session = await auth.api.getSession({
@@ -10,6 +12,13 @@ export default async function WorkspaceManagementPage() {
 
   if (!session?.user?.id) {
     return <div>Você precisa estar logado para acessar esta página</div>
+  }
+
+  // Busca dados do usuário para o menu
+  const user = {
+    name: session.user.name || 'Usuário',
+    email: session.user.email || '',
+    avatar: session.user.image || '/avatars/default.jpg',
   }
 
   // Busca todos os workspaces do usuário
@@ -36,5 +45,15 @@ export default async function WorkspaceManagementPage() {
     }
   })
 
-  return <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Navbar */}
+      <WorkspaceManagementNavbar user={user} />
+      <Separator />
+      {/* Conteúdo principal */}
+      <main className="flex-1">
+        <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
+      </main>
+    </div>
+  )
 }
