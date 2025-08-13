@@ -27,9 +27,10 @@ interface Product {
 interface ProductActionsProps {
   product: Product
   workspaceId: string
+  onProductDeleted?: () => void
 }
 
-export function ProductActions({ product, workspaceId }: ProductActionsProps) {
+export function ProductActions({ product, workspaceId, onProductDeleted }: ProductActionsProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -69,6 +70,7 @@ export function ProductActions({ product, workspaceId }: ProductActionsProps) {
         onClose={() => setDeleteOpen(false)}
         product={product}
         workspaceId={workspaceId}
+        onProductDeleted={onProductDeleted}
       />
     </>
   )

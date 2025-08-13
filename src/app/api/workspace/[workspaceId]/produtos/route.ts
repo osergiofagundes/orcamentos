@@ -41,6 +41,7 @@ export async function GET(
     const produtos = await prisma.produtoServico.findMany({
       where: {
         area_trabalho_id: parseInt(workspaceId),
+        deletedAt: null,
       },
       include: {
         categoria: true,

@@ -114,7 +114,11 @@ export function ProductsGrid({ workspaceId }: ProductsGridProps) {
                     </Badge>
                   </div>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <ProductActions product={product} workspaceId={workspaceId} />
+                    <ProductActions 
+                      product={product} 
+                      workspaceId={workspaceId} 
+                      onProductDeleted={fetchProducts}
+                    />
                   </div>
                 </div>
               </CardHeader>

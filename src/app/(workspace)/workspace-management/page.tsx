@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
 import { WorkspaceManagementNavbar } from '@/components/workspace-management-navbar'
 import { Separator } from '@/components/ui/separator'
+import { redirect } from 'next/navigation'
 
 export default async function WorkspaceManagementPage() {
   const session = await auth.api.getSession({
@@ -11,7 +12,7 @@ export default async function WorkspaceManagementPage() {
     });
 
   if (!session?.user?.id) {
-    return <div>Você precisa estar logado para acessar esta página</div>
+    redirect('/signin')
   }
 
   // Busca dados do usuário para o menu
