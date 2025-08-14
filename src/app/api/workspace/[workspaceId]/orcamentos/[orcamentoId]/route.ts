@@ -235,3 +235,78 @@ export async function PUT(
     )
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ workspaceId: string; orcamentoId: string }> }
+) {
+  try {
+    const { workspaceId, orcamentoId } = await params
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+    }
+
+    // Verificar se o usuário tem acesso ao workspace
+    const userWorkspace = await prisma.usuarioAreaTrabalho.findFirst({
+      where: {
+        usuario_id: session.user.id,
+        area_trabalho_id: parseInt(workspaceId),
+      },
+    })
+
+    if (!userWorkspace) {
+      return NextResponse.json({ error: "Acesso negado" }, { status: 403 })
+    }
+
+    // Verificar se o orçamento existe e pertence ao workspace
+    const existingOrcamento = await prisma.orcamento.findFirst({
+      where: {
+        id: parseInt(orcamentoId),
+        area_trabalho_id: parseInt(workspaceId),
+      },
+    })
+
+    if (!existingOrcamento) {
+      return NextResponse.json(
+        { error: "Orçamento não encontrado" },
+        { status: 404 }
+      )
+    }
+
+    // Verificar se o orçamento pode ser excluído (apenas RASCUNHO e ENVIADO)
+    if (!["RASCUNHO", "ENVIADO"].includes(existingOrcamento.status)) {
+      return NextResponse.json(
+        { error: "Este orçamento não pode ser excluído" },
+        { status: 400 }
+      )
+    }
+
+    // Excluir orçamento e itens em transação
+    await prisma.$transaction(async (tx) => {
+      // Primeiro, excluir todos os itens do orçamento
+      await tx.itemOrcamento.deleteMany({
+        where: { orcamento_id: parseInt(orcamentoId) },
+      })
+
+      // Depois, excluir o orçamento
+      await tx.orcamento.delete({
+        where: { id: parseInt(orcamentoId) },
+      })
+    })
+
+    return NextResponse.json({ 
+      message: "Orçamento excluído com sucesso",
+      success: true 
+    })
+  } catch (error) {
+    console.error("Erro ao excluir orçamento:", error)
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
+    )
+  }
+}

@@ -22,12 +22,14 @@ import {
   Mail,
   Phone,
   MapPin,
-  Edit
+  Edit,
+  Trash2
 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useRouter } from "next/navigation"
 import { EditOrcamentoModal } from "../../_components/edit-orcamento-modal"
+import { DeleteOrcamentoModal } from "../../_components/delete-orcamento-modal"
 
 interface OrcamentoDetalhado {
   id: number
@@ -83,6 +85,7 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -130,12 +133,24 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
     setEditModalOpen(true)
   }
 
+  const handleDeleteOrcamento = () => {
+    setDeleteModalOpen(true)
+  }
+
   const handleCloseEditModal = () => {
     setEditModalOpen(false)
   }
 
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false)
+  }
+
   const handleOrcamentoUpdated = () => {
     loadOrcamento() // Recarregar os dados
+  }
+
+  const handleOrcamentoDeleted = () => {
+    router.push(`/${workspaceId}/dashboard/orcamentos`) // Voltar para a lista
   }
 
   if (loading) {
@@ -212,14 +227,25 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
             {statusLabels[orcamento.status as keyof typeof statusLabels]}
           </Badge>
           {(orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO") && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleEditOrcamento}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
+            <>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={handleEditOrcamento}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteOrcamento}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -382,6 +408,20 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
           isOpen={editModalOpen}
           onClose={handleCloseEditModal}
           onOrcamentoUpdated={handleOrcamentoUpdated}
+        />
+      )}
+
+      {/* Modal de Exclusão */}
+      {orcamento && (
+        <DeleteOrcamentoModal
+          orcamentoId={orcamento.id}
+          orcamentoNumero={orcamento.id.toString()}
+          clienteNome={orcamento.cliente.nome}
+          valorTotal={orcamento.valor_total}
+          workspaceId={workspaceId}
+          isOpen={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          onOrcamentoDeleted={handleOrcamentoDeleted}
         />
       )}
     </div>

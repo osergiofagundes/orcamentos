@@ -13,10 +13,11 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, FileText, Calendar, DollarSign, User, Edit } from "lucide-react"
+import { Eye, FileText, Calendar, DollarSign, User, Edit, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { EditOrcamentoModal } from "./edit-orcamento-modal"
+import { DeleteOrcamentoModal } from "./delete-orcamento-modal"
 
 interface Orcamento {
   id: number
@@ -65,7 +66,9 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedOrcamentoId, setSelectedOrcamentoId] = useState<number | null>(null)
+  const [selectedOrcamento, setSelectedOrcamento] = useState<Orcamento | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -92,12 +95,26 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
     setEditModalOpen(true)
   }
 
+  const handleDeleteOrcamento = (orcamento: Orcamento) => {
+    setSelectedOrcamento(orcamento)
+    setDeleteModalOpen(true)
+  }
+
   const handleCloseEditModal = () => {
     setEditModalOpen(false)
     setSelectedOrcamentoId(null)
   }
 
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setSelectedOrcamento(null)
+  }
+
   const handleOrcamentoUpdated = () => {
+    loadOrcamentos() // Recarregar a lista
+  }
+
+  const handleOrcamentoDeleted = () => {
     loadOrcamentos() // Recarregar a lista
   }
 
@@ -263,14 +280,25 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
                         Visualizar
                       </Button>
                       {(orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO") && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditOrcamento(orcamento.id)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar
-                        </Button>
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditOrcamento(orcamento.id)}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteOrcamento(orcamento)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </Button>
+                        </>
                       )}
                     </div>
                   </TableCell>
@@ -289,6 +317,20 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
           isOpen={editModalOpen}
           onClose={handleCloseEditModal}
           onOrcamentoUpdated={handleOrcamentoUpdated}
+        />
+      )}
+
+      {/* Modal de Exclusão */}
+      {selectedOrcamento && (
+        <DeleteOrcamentoModal
+          orcamentoId={selectedOrcamento.id}
+          orcamentoNumero={selectedOrcamento.id.toString()}
+          clienteNome={selectedOrcamento.cliente.nome}
+          valorTotal={selectedOrcamento.valor_total}
+          workspaceId={workspaceId}
+          isOpen={deleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          onOrcamentoDeleted={handleOrcamentoDeleted}
         />
       )}
     </div>
