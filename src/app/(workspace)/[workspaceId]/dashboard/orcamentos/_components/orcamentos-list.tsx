@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -62,6 +63,7 @@ const statusLabels = {
 export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     loadOrcamentos()
@@ -234,7 +236,11 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => router.push(`/${workspaceId}/dashboard/orcamentos/${orcamento.id}`)}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       Visualizar
                     </Button>
