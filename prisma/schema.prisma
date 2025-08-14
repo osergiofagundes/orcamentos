@@ -133,6 +133,7 @@ model Orcamento {
   data_criacao        DateTime       @default(now())
   valor_total         Int?           // Em centavos (R$ 10,50 = 1050)
   status              StatusOrcamento @default(RASCUNHO)
+  observacoes         String?        @db.Text
   cliente_id          Int
   usuario_id          String         // Alterado para String para relacionar com User.id
   area_trabalho_id    Int

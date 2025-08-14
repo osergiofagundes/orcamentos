@@ -98,7 +98,7 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { clienteId, itens } = body
+    const { clienteId, observacoes, itens } = body
 
     // Validar dados
     if (!clienteId || !itens || !Array.isArray(itens) || itens.length === 0) {
@@ -140,6 +140,7 @@ export async function POST(
           area_trabalho_id: parseInt(workspaceId),
           valor_total: valorTotal,
           status: "RASCUNHO",
+          observacoes: observacoes || null,
         },
       })
 

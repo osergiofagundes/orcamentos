@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2 } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -35,6 +36,7 @@ import { toast } from "sonner"
 
 const createOrcamentoSchema = z.object({
   clienteId: z.string().min(1, "Selecione um cliente"),
+  observacoes: z.string().optional(),
   itens: z.array(z.object({
     produtoServicoId: z.string().min(1, "Selecione um produto/serviço"),
     quantidade: z.number().min(1, "Quantidade deve ser maior que 0"),
@@ -74,6 +76,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     resolver: zodResolver(createOrcamentoSchema),
     defaultValues: {
       clienteId: "",
+      observacoes: "",
       itens: [{ produtoServicoId: "", quantidade: 1, precoUnitario: 0 }],
     },
   })
@@ -190,6 +193,24 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="observacoes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Observações adicionais sobre o orçamento..."
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
