@@ -21,11 +21,13 @@ import {
   ArrowLeft,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  Edit
 } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useRouter } from "next/navigation"
+import { EditOrcamentoModal } from "../../_components/edit-orcamento-modal"
 
 interface OrcamentoDetalhado {
   id: number
@@ -80,6 +82,7 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
   const [orcamento, setOrcamento] = useState<OrcamentoDetalhado | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -121,6 +124,18 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
 
   const calculateSubtotal = (quantidade: number, precoUnitario: number) => {
     return quantidade * precoUnitario
+  }
+
+  const handleEditOrcamento = () => {
+    setEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+  }
+
+  const handleOrcamentoUpdated = () => {
+    loadOrcamento() // Recarregar os dados
   }
 
   if (loading) {
@@ -190,11 +205,23 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
             </p>
           </div>
         </div>
-        <Badge 
-          className={`text-sm ${statusColors[orcamento.status as keyof typeof statusColors]}`}
-        >
-          {statusLabels[orcamento.status as keyof typeof statusLabels]}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge 
+            className={`text-sm ${statusColors[orcamento.status as keyof typeof statusColors]}`}
+          >
+            {statusLabels[orcamento.status as keyof typeof statusLabels]}
+          </Badge>
+          {(orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO") && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleEditOrcamento}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Cards de informações */}
@@ -345,6 +372,17 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
             <p className="text-muted-foreground">{orcamento.observacoes}</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Modal de Edição */}
+      {orcamento && orcamento.id && (
+        <EditOrcamentoModal
+          orcamentoId={orcamento.id}
+          workspaceId={workspaceId}
+          isOpen={editModalOpen}
+          onClose={handleCloseEditModal}
+          onOrcamentoUpdated={handleOrcamentoUpdated}
+        />
       )}
     </div>
   )

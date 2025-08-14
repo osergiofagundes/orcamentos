@@ -13,9 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, FileText, Calendar, DollarSign, User } from "lucide-react"
+import { Eye, FileText, Calendar, DollarSign, User, Edit } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { EditOrcamentoModal } from "./edit-orcamento-modal"
 
 interface Orcamento {
   id: number
@@ -63,6 +64,8 @@ const statusLabels = {
 export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedOrcamentoId, setSelectedOrcamentoId] = useState<number | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -82,6 +85,20 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEditOrcamento = (orcamentoId: number) => {
+    setSelectedOrcamentoId(orcamentoId)
+    setEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedOrcamentoId(null)
+  }
+
+  const handleOrcamentoUpdated = () => {
+    loadOrcamentos() // Recarregar a lista
   }
 
   const formatCurrency = (value: number | null) => {
@@ -236,14 +253,26 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => router.push(`/${workspaceId}/dashboard/orcamentos/${orcamento.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      Visualizar
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => router.push(`/${workspaceId}/dashboard/orcamentos/${orcamento.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar
+                      </Button>
+                      {(orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO") && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditOrcamento(orcamento.id)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -251,6 +280,17 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
           </Table>
         </CardContent>
       </Card>
+
+      {/* Modal de Edição */}
+      {selectedOrcamentoId && selectedOrcamentoId > 0 && (
+        <EditOrcamentoModal
+          orcamentoId={selectedOrcamentoId}
+          workspaceId={workspaceId}
+          isOpen={editModalOpen}
+          onClose={handleCloseEditModal}
+          onOrcamentoUpdated={handleOrcamentoUpdated}
+        />
+      )}
     </div>
   )
 }
