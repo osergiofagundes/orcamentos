@@ -12,69 +12,69 @@ import {
 } from "@/components/ui/table"
 import { ClientActions } from "./client-actions"
 import { Badge } from "@/components/ui/badge"
-import { User, Building, Phone, Mail, Calendar, Search, Users } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { User, Building, Phone, Mail, Calendar } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface Client {
   id: number
   nome: string
-  email: string | null
-  telefone: string | null
-  tipo_pessoa: "PF" | "PJ"
-  documento: string | null
   cpf_cnpj: string
-  endereco: string | null
+  telefone: string
+  email: string
+  endereco: string
   createdAt: string
   updatedAt: string
 }
 
-interface ClientsListProps {
+interface ClientsListClientProps {
   workspaceId: string
+  refreshTrigger: number
 }
 
-export function ClientsList({ workspaceId }: ClientsListProps) {
+export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListClientProps) {
   const [clients, setClients] = useState<Client[]>([])
-  const [filteredClients, setFilteredClients] = useState<Client[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await fetch(`/api/workspace/${workspaceId}/clientes`)
+    loadClients()
+  }, [workspaceId, refreshTrigger])
 
-        if (response.ok) {
-          const data = await response.json()
-          setClients(data)
-          setFilteredClients(data)
-        }
-      } catch (error) {
-        console.error("Erro ao buscar clientes:", error)
-      } finally {
-        setIsLoading(false)
+  const loadClients = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/workspace/${workspaceId}/clientes`)
+      if (response.ok) {
+        const data = await response.json()
+        setClients(data)
       }
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchClients()
-  }, [workspaceId])
-
-  useEffect(() => {
-    const filtered = clients.filter(client =>
-      client.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.telefone?.includes(searchTerm) ||
-      client.documento?.includes(searchTerm)
-    )
-    setFilteredClients(filtered)
-  }, [searchTerm, clients])
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
-  const formatPhone = (phone: string | null) => {
+  const formatCpfCnpj = (cpfCnpj: string) => {
+    const numbersOnly = cpfCnpj.replace(/\D/g, '')
+    
+    if (numbersOnly.length === 11) {
+      // CPF
+      return cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+    } else if (numbersOnly.length === 14) {
+      // CNPJ
+      return cpfCnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+    }
+    return cpfCnpj
+  }
+
+  const getClientType = (cpfCnpj: string) => {
+    const numbersOnly = cpfCnpj.replace(/\D/g, '')
+    return numbersOnly.length === 11 ? 'PF' : 'PJ'
+  }
+
+  const formatPhone = (phone: string) => {
     if (!phone) return "-"
-    // Formatar telefone brasileiro
     const cleaned = phone.replace(/\D/g, '')
     if (cleaned.length === 11) {
       return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`
@@ -84,187 +84,122 @@ export function ClientsList({ workspaceId }: ClientsListProps) {
     return phone
   }
 
-  const formatDocument = (document: string | null, type: "PF" | "PJ") => {
-    if (!document) return "-"
-    const cleaned = document.replace(/\D/g, '')
-    
-    if (type === "PF" && cleaned.length === 11) {
-      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`
-    } else if (type === "PJ" && cleaned.length === 14) {
-      return `${cleaned.slice(0, 2)}.${cleaned.slice(2, 5)}.${cleaned.slice(5, 8)}/${cleaned.slice(8, 12)}-${cleaned.slice(12)}`
-    }
-    return document
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR })
   }
 
-  const onClientUpdate = () => {
-    // Recarregar dados após atualização
-    const fetchClients = async () => {
-      try {
-        const response = await fetch(`/api/workspace/${workspaceId}/clientes`)
-        if (response.ok) {
-          const data = await response.json()
-          setClients(data)
-          setFilteredClients(data)
-        }
-      } catch (error) {
-        console.error("Erro ao recarregar clientes:", error)
-      }
-    }
-    fetchClients()
-  }
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="border-b bg-muted/20 pb-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <div className="h-6 bg-muted animate-pulse rounded w-48" />
-              <div className="h-4 bg-muted animate-pulse rounded w-64" />
-            </div>
-            <div className="h-10 bg-muted animate-pulse rounded w-48" />
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-muted animate-pulse rounded" />
-            ))}
-          </div>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  if (clients.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhum cliente encontrado</h3>
+          <p className="text-muted-foreground">
+            Comece criando seu primeiro cliente clicando no botão "Novo Cliente".
+          </p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="border-0 shadow-sm">
-      <CardHeader className="border-b bg-muted/20 pb-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-xl font-semibold flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              Lista de Clientes
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {filteredClients.length} {filteredClients.length === 1 ? 'cliente encontrado' : 'clientes encontrados'}
-            </p>
-          </div>
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, email, telefone ou documento..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {filteredClients.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <User className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">
-              {searchTerm ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
-            </h3>
-            <p className="text-muted-foreground max-w-md">
-              {searchTerm 
-                ? "Tente ajustar os termos de busca para encontrar o que procura."
-                : "Comece cadastrando seus primeiros clientes para gerenciar seu negócio."
-              }
-            </p>
-          </div>
-        ) : (
+    <div className="space-y-6">
+      {/* Tabela de clientes */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Lista de Clientes</CardTitle>
+        </CardHeader>
+        <CardContent>
           <Table>
             <TableHeader>
-              <TableRow className="border-b bg-muted/10">
-                <TableHead className="font-semibold">Cliente</TableHead>
-                <TableHead className="font-semibold">Contato</TableHead>
-                <TableHead className="font-semibold">Tipo</TableHead>
-                <TableHead className="font-semibold">Documento</TableHead>
-                <TableHead className="font-semibold">Cadastrado em</TableHead>
-                <TableHead className="font-semibold text-right">Ações</TableHead>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>CPF/CNPJ</TableHead>
+                <TableHead>Telefone</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Cadastrado em</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClients.map((client) => (
-                <TableRow 
-                  key={client.id} 
-                  className="hover:bg-muted/30 transition-colors border-b border-muted/20"
-                >
+              {clients.map((client) => (
+                <TableRow key={client.id}>
+                  <TableCell className="font-medium">#{client.id}</TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-medium text-foreground">{client.nome}</p>
-                      {client.endereco && (
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {client.endereco}
-                        </p>
-                      )}
+                    <div>
+                      <div className="font-medium">{client.nome}</div>
+                      <div className="text-sm text-muted-foreground">
+                        <Badge variant={getClientType(client.cpf_cnpj) === 'PF' ? 'default' : 'secondary'}>
+                          {getClientType(client.cpf_cnpj) === 'PF' ? (
+                            <>
+                              <User className="h-3 w-3 mr-1" />
+                              Pessoa Física
+                            </>
+                          ) : (
+                            <>
+                              <Building className="h-3 w-3 mr-1" />
+                              Pessoa Jurídica
+                            </>
+                          )}
+                        </Badge>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      {client.email && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-foreground">{client.email}</span>
-                        </div>
-                      )}
-                      {client.telefone && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-foreground">{formatPhone(client.telefone)}</span>
-                        </div>
-                      )}
-                      {!client.email && !client.telefone && (
-                        <span className="text-sm text-muted-foreground">-</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={client.tipo_pessoa === "PF" ? "default" : "secondary"}
-                      className="flex items-center gap-1 w-fit"
-                    >
-                      {client.tipo_pessoa === "PF" ? (
-                        <User className="h-3 w-3" />
-                      ) : (
-                        <Building className="h-3 w-3" />
-                      )}
-                      {client.tipo_pessoa === "PF" ? "Pessoa Física" : "Pessoa Jurídica"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm font-mono">
-                      {formatDocument(client.documento, client.tipo_pessoa)}
+                    <span className="font-mono text-sm">
+                      {formatCpfCnpj(client.cpf_cnpj)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
+                    <div className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {formatPhone(client.telefone)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {client.email}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                       {formatDate(client.createdAt)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <ClientActions 
-                      client={{
-                        id: client.id,
-                        nome: client.nome,
-                        cpf_cnpj: client.cpf_cnpj,
-                        telefone: client.telefone || "",
-                        email: client.email || "",
-                        endereco: client.endereco || "",
-                      }} 
+                      client={client}
                       workspaceId={workspaceId}
-                      onUpdate={onClientUpdate}
+                      onUpdate={loadClients}
                     />
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

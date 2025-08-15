@@ -1,6 +1,8 @@
 // Componentes da página de clientes
 export { ClientsStats } from './clients-stats-client'
-export { ClientsList } from './clients-list-client'
+export { ClientsListClient } from './clients-list-client'
+export { ClientsPageClient } from './clients-page-client'
+export { ClientsContent } from './clients-content'
 export { CreateClientButton } from './create-client-button'
 export { CreateClientModal } from './create-client-modal'
 export { EditClientModal } from './edit-client-modal'

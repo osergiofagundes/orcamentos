@@ -1,10 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -12,6 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -23,7 +21,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { toast } from "sonner"
 
 const clientSchema = z.object({
@@ -37,14 +38,13 @@ const clientSchema = z.object({
 type ClientFormData = z.infer<typeof clientSchema>
 
 interface CreateClientModalProps {
-  isOpen: boolean
-  onClose: () => void
   workspaceId: string
+  onClientCreated?: () => void
 }
 
-export function CreateClientModal({ isOpen, onClose, workspaceId }: CreateClientModalProps) {
+export function CreateClientModal({ workspaceId, onClientCreated }: CreateClientModalProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -75,8 +75,8 @@ export function CreateClientModal({ isOpen, onClose, workspaceId }: CreateClient
 
       toast.success("Cliente criado com sucesso!")
       form.reset()
-      onClose()
-      router.refresh()
+      setIsOpen(false)
+      onClientCreated?.()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao criar cliente")
     } finally {
@@ -85,7 +85,13 @@ export function CreateClientModal({ isOpen, onClose, workspaceId }: CreateClient
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Cliente
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Novo Cliente</DialogTitle>
@@ -165,7 +171,7 @@ export function CreateClientModal({ isOpen, onClose, workspaceId }: CreateClient
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading}>
