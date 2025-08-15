@@ -1,28 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
 import { CreateClientModal } from "./create-client-modal"
 
 interface CreateClientButtonProps {
   workspaceId: string
+  onClientCreated?: () => void
 }
 
-export function CreateClientButton({ workspaceId }: CreateClientButtonProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
+export function CreateClientButton({ workspaceId, onClientCreated }: CreateClientButtonProps) {
   return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>
-        <Plus className="h-4 w-4 mr-2" />
-        Novo Cliente
-      </Button>
-      <CreateClientModal 
-        isOpen={isOpen} 
-        onClose={() => setIsOpen(false)}
-        workspaceId={workspaceId}
-      />
-    </>
+    <CreateClientModal 
+      workspaceId={workspaceId}
+      onClientCreated={onClientCreated}
+    />
   )
 }

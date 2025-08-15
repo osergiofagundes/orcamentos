@@ -16,9 +16,9 @@ interface Client {
   id: number
   nome: string
   cpf_cnpj: string
-  telefone: string | null
-  email: string | null
-  endereco: string | null
+  telefone: string
+  email: string
+  endereco: string
 }
 
 interface ClientActionsProps {

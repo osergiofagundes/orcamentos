@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
-import { prisma } from "@/lib/prisma"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, TrendingUp, Building, User } from "lucide-react"
 
@@ -8,127 +8,134 @@ interface ClientsStatsProps {
   workspaceId: string
 }
 
-export async function ClientsStats({ workspaceId }: ClientsStatsProps) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
+export function ClientsStats({ workspaceId }: ClientsStatsProps) {
+  const [stats, setStats] = useState({
+    totalClientes: 0,
+    clientesUltimaSemana: 0,
+    pessoasFisicas: 0,
+    pessoasJuridicas: 0,
   })
+  const [isLoading, setIsLoading] = useState(true)
 
-  if (!session?.user?.id) {
-    return null
-  }
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`/api/workspace/${workspaceId}/clientes`)
 
-  try {
-    // Verificar acesso ao workspace
-    const hasAccess = await prisma.usuarioAreaTrabalho.findFirst({
-      where: {
-        usuario_id: session.user.id,
-        area_trabalho_id: parseInt(workspaceId),
-      },
-    })
+        if (response.ok) {
+          const clientes = await response.json()
 
-    if (!hasAccess) {
-      return null
+          // Calcular estatísticas
+          const totalClientes = clientes.length
+
+          // Clientes da última semana
+          const oneWeekAgo = new Date()
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+
+          const clientesUltimaSemana = clientes.filter((cliente: any) => 
+            new Date(cliente.createdAt) >= oneWeekAgo
+          ).length
+
+          // Contar tipos de pessoa
+          const pessoasFisicas = clientes.filter((cliente: any) => {
+            const cpfCnpj = cliente.cpf_cnpj.replace(/\D/g, '')
+            return cpfCnpj.length === 11
+          }).length
+
+          const pessoasJuridicas = clientes.filter((cliente: any) => {
+            const cpfCnpj = cliente.cpf_cnpj.replace(/\D/g, '')
+            return cpfCnpj.length === 14
+          }).length
+
+          setStats({
+            totalClientes,
+            clientesUltimaSemana,
+            pessoasFisicas,
+            pessoasJuridicas,
+          })
+        }
+      } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    const workspaceIdInt = parseInt(workspaceId)
+    fetchStats()
+  }, [workspaceId])
 
-    // Total de clientes
-    const totalClientes = await prisma.cliente.count({
-      where: {
-        area_trabalho_id: workspaceIdInt,
-        deletedAt: null,
-      },
-    })
-
-    // Clientes da última semana
-    const oneWeekAgo = new Date()
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-
-    const clientesUltimaSemana = await prisma.cliente.count({
-      where: {
-        area_trabalho_id: workspaceIdInt,
-        deletedAt: null,
-        createdAt: {
-          gte: oneWeekAgo,
-        },
-      },
-    })
-
-    // Buscar todos os clientes para classificar
-    const allClientes = await prisma.cliente.findMany({
-      where: {
-        area_trabalho_id: workspaceIdInt,
-        deletedAt: null,
-      },
-      select: {
-        cpf_cnpj: true,
-      },
-    })
-
-    // Classificar clientes PF vs PJ
-    let clientesPF = 0
-    let clientesPJ = 0
-
-    allClientes.forEach((cliente) => {
-      // Remove caracteres especiais para contar apenas números
-      const numbersOnly = cliente.cpf_cnpj.replace(/\D/g, '')
-      
-      if (numbersOnly.length === 11) {
-        clientesPF++
-      } else if (numbersOnly.length === 14) {
-        clientesPJ++
-      }
-    })
-
-    const stats = [
-      {
-        title: "Total de Clientes",
-        value: totalClientes.toString(),
-        icon: Users,
-        description: "Clientes cadastrados",
-      },
-      {
-        title: "Novos esta semana",
-        value: clientesUltimaSemana.toString(),
-        icon: TrendingUp,
-        description: "Últimos 7 dias",
-      },
-      {
-        title: "Pessoa Física",
-        value: clientesPF.toString(),
-        icon: User,
-        description: "Clientes PF",
-      },
-      {
-        title: "Pessoa Jurídica",
-        value: clientesPJ.toString(),
-        icon: Building,
-        description: "Clientes PJ",
-      },
-    ]
-
+  if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
+              <div className="h-4 bg-muted rounded w-24"></div>
+              <div className="h-4 w-4 bg-muted rounded"></div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
-                {stat.description}
-              </p>
+              <div className="h-8 bg-muted rounded w-16 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-32"></div>
             </CardContent>
           </Card>
         ))}
       </div>
     )
-  } catch (error) {
-    console.error("Failed to fetch client stats:", error)
-    return null
   }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.totalClientes}</div>
+          <p className="text-xs text-muted-foreground">
+            Clientes cadastrados
+          </p>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Novos Esta Semana</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.clientesUltimaSemana}</div>
+          <p className="text-xs text-muted-foreground">
+            Nos últimos 7 dias
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pessoas Físicas</CardTitle>
+          <User className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.pessoasFisicas}</div>
+          <p className="text-xs text-muted-foreground">
+            CPF cadastrados
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pessoas Jurídicas</CardTitle>
+          <Building className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.pessoasJuridicas}</div>
+          <p className="text-xs text-muted-foreground">
+            CNPJ cadastrados
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
