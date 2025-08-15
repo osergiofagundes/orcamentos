@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -11,13 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, FileText, Calendar, DollarSign, User, Edit, Trash2 } from "lucide-react"
+import { FileText, Calendar, DollarSign, User } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { EditOrcamentoModal } from "./edit-orcamento-modal"
-import { DeleteOrcamentoModal } from "./delete-orcamento-modal"
+import { OrcamentoActions } from "./orcamento-actions"
 
 interface Orcamento {
   id: number
@@ -65,11 +62,6 @@ const statusLabels = {
 export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [selectedOrcamentoId, setSelectedOrcamentoId] = useState<number | null>(null)
-  const [selectedOrcamento, setSelectedOrcamento] = useState<Orcamento | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     loadOrcamentos()
@@ -88,34 +80,6 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleEditOrcamento = (orcamentoId: number) => {
-    setSelectedOrcamentoId(orcamentoId)
-    setEditModalOpen(true)
-  }
-
-  const handleDeleteOrcamento = (orcamento: Orcamento) => {
-    setSelectedOrcamento(orcamento)
-    setDeleteModalOpen(true)
-  }
-
-  const handleCloseEditModal = () => {
-    setEditModalOpen(false)
-    setSelectedOrcamentoId(null)
-  }
-
-  const handleCloseDeleteModal = () => {
-    setDeleteModalOpen(false)
-    setSelectedOrcamento(null)
-  }
-
-  const handleOrcamentoUpdated = () => {
-    loadOrcamentos() // Recarregar a lista
-  }
-
-  const handleOrcamentoDeleted = () => {
-    loadOrcamentos() // Recarregar a lista
   }
 
   const formatCurrency = (value: number | null) => {
@@ -164,59 +128,6 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
 
   return (
     <div className="space-y-6">
-      {/* Cards de estatísticas */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Orçamentos</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{orcamentos.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aprovados</CardTitle>
-            <Badge className="h-4 w-4 text-muted-foreground bg-green-100" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orcamentos.filter(o => o.status === "APROVADO").length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Badge className="h-4 w-4 text-muted-foreground bg-blue-100" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orcamentos.filter(o => o.status === "ENVIADO").length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(
-                orcamentos
-                  .filter(o => o.status === "APROVADO")
-                  .reduce((sum, o) => sum + (o.valor_total || 0), 0)
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Tabela de orçamentos */}
       <Card>
         <CardHeader>
@@ -232,7 +143,7 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
                 <TableHead>Valor Total</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Responsável</TableHead>
-                <TableHead>Ações</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -269,38 +180,12 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
                       {orcamento.usuario.name}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => router.push(`/${workspaceId}/dashboard/orcamentos/${orcamento.id}`)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Visualizar
-                      </Button>
-                      {(orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO") && (
-                        <>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditOrcamento(orcamento.id)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteOrcamento(orcamento)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                  <TableCell className="text-right">
+                    <OrcamentoActions 
+                      orcamento={orcamento}
+                      workspaceId={workspaceId}
+                      onUpdate={loadOrcamentos}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -308,31 +193,6 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
           </Table>
         </CardContent>
       </Card>
-
-      {/* Modal de Edição */}
-      {selectedOrcamentoId && selectedOrcamentoId > 0 && (
-        <EditOrcamentoModal
-          orcamentoId={selectedOrcamentoId}
-          workspaceId={workspaceId}
-          isOpen={editModalOpen}
-          onClose={handleCloseEditModal}
-          onOrcamentoUpdated={handleOrcamentoUpdated}
-        />
-      )}
-
-      {/* Modal de Exclusão */}
-      {selectedOrcamento && (
-        <DeleteOrcamentoModal
-          orcamentoId={selectedOrcamento.id}
-          orcamentoNumero={selectedOrcamento.id.toString()}
-          clienteNome={selectedOrcamento.cliente.nome}
-          valorTotal={selectedOrcamento.valor_total}
-          workspaceId={workspaceId}
-          isOpen={deleteModalOpen}
-          onClose={handleCloseDeleteModal}
-          onOrcamentoDeleted={handleOrcamentoDeleted}
-        />
-      )}
     </div>
   )
 }

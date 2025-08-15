@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { OrcamentosContent } from "./_components/orcamentos-content"
+import { OrcamentosPageClient } from "./_components"
 
 interface PageProps {
   params: Promise<{ workspaceId: string }>
@@ -49,15 +49,9 @@ export default async function OrcamentosPage({ params }: PageProps) {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight">Orçamentos</h1>
-              <p className="text-muted-foreground">
-                Gerencie seus orçamentos e acompanhe estatísticas importantes
-              </p>
-            </div>
+          <div className="space-y-6">
+            <OrcamentosPageClient workspaceId={workspaceId} />
           </div>
-          <OrcamentosContent workspaceId={workspaceId} />
         </div>
       </SidebarInset>
     </SidebarProvider>
