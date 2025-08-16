@@ -5,6 +5,7 @@ import {
   HandCoins,
   LayoutDashboard,
   Sprout,
+  Tag,
   UserRound,
 } from "lucide-react"
 
@@ -41,6 +42,11 @@ const data = {
       name: "Produtos & Serviços",
       url: "produtos-e-servicos",
       icon: Sprout,
+    },
+    {
+      name: "Categorias",
+      url: "categorias",
+      icon: Tag,
     },
     {
       name: "Orçamentos",

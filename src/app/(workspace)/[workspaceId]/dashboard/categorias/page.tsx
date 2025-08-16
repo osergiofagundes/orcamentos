@@ -13,13 +13,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { ProductsServicesPageClient } from "./_components/products-services-page-client"
+import { CategoriesPageClient } from "./_components/categories-page-client"
 
 interface PageProps {
   params: Promise<{ workspaceId: string }>
 }
 
-export default async function ProdutosServicosPage({ params }: PageProps) {
+export default async function CategoriasPage({ params }: PageProps) {
   const { workspaceId } = await params
 
   return (
@@ -42,7 +42,7 @@ export default async function ProdutosServicosPage({ params }: PageProps) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Produtos & Serviços</BreadcrumbPage>
+                  <BreadcrumbPage>Categorias</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -50,7 +50,7 @@ export default async function ProdutosServicosPage({ params }: PageProps) {
         </header>
         <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
           <div className="space-y-6">
-            <ProductsServicesPageClient workspaceId={workspaceId} />
+            <CategoriesPageClient workspaceId={workspaceId} />
           </div>
         </div>
       </SidebarInset>
