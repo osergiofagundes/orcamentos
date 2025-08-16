@@ -15,6 +15,7 @@ import { DeleteCategoryModal } from "./delete-category-modal"
 interface Category {
   id: number
   nome: string
+  descricao?: string | null
   _count?: {
     produtosServicos?: number
   }

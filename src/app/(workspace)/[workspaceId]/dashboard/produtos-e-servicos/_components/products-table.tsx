@@ -62,7 +62,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: Pr
     onDataChanged?.()
   }
 
-  const formatCurrency = (value: number | null) => {
+  const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return "R$ 0,00"
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -133,7 +133,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: Pr
                   <TableCell className="font-medium">#{product.id}</TableCell>
                   <TableCell>{product.nome}</TableCell>
                   <TableCell>{product.descricao}</TableCell>
-                  <TableCell>{product.valor}</TableCell>
+                  <TableCell>{formatCurrency(product.valor)}</TableCell>
                   <TableCell>{product.categoria.nome}</TableCell>
                                       <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}
