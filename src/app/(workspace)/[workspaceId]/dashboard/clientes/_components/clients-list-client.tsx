@@ -57,7 +57,7 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
 
   const formatCpfCnpj = (cpfCnpj: string) => {
     const numbersOnly = cpfCnpj.replace(/\D/g, '')
-    
+
     if (numbersOnly.length === 11) {
       // CPF
       return cpfCnpj.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
@@ -85,7 +85,7 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
   }
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR })
+    return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR })
   }
 
   if (loading) {
@@ -144,28 +144,14 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
               {clients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">#{client.id}</TableCell>
+                  <TableCell>{client.nome}</TableCell>
                   <TableCell>
-                    <div>
-                      <div className="font-medium">{client.nome}</div>
-                      <div className="text-sm text-muted-foreground">
-                        <Badge variant={getClientType(client.cpf_cnpj) === 'PF' ? 'default' : 'secondary'}>
-                          {getClientType(client.cpf_cnpj) === 'PF' ? (
-                            <>
-                              <User className="h-3 w-3 mr-1" />
-                              Pessoa Física
-                            </>
-                          ) : (
-                            <>
-                              <Building className="h-3 w-3 mr-1" />
-                              Pessoa Jurídica
-                            </>
-                          )}
-                        </Badge>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-sm">
+                    <span className="text-sm flex items-center gap-1">
+                      {getClientType(client.cpf_cnpj) === 'PF' ? (
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                      )}
                       {formatCpfCnpj(client.cpf_cnpj)}
                     </span>
                   </TableCell>
@@ -188,7 +174,7 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <ClientActions 
+                    <ClientActions
                       client={client}
                       workspaceId={workspaceId}
                       onUpdate={loadClients}

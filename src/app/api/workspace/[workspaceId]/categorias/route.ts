@@ -6,6 +6,7 @@ import { z } from "zod"
 
 const createCategorySchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
+  descricao: z.string().optional(),
 })
 
 export async function GET(
@@ -107,6 +108,7 @@ export async function POST(
     const categoria = await prisma.categoria.create({
       data: {
         nome: validatedData.nome,
+        descricao: validatedData.descricao || null,
         area_trabalho_id: parseInt(workspaceId),
       },
       include: {

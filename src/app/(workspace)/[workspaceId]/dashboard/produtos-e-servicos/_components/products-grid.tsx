@@ -44,8 +44,8 @@ export async function ProductsGrid({ workspaceId }: ProductsGridProps) {
       },
     })
 
-    const formatCurrency = (value: number | null) => {
-      if (!value) return "Preço não definido"
+    const formatCurrency = (value: number | null | undefined) => {
+      if (value === null || value === undefined) return "R$ 0,00"
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
