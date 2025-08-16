@@ -7,10 +7,16 @@ import { CreateProductModal } from "./create-product-modal"
 
 interface CreateProductButtonProps {
   workspaceId: string
+  onProductCreated?: () => void
 }
 
-export function CreateProductButton({ workspaceId }: CreateProductButtonProps) {
+export function CreateProductButton({ workspaceId, onProductCreated }: CreateProductButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleClose = () => {
+    setIsOpen(false)
+    onProductCreated?.()
+  }
 
   return (
     <>
@@ -20,7 +26,7 @@ export function CreateProductButton({ workspaceId }: CreateProductButtonProps) {
       </Button>
       <CreateProductModal 
         isOpen={isOpen} 
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
         workspaceId={workspaceId}
       />
     </>
