@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CreateCategoryModal } from "./create-category-modal"
 import { CategoriesContent } from "./categories-content"
 import { CategoriesStats } from "./categories-stats"
+import { SearchInput } from "@/components/search-input"
 
 interface CategoriesPageClientProps {
   workspaceId: string
@@ -11,6 +12,7 @@ interface CategoriesPageClientProps {
 
 export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [search, setSearch] = useState("")
 
   const handleCategoryCreated = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -25,13 +27,22 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
             Gerencie as categorias dos seus produtos e serviços
           </p>
         </div>
-        <CreateCategoryModal 
+        <CreateCategoryModal
           workspaceId={workspaceId}
           onCategoryCreated={handleCategoryCreated}
         />
       </div>
       <CategoriesStats workspaceId={workspaceId} />
-      <CategoriesContent workspaceId={workspaceId} refreshTrigger={refreshTrigger} />
+
+      <div className="mb-6">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Pesquisar categorias por ID, nome ou descrição"
+        />
+      </div>
+
+      <CategoriesContent workspaceId={workspaceId} refreshTrigger={refreshTrigger} search={search} />
     </>
   )
 }

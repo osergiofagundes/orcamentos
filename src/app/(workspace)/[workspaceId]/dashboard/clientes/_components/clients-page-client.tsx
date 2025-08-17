@@ -4,7 +4,7 @@ import { useState } from "react"
 import { CreateClientModal } from "./create-client-modal"
 import { ClientsContent } from "./clients-content"
 import { ClientsStats } from "./clients-stats"
-import { SearchInput } from "./search-input"
+import { SearchInput } from "@/components/search-input"
 
 interface ClientsPageClientProps {
   workspaceId: string
