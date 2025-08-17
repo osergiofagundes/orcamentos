@@ -33,9 +33,10 @@ interface ProductsTableProps {
   workspaceId: string
   refreshTrigger?: number
   onDataChanged?: () => void
+  search?: string
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -61,6 +62,19 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: Pr
     fetchProducts()
     onDataChanged?.()
   }
+
+  // Filtrar produtos baseado na pesquisa
+  const filteredProducts = products.filter(product => {
+    if (!search || search.trim() === "") return true
+    
+    const searchTerm = search.toLowerCase().trim()
+    return (
+      product.id.toString().includes(searchTerm) ||
+      product.nome.toLowerCase().includes(searchTerm) ||
+      (product.descricao && product.descricao.toLowerCase().includes(searchTerm)) ||
+      product.categoria.nome.toLowerCase().includes(searchTerm)
+    )
+  })
 
   const formatCurrency = (value: number | null | undefined) => {
     if (value === null || value === undefined) return "R$ 0,00"
@@ -128,7 +142,16 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: Pr
                   </TableRow>
                 </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {filteredProducts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    {search && search.trim() !== "" 
+                      ? `Nenhum produto encontrado para "${search}"` 
+                      : "Nenhum produto cadastrado"}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">#{product.id}</TableCell>
                   <TableCell>{product.nome}</TableCell>
@@ -146,7 +169,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged }: Pr
                     />
                   </TableCell>
                 </TableRow>
-              ))}
+              )))}
             </TableBody>
           </Table>
         </CardContent>

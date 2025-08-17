@@ -16,6 +16,7 @@ import { FileText, Calendar, DollarSign, User, Building } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { OrcamentoActions } from "./orcamento-actions"
+import { DateRange } from "react-day-picker"
 
 interface Orcamento {
   id: number
@@ -42,6 +43,11 @@ interface Orcamento {
 interface OrcamentosListProps {
   workspaceId: string
   refreshTrigger: number
+  search?: string
+  statusFilter?: string
+  responsavelFilter?: string
+  dateRange?: DateRange
+  onResponsaveisLoaded?: (responsaveis: string[]) => void
 }
 
 const statusColors = {
@@ -60,10 +66,11 @@ const statusLabels = {
   CANCELADO: "Cancelado",
 }
 
-export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListProps) {
+export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilter, responsavelFilter, dateRange, onResponsaveisLoaded }: OrcamentosListProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null)
+  const [responsaveis, setResponsaveis] = useState<string[]>([])
 
   useEffect(() => {
     loadOrcamentos()
@@ -76,6 +83,13 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
       if (response.ok) {
         const data = await response.json()
         setOrcamentos(data)
+        
+        // Extrair responsáveis únicos
+        const uniqueResponsaveis = [...new Set(data.map((orcamento: Orcamento) => orcamento.usuario.name))] as string[]
+        setResponsaveis(uniqueResponsaveis)
+        
+        // Notificar o componente pai sobre os responsáveis carregados
+        onResponsaveisLoaded?.(uniqueResponsaveis)
       }
     } catch (error) {
       console.error("Erro ao carregar orçamentos:", error)
@@ -139,6 +153,55 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
     }
   }
 
+  // Filtrar orçamentos baseado na pesquisa e filtros
+  const filteredOrcamentos = orcamentos.filter(orcamento => {
+    // Filtro de pesquisa
+    if (search && search.trim() !== "") {
+      const searchTerm = search.toLowerCase().trim()
+      const matchesSearch = (
+        orcamento.id.toString().includes(searchTerm) ||
+        orcamento.cliente.nome.toLowerCase().includes(searchTerm) ||
+        orcamento.cliente.cpf_cnpj.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, '')) ||
+        orcamento.usuario.name.toLowerCase().includes(searchTerm)
+      )
+      if (!matchesSearch) return false
+    }
+
+    // Filtro de status
+    if (statusFilter && statusFilter !== "all") {
+      if (orcamento.status !== statusFilter) return false
+    }
+
+    // Filtro de responsável
+    if (responsavelFilter && responsavelFilter !== "all") {
+      if (orcamento.usuario.name !== responsavelFilter) return false
+    }
+
+    // Filtro de data
+    if (dateRange?.from || dateRange?.to) {
+      const orcamentoDate = new Date(orcamento.data_criacao)
+      
+      // Se só tem data inicial, filtra a partir dela
+      if (dateRange.from && !dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        fromDate.setHours(0, 0, 0, 0)
+        if (orcamentoDate < fromDate) return false
+      }
+      
+      // Se tem ambas as datas, filtra pelo intervalo
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        const toDate = new Date(dateRange.to)
+        fromDate.setHours(0, 0, 0, 0)
+        toDate.setHours(23, 59, 59, 999)
+        
+        if (orcamentoDate < fromDate || orcamentoDate > toDate) return false
+      }
+    }
+
+    return true
+  })
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -157,14 +220,27 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
     )
   }
 
-  if (orcamentos.length === 0) {
+  if (filteredOrcamentos.length === 0) {
+    const hasFilters = (search && search.trim() !== "") || 
+                      (statusFilter && statusFilter !== "all") || 
+                      (responsavelFilter && responsavelFilter !== "all") ||
+                      (dateRange?.from || dateRange?.to)
+    
     return (
       <Card>
         <CardContent className="p-12 text-center">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Nenhum orçamento encontrado</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            {hasFilters
+              ? "Nenhum orçamento encontrado com os filtros aplicados"
+              : "Nenhum orçamento encontrado"
+            }
+          </h3>
           <p className="text-muted-foreground">
-            Comece criando seu primeiro orçamento clicando no botão "Novo Orçamento".
+            {hasFilters
+              ? "Tente ajustar os filtros ou termos da sua pesquisa."
+              : "Comece criando seu primeiro orçamento clicando no botão \"Novo Orçamento\"."
+            }
           </p>
         </CardContent>
       </Card>
@@ -192,7 +268,7 @@ export function OrcamentosList({ workspaceId, refreshTrigger }: OrcamentosListPr
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orcamentos.map((orcamento) => (
+              {filteredOrcamentos.map((orcamento) => (
                 <TableRow key={orcamento.id}>
                   <TableCell>#{orcamento.id}</TableCell>
                   <TableCell>
