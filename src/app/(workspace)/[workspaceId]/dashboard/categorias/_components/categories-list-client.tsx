@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Tag } from "lucide-react"
 import { CategoryActions } from "./category-actions"
 
 interface Category {
@@ -28,9 +28,10 @@ interface Category {
 interface CategoriesListClientProps {
   workspaceId: string
   refreshTrigger?: number
+  search: string
 }
 
-export function CategoriesListClient({ workspaceId, refreshTrigger }: CategoriesListClientProps) {
+export function CategoriesListClient({ workspaceId, refreshTrigger, search }: CategoriesListClientProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -67,6 +68,26 @@ export function CategoriesListClient({ workspaceId, refreshTrigger }: Categories
     })
   }
 
+  // Função para filtrar categorias baseado na busca
+  const filteredCategories = categories.filter(category => {
+    if (!search || search.trim() === '') return true
+    
+    const searchTerm = search.toLowerCase().trim()
+    
+    // Função auxiliar para busca em texto
+    const matchesText = (text: string | number | null | undefined): boolean => {
+      if (text === null || text === undefined) return false
+      return text.toString().toLowerCase().includes(searchTerm)
+    }
+    
+    // Verifica se o termo de busca está presente em qualquer campo
+    return (
+      matchesText(category.id) ||
+      matchesText(category.nome) ||
+      matchesText(category.descricao)
+    )
+  })
+
   if (isLoading) {
     return (
       <Card>
@@ -90,20 +111,40 @@ export function CategoriesListClient({ workspaceId, refreshTrigger }: Categories
     )
   }
 
+  if (categories.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhuma categoria encontrada</h3>
+          <p className="text-muted-foreground">
+            Comece criando sua primeira categoria clicando no botão "Nova Categoria".
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (filteredCategories.length === 0 && search) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhuma categoria encontrada</h3>
+          <p className="text-muted-foreground">
+            Não foram encontradas categorias que correspondam à sua busca por "{search}".
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Lista de Categorias</CardTitle>
       </CardHeader>
       <CardContent>
-        {categories.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">Nenhuma categoria encontrada</p>
-            <p className="text-sm text-muted-foreground">
-              Clique no botão "Nova Categoria" para começar
-            </p>
-          </div>
-        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -116,7 +157,7 @@ export function CategoriesListClient({ workspaceId, refreshTrigger }: Categories
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">#{category.id}</TableCell>
                   <TableCell className="font-medium">{category.nome}</TableCell>
@@ -142,8 +183,7 @@ export function CategoriesListClient({ workspaceId, refreshTrigger }: Categories
               ))}
             </TableBody>
           </Table>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
   )
 }
