@@ -30,9 +30,10 @@ interface Client {
 interface ClientsListClientProps {
   workspaceId: string
   refreshTrigger: number
+  search: string
 }
 
-export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListClientProps) {
+export function ClientsListClient({ workspaceId, refreshTrigger, search }: ClientsListClientProps) {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -88,6 +89,44 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR })
   }
 
+  // Função para filtrar clientes baseado na busca
+  const filteredClients = clients.filter(client => {
+    if (!search || search.trim() === '') return true
+    
+    const searchTerm = search.toLowerCase().trim()
+    
+    // Função auxiliar para busca em texto
+    const matchesText = (text: string | number | null | undefined): boolean => {
+      if (text === null || text === undefined) return false
+      return text.toString().toLowerCase().includes(searchTerm)
+    }
+    
+    // Função auxiliar para busca em números (telefone, CPF/CNPJ)
+    const matchesNumber = (text: string | null | undefined): boolean => {
+      if (!text) return false
+      
+      // Busca no texto original (com formatação)
+      if (text.toLowerCase().includes(searchTerm)) return true
+      
+      // Busca apenas nos números (sem formatação)
+      const numbersOnly = text.replace(/\D/g, '')
+      const searchNumbersOnly = searchTerm.replace(/\D/g, '')
+      
+      if (searchNumbersOnly && numbersOnly.includes(searchNumbersOnly)) return true
+      
+      return false
+    }
+    
+    // Verifica se o termo de busca está presente em qualquer campo
+    return (
+      matchesText(client.id) ||
+      matchesText(client.nome) ||
+      matchesNumber(client.cpf_cnpj) ||
+      matchesNumber(client.telefone) ||
+      matchesText(client.email)
+    )
+  })
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -120,6 +159,20 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
     )
   }
 
+  if (filteredClients.length === 0 && search) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhum cliente encontrado</h3>
+          <p className="text-muted-foreground">
+            Não foram encontrados clientes que correspondam à sua busca por "{search}".
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Tabela de clientes */}
@@ -141,7 +194,7 @@ export function ClientsListClient({ workspaceId, refreshTrigger }: ClientsListCl
               </TableRow>
             </TableHeader>
             <TableBody>
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-medium">#{client.id}</TableCell>
                   <TableCell>{client.nome}</TableCell>
