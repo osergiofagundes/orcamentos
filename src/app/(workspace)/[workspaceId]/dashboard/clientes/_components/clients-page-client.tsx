@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CreateClientModal } from "./create-client-modal"
 import { ClientsContent } from "./clients-content"
 import { ClientsStats } from "./clients-stats"
+import { SearchInput } from "./search-input"
 
 interface ClientsPageClientProps {
   workspaceId: string
@@ -11,6 +12,7 @@ interface ClientsPageClientProps {
 
 export function ClientsPageClient({ workspaceId }: ClientsPageClientProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [search, setSearch] = useState("")
 
   const handleClientCreated = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -31,7 +33,16 @@ export function ClientsPageClient({ workspaceId }: ClientsPageClientProps) {
         />
       </div>
       <ClientsStats workspaceId={workspaceId} />
-      <ClientsContent workspaceId={workspaceId} refreshTrigger={refreshTrigger} />
+
+      <div className="mb-6">
+        <SearchInput 
+          value={search} 
+          onChange={setSearch} 
+          placeholder="Pesquisar clientes por ID, nome, CPF/CNPJ, telefone ou email" 
+        />
+      </div>
+
+      <ClientsContent workspaceId={workspaceId} refreshTrigger={refreshTrigger} search={search} />
     </>
   )
 }
