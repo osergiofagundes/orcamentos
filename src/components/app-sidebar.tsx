@@ -7,6 +7,7 @@ import {
   Sprout,
   Tag,
   UserRound,
+  Package,
 } from "lucide-react"
 
 import { NavProjects } from "@/components/nav-projects"
@@ -41,7 +42,7 @@ const data = {
     {
       name: "Produtos & Serviços",
       url: "produtos-e-servicos",
-      icon: Sprout,
+      icon: Package,
     },
     {
       name: "Categorias",

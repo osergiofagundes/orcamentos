@@ -52,6 +52,15 @@ export async function ProductsGrid({ workspaceId }: ProductsGridProps) {
       }).format(value / 100)
     }
 
+    const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "PESO") => {
+      const tipoLabels = {
+        UNIDADE: "Unidade",
+        METRO: "Metro", 
+        PESO: "Peso"
+      }
+      return tipoLabels[tipo]
+    }
+
     return (
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -78,12 +87,20 @@ export async function ProductsGrid({ workspaceId }: ProductsGridProps) {
                       <CardTitle className="text-lg line-clamp-2 mb-2">
                         {product.nome}
                       </CardTitle>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                      >
-                        {product.categoria.nome}
-                      </Badge>
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge 
+                          variant="secondary" 
+                          className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                        >
+                          {product.categoria.nome}
+                        </Badge>
+                        <Badge 
+                          variant="outline"
+                          className="text-xs"
+                        >
+                          {formatTipoValor(product.tipo_valor)}
+                        </Badge>
+                      </div>
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <ProductActions product={product} workspaceId={workspaceId} />

@@ -37,6 +37,9 @@ const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional(),
   valor: z.string().min(1, "Valor é obrigatório"),
+  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO"], {
+    required_error: "Tipo de valor é obrigatório",
+  }),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
 })
 
@@ -52,6 +55,7 @@ interface Product {
   nome: string
   descricao?: string | null
   valor?: number | null
+  tipo_valor: "UNIDADE" | "METRO" | "PESO"
   categoria_id: number
   categoria: {
     id: number
@@ -85,6 +89,7 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
       nome: product.nome,
       descricao: product.descricao || "",
       valor: formatValueForInput(product.valor || null),
+      tipo_valor: product.tipo_valor,
       categoria_id: product.categoria_id.toString(),
     },
   })
@@ -209,6 +214,28 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
                       }}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tipo_valor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo Valor</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de valor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="UNIDADE">Unidade</SelectItem>
+                      <SelectItem value="METRO">Metro</SelectItem>
+                      <SelectItem value="PESO">Peso</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

@@ -80,6 +80,12 @@ enum StatusOrcamento {
   CANCELADO
 }
 
+enum TipoValor {
+  UNIDADE
+  METRO
+  PESO
+}
+
 model AreaTrabalho {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
@@ -167,6 +173,7 @@ model ProdutoServico {
   nome                String         @db.VarChar(255)
   descricao           String?        @db.Text
   valor               Int?           // Em centavos (R$ 10,50 = 1050)
+  tipo_valor          TipoValor      @default(UNIDADE)
   categoria_id        Int
   area_trabalho_id    Int
   createdAt           DateTime       @default(now())

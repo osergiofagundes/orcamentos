@@ -21,6 +21,7 @@ interface Product {
   nome: string
   descricao?: string | null
   valor?: number | null
+  tipo_valor: "UNIDADE" | "METRO" | "PESO"
   categoria_id: number
   createdAt: string
   categoria: {
@@ -84,6 +85,15 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     }).format(value / 100)
   }
 
+  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "PESO") => {
+    const tipoLabels = {
+      UNIDADE: "Unidade",
+      METRO: "Metro", 
+      PESO: "Peso"
+    }
+    return tipoLabels[tipo]
+  }
+
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleString('pt-BR', {
@@ -136,6 +146,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                     <TableHead>Nome</TableHead>
                     <TableHead>Descrição</TableHead>
                     <TableHead>Valor</TableHead>
+                    <TableHead>Tipo Valor</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Criado em</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -144,7 +155,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     {search && search.trim() !== "" 
                       ? `Nenhum produto encontrado para "${search}"` 
                       : "Nenhum produto cadastrado"}
@@ -157,6 +168,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                   <TableCell>{product.nome}</TableCell>
                   <TableCell>{product.descricao}</TableCell>
                   <TableCell>{formatCurrency(product.valor)}</TableCell>
+                  <TableCell>{formatTipoValor(product.tipo_valor)}</TableCell>
                   <TableCell>{product.categoria.nome}</TableCell>
                                       <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}
