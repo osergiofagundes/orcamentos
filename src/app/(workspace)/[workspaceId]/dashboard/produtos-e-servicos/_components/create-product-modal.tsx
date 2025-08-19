@@ -37,6 +37,9 @@ const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional(),
   valor: z.string().min(1, "Valor é obrigatório"),
+  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO"], {
+    required_error: "Tipo de valor é obrigatório",
+  }),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
 })
 
@@ -64,6 +67,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
       nome: "",
       descricao: "",
       valor: "",
+      tipo_valor: "UNIDADE",
       categoria_id: "",
     },
   })
@@ -193,6 +197,29 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                 </FormItem>
               )}
             />
+            <div className="flex gap-2">
+              <FormField
+              control={form.control}
+              name="tipo_valor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo Valor</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de valor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="UNIDADE">Unidade</SelectItem>
+                      <SelectItem value="METRO">Metro</SelectItem>
+                      <SelectItem value="PESO">Peso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="categoria_id"
@@ -217,6 +244,8 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                 </FormItem>
               )}
             />
+            </div>
+            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
