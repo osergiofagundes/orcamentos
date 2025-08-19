@@ -37,7 +37,10 @@ const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional(),
   valor: z.string().min(1, "Valor é obrigatório"),
-  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO"], {
+  tipo: z.enum(["PRODUTO", "SERVICO"], {
+    required_error: "Tipo é obrigatório",
+  }),
+  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO", "HORA", "DIA"], {
     required_error: "Tipo de valor é obrigatório",
   }),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
@@ -67,10 +70,14 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
       nome: "",
       descricao: "",
       valor: "",
+      tipo: "PRODUTO",
       tipo_valor: "UNIDADE",
       categoria_id: "",
     },
   })
+
+  // Observar mudanças no campo tipo
+  const tipoValue = form.watch("tipo")
 
   const fetchCategories = async () => {
     try {
@@ -90,6 +97,15 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
     }
   }, [isOpen, workspaceId])
 
+  // Resetar tipo_valor quando tipo mudar
+  useEffect(() => {
+    if (tipoValue === "PRODUTO") {
+      form.setValue("tipo_valor", "UNIDADE")
+    } else if (tipoValue === "SERVICO") {
+      form.setValue("tipo_valor", "HORA")
+    }
+  }, [tipoValue, form])
+
   const formatCurrency = (value: string) => {
     // Remove tudo que não é número
     const numbers = value.replace(/\D/g, "")
@@ -100,6 +116,21 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
+  }
+
+  const getTipoValorOptions = (tipo: "PRODUTO" | "SERVICO") => {
+    if (tipo === "PRODUTO") {
+      return [
+        { value: "UNIDADE", label: "Unidade" },
+        { value: "METRO", label: "Metro" },
+        { value: "PESO", label: "Peso" },
+      ]
+    } else {
+      return [
+        { value: "HORA", label: "Hora" },
+        { value: "DIA", label: "Dia" },
+      ]
+    }
   }
 
   const onSubmit = async (data: ProductFormData) => {
@@ -197,23 +228,45 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                 </FormItem>
               )}
             />
-            <div className="flex gap-2">
-              <FormField
+            <FormField
+              control={form.control}
+              name="tipo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="PRODUTO">Produto</SelectItem>
+                      <SelectItem value="SERVICO">Serviço</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
               control={form.control}
               name="tipo_valor"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo Valor</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo de valor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="UNIDADE">Unidade</SelectItem>
-                      <SelectItem value="METRO">Metro</SelectItem>
-                      <SelectItem value="PESO">Peso</SelectItem>
+                      {getTipoValorOptions(tipoValue).map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -244,8 +297,6 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                 </FormItem>
               )}
             />
-            </div>
-            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

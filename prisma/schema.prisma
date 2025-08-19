@@ -80,10 +80,17 @@ enum StatusOrcamento {
   CANCELADO
 }
 
+enum TipoProdutoServico {
+  PRODUTO
+  SERVICO
+}
+
 enum TipoValor {
   UNIDADE
   METRO
   PESO
+  HORA
+  DIA
 }
 
 model AreaTrabalho {
@@ -173,6 +180,7 @@ model ProdutoServico {
   nome                String         @db.VarChar(255)
   descricao           String?        @db.Text
   valor               Int?           // Em centavos (R$ 10,50 = 1050)
+  tipo                TipoProdutoServico @default(PRODUTO)
   tipo_valor          TipoValor      @default(UNIDADE)
   categoria_id        Int
   area_trabalho_id    Int

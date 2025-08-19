@@ -8,7 +8,10 @@ const updateProductSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional(),
   valor: z.number().int().positive("Valor deve ser positivo"),
-  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO"], {
+  tipo: z.enum(["PRODUTO", "SERVICO"], {
+    required_error: "Tipo é obrigatório",
+  }),
+  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO", "HORA", "DIA"], {
     required_error: "Tipo de valor é obrigatório",
   }),
   categoria_id: z.number().int().positive("Categoria é obrigatória"),
@@ -77,6 +80,7 @@ export async function PUT(
         nome: validatedData.nome,
         descricao: validatedData.descricao,
         valor: validatedData.valor,
+        tipo: validatedData.tipo,
         tipo_valor: validatedData.tipo_valor,
         categoria_id: validatedData.categoria_id,
       },
