@@ -198,24 +198,6 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="observacoes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Observações adicionais sobre o orçamento..."
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Itens do Orçamento</h3>
@@ -326,6 +308,24 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 </div>
               ))}
             </div>
+
+            <FormField
+              control={form.control}
+              name="observacoes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Observações adicionais sobre o orçamento..."
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
               <span className="text-lg font-semibold">Total do Orçamento:</span>

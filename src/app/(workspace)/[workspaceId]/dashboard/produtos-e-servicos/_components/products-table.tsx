@@ -21,7 +21,8 @@ interface Product {
   nome: string
   descricao?: string | null
   valor?: number | null
-  tipo_valor: "UNIDADE" | "METRO" | "PESO"
+  tipo: "PRODUTO" | "SERVICO"
+  tipo_valor: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA"
   categoria_id: number
   createdAt: string
   categoria: {
@@ -85,11 +86,13 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     }).format(value / 100)
   }
 
-  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "PESO") => {
+  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA") => {
     const tipoLabels = {
       UNIDADE: "Unidade",
       METRO: "Metro", 
-      PESO: "Peso"
+      PESO: "Peso",
+      HORA: "Hora",
+      DIA: "Dia"
     }
     return tipoLabels[tipo]
   }
@@ -146,6 +149,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                     <TableHead>Nome</TableHead>
                     <TableHead>Descrição</TableHead>
                     <TableHead>Valor</TableHead>
+                    <TableHead>Tipo</TableHead>
                     <TableHead>Tipo Valor</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Criado em</TableHead>
@@ -155,7 +159,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                     {search && search.trim() !== "" 
                       ? `Nenhum produto encontrado para "${search}"` 
                       : "Nenhum produto cadastrado"}
@@ -168,7 +172,14 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                   <TableCell>{product.nome}</TableCell>
                   <TableCell>{product.descricao}</TableCell>
                   <TableCell>{formatCurrency(product.valor)}</TableCell>
-                  <TableCell>{formatTipoValor(product.tipo_valor)}</TableCell>
+                  <TableCell>
+                    <Badge variant={product.tipo === "PRODUTO" ? "default" : "secondary"}>
+                      {product.tipo === "PRODUTO" ? "Produto" : "Serviço"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{formatTipoValor(product.tipo_valor)}</Badge>
+                  </TableCell>
                   <TableCell>{product.categoria.nome}</TableCell>
                                       <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}

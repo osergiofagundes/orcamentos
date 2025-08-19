@@ -17,7 +17,8 @@ interface Product {
   nome: string
   descricao?: string | null
   valor?: number | null
-  tipo_valor: "UNIDADE" | "METRO" | "PESO"
+  tipo: "PRODUTO" | "SERVICO"
+  tipo_valor: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA"
   categoria_id: number
   categoria: {
     id: number

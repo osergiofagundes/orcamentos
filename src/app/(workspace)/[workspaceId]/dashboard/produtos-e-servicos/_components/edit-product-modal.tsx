@@ -37,7 +37,10 @@ const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional(),
   valor: z.string().min(1, "Valor é obrigatório"),
-  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO"], {
+  tipo: z.enum(["PRODUTO", "SERVICO"], {
+    required_error: "Tipo é obrigatório",
+  }),
+  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO", "HORA", "DIA"], {
     required_error: "Tipo de valor é obrigatório",
   }),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
@@ -55,7 +58,8 @@ interface Product {
   nome: string
   descricao?: string | null
   valor?: number | null
-  tipo_valor: "UNIDADE" | "METRO" | "PESO"
+  tipo: "PRODUTO" | "SERVICO"
+  tipo_valor: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA"
   categoria_id: number
   categoria: {
     id: number
@@ -89,10 +93,14 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
       nome: product.nome,
       descricao: product.descricao || "",
       valor: formatValueForInput(product.valor || null),
+      tipo: product.tipo,
       tipo_valor: product.tipo_valor,
       categoria_id: product.categoria_id.toString(),
     },
   })
+
+  // Observar mudanças no campo tipo
+  const tipoValue = form.watch("tipo")
 
   const fetchCategories = async () => {
     try {
@@ -112,6 +120,20 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
     }
   }, [isOpen, workspaceId])
 
+  // Resetar tipo_valor quando tipo mudar (só se não for compatível)
+  useEffect(() => {
+    const currentTipoValor = form.getValues("tipo_valor")
+    const validOptions = getTipoValorOptions(tipoValue).map(opt => opt.value)
+    
+    if (!validOptions.includes(currentTipoValor)) {
+      if (tipoValue === "PRODUTO") {
+        form.setValue("tipo_valor", "UNIDADE")
+      } else if (tipoValue === "SERVICO") {
+        form.setValue("tipo_valor", "HORA")
+      }
+    }
+  }, [tipoValue, form])
+
   const formatCurrency = (value: string) => {
     // Remove tudo que não é número
     const numbers = value.replace(/\D/g, "")
@@ -122,6 +144,21 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
+  }
+
+  const getTipoValorOptions = (tipo: "PRODUTO" | "SERVICO") => {
+    if (tipo === "PRODUTO") {
+      return [
+        { value: "UNIDADE", label: "Unidade" },
+        { value: "METRO", label: "Metro" },
+        { value: "PESO", label: "Peso" },
+      ]
+    } else {
+      return [
+        { value: "HORA", label: "Hora" },
+        { value: "DIA", label: "Dia" },
+      ]
+    }
   }
 
   const onSubmit = async (data: ProductFormData) => {
@@ -220,20 +257,43 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
             />
             <FormField
               control={form.control}
+              name="tipo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="PRODUTO">Produto</SelectItem>
+                      <SelectItem value="SERVICO">Serviço</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="tipo_valor"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo Valor</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo de valor" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="UNIDADE">Unidade</SelectItem>
-                      <SelectItem value="METRO">Metro</SelectItem>
-                      <SelectItem value="PESO">Peso</SelectItem>
+                      {getTipoValorOptions(tipoValue).map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
