@@ -2,15 +2,15 @@
 export { ProductsServicesPageClient } from './products-services-page-client'
 export { ProductsServicesStats } from './products-services-stats'
 export { ProductsTable } from './products-table'
-export { CategoriesTable } from './categories-table'
+// export { CategoriesTable } from './categories-table' // Comentado temporariamente
 
 // Componentes existentes
 export { ProductsTab } from './products-tab'
-export { CategoriesTab } from './categories-tab'
+// export { CategoriesTab } from './categories-tab' // Comentado temporariamente
 export { ProductsStats } from './products-stats-client'
 export { ProductsGrid } from './products-grid-client'
-export { CategoriesStats } from './categories-stats'
+// export { CategoriesStats } from './categories-stats' // Comentado temporariamente
 export { CreateProductButton } from './create-product-button'
-export { CreateCategoryModal } from './create-category-modal'
+// export { CreateCategoryModal } from './create-category-modal' // Comentado temporariamente
 export { ProductActions } from './product-actions'
-export { CategoryActions } from './category-actions'
+// export { CategoryActions } from './category-actions' // Comentado temporariamente

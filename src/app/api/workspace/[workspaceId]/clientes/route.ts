@@ -79,7 +79,19 @@ export async function POST(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { nome, cpf_cnpj, telefone, email, endereco } = await req.json()
+        const body = await req.json()
+        console.log('Request body:', body)
+        
+        const { nome, cpf_cnpj, telefone, email, endereco } = body
+
+        // Validação básica
+        if (!nome || !cpf_cnpj || !telefone || !email || !endereco) {
+            console.log('Missing fields:', { nome: !!nome, cpf_cnpj: !!cpf_cnpj, telefone: !!telefone, email: !!email, endereco: !!endereco })
+            return NextResponse.json(
+                { error: 'Todos os campos são obrigatórios' },
+                { status: 400 }
+            )
+        }
 
         // Verificar se CPF/CNPJ já existe no workspace
         const existingClient = await prisma.cliente.findFirst({

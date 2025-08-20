@@ -58,7 +58,7 @@ export async function PUT(
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-    const { nome, descricao, cpf_cnpj } = await req.json()
+    const { nome, descricao, cpf_cnpj, endereco, bairro, cidade, estado, cep } = await req.json()
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -67,12 +67,12 @@ export async function PUT(
     const { workspaceId } = await params
 
     try {
-        // Verifica se usuário tem permissão de owner
+        // Verifica se usuário tem permissão de nível 2+
         const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
                 area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao: 3 // Nível de dono
+                nivel_permissao: { gte: 2 } // Nível 2 ou 3
             }
         })
 
@@ -82,7 +82,16 @@ export async function PUT(
 
         const updatedWorkspace = await prisma.areaTrabalho.update({
             where: { id: parseInt(workspaceId) },
-            data: { nome, descricao, cpf_cnpj }
+            data: { 
+                nome, 
+                descricao, 
+                cpf_cnpj,
+                endereco,
+                bairro,
+                cidade,
+                estado,
+                cep
+            }
         })
 
         return NextResponse.json(updatedWorkspace)

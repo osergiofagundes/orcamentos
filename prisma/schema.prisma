@@ -98,6 +98,11 @@ model AreaTrabalho {
   nome                String         @db.VarChar(255)
   descricao           String?
   cpf_cnpj            String?
+  endereco            String?
+  bairro              String?
+  cidade              String?
+  estado              String?
+  cep                 String?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
@@ -127,7 +132,7 @@ model UsuarioAreaTrabalho {
 model Cliente {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
-  cpf_cnpj            String         @db.VarChar(255) @unique
+  cpf_cnpj            String         @db.VarChar(255)
   telefone            String         @db.VarChar(255)
   email               String         @db.Text
   endereco            String         @db.Text
@@ -138,6 +143,7 @@ model Cliente {
   areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
   orcamentos         Orcamento[]
 
+  @@unique([cpf_cnpj, area_trabalho_id])
   @@map("cliente")
 }
 

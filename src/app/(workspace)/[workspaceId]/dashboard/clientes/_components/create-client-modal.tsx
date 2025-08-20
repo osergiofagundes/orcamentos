@@ -60,6 +60,7 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
   const onSubmit = async (data: ClientFormData) => {
     setIsLoading(true)
     try {
+      console.log('Sending data:', data)
       const response = await fetch(`/api/workspace/${workspaceId}/clientes`, {
         method: "POST",
         headers: {
@@ -70,7 +71,8 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || "Erro ao criar cliente")
+        console.error('API Error:', error)
+        throw new Error(error.error || "Erro ao criar cliente")
       }
 
       toast.success("Cliente criado com sucesso!")
@@ -78,6 +80,7 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
       setIsOpen(false)
       onClientCreated?.()
     } catch (error) {
+      console.error('Client creation error:', error)
       toast.error(error instanceof Error ? error.message : "Erro ao criar cliente")
     } finally {
       setIsLoading(false)
