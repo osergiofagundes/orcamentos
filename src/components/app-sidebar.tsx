@@ -8,6 +8,7 @@ import {
   Tag,
   UserRound,
   Package,
+  Settings
 } from "lucide-react"
 
 import { NavProjects } from "@/components/nav-projects"
@@ -53,6 +54,11 @@ const data = {
       name: "Orçamentos",
       url: "orcamentos",
       icon: HandCoins,
+    },
+    {
+      name: "Configurações",
+      url: "configuracoes",
+      icon: Settings,
     },
   ],
 }
