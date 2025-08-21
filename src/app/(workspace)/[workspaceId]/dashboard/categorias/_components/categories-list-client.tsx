@@ -29,9 +29,10 @@ interface CategoriesListClientProps {
   workspaceId: string
   refreshTrigger?: number
   search: string
+  canManageCategories: boolean
 }
 
-export function CategoriesListClient({ workspaceId, refreshTrigger, search }: CategoriesListClientProps) {
+export function CategoriesListClient({ workspaceId, refreshTrigger, search, canManageCategories }: CategoriesListClientProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -153,7 +154,7 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search }: Ca
                 <TableHead>Descrição</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Criado em</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                {canManageCategories && <TableHead className="text-right">Ações</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -172,13 +173,15 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search }: Ca
                   <TableCell className="text-muted-foreground">
                     {formatDateTime(category.createdAt)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <CategoryActions
-                      category={category}
-                      workspaceId={workspaceId}
-                      onUpdate={handleCategoryUpdate}
-                    />
-                  </TableCell>
+                  {canManageCategories && (
+                    <TableCell className="text-right">
+                      <CategoryActions
+                        category={category}
+                        workspaceId={workspaceId}
+                        onUpdate={handleCategoryUpdate}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

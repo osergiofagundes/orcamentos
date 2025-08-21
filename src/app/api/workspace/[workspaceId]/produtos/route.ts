@@ -83,16 +83,23 @@ export async function POST(
       return NextResponse.json({ message: "Não autorizado" }, { status: 401 })
     }
 
-    // Verificar se o usuário tem acesso ao workspace
-    const hasAccess = await prisma.usuarioAreaTrabalho.findFirst({
+    // Verificar se o usuário tem acesso ao workspace e permissão para criar produtos (nível 2+)
+    const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
       where: {
         usuario_id: session.user.id,
         area_trabalho_id: parseInt(workspaceId),
       },
     })
 
-    if (!hasAccess) {
+    if (!userAccess) {
       return NextResponse.json({ message: "Workspace não encontrado" }, { status: 404 })
+    }
+
+    // Verificar se usuário tem permissão para criar produtos (nível 2 ou superior)
+    if (userAccess.nivel_permissao < 2) {
+      return NextResponse.json({ 
+        message: "Você não tem permissão para criar produtos e serviços. Necessário nível de acesso 2 ou superior." 
+      }, { status: 403 })
     }
 
     // Validar dados
