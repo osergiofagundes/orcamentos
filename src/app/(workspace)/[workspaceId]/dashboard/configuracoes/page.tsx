@@ -55,8 +55,8 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
 
     const workspace = userAccess.areaTrabalho
     const userPermission = userAccess.nivel_permissao
-    const canEdit = userPermission >= 2 // Admin ou Owner
-    const canManageUsers = userPermission >= 2 // Admin ou Owner
+    const canEdit = userPermission >= 3 // Apenas Owner (Nível 3)
+    const canManageUsers = userPermission >= 3 // Apenas Owner (Nível 3)
 
     return (
         <SidebarProvider>
