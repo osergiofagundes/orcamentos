@@ -20,12 +20,12 @@ export async function PUT(
     const { workspaceId, userId } = await params
 
     try {
-        // Verifica se usuário tem permissão de nível 2+
+        // Verifica se usuário tem permissão de nível 3 (Owner)
         const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
                 area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao: { gte: 2 } // Nível 2 ou 3
+                nivel_permissao: { gte: 3 } // Apenas Nível 3
             }
         })
 
@@ -105,12 +105,12 @@ export async function DELETE(
     const { workspaceId, userId } = await params
 
     try {
-        // Verifica se usuário tem permissão de nível 2+
+        // Verifica se usuário tem permissão de nível 3 (Owner)
         const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
             where: {
                 usuario_id: session.user.id,
                 area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao: { gte: 2 } // Nível 2 ou 3
+                nivel_permissao: { gte: 3 } // Apenas Nível 3
             }
         })
 

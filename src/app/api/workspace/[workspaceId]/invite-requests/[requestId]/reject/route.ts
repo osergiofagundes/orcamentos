@@ -26,7 +26,7 @@ export async function POST(
             where: {
                 usuario_id: session.user.id,
                 area_trabalho_id: parseInt(workspaceId),
-                nivel_permissao: { gte: 2 }
+                nivel_permissao: { gte: 3 }
             }
         })
 

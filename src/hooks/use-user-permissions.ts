@@ -35,7 +35,7 @@ export function useUserPermissions(workspaceId: string): UserPermissions {
             canManageCategories: level >= 2, // Nível 2+ pode gerenciar categorias
             canManageProducts: level >= 2,   // Nível 2+ pode gerenciar produtos
             canManageClients: level >= 2,    // Nível 2+ pode gerenciar clientes
-            canManageUsers: level >= 2,      // Nível 2+ pode gerenciar usuários
+            canManageUsers: level >= 3,      // Nível 3 pode gerenciar usuários
             canManageWorkspace: level >= 3,  // Nível 3 pode gerenciar workspace
             userLevel: level,
             isLoading: false,
