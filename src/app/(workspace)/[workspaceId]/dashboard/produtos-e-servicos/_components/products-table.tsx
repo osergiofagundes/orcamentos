@@ -36,9 +36,10 @@ interface ProductsTableProps {
   refreshTrigger?: number
   onDataChanged?: () => void
   search?: string
+  canManageProducts: boolean
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -153,13 +154,13 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                     <TableHead>Tipo Valor</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Criado em</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    {canManageProducts && <TableHead className="text-right">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={canManageProducts ? 9 : 8} className="text-center text-muted-foreground py-8">
                     {search && search.trim() !== "" 
                       ? `Nenhum produto encontrado para "${search}"` 
                       : "Nenhum produto cadastrado"}
@@ -184,13 +185,15 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                                       <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}
                     </TableCell>
-                  <TableCell className="text-right">
-                    <ProductActions
-                      product={product}
-                      workspaceId={workspaceId}
-                      onProductDeleted={handleProductDeleted}
-                    />
-                  </TableCell>
+                  {canManageProducts && (
+                    <TableCell className="text-right">
+                      <ProductActions
+                        product={product}
+                        workspaceId={workspaceId}
+                        onProductDeleted={handleProductDeleted}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               )))}
             </TableBody>
