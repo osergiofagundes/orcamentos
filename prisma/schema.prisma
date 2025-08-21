@@ -21,6 +21,9 @@ model User {
   accounts      Account[]
   orcamentos    Orcamento[] // Relação adicionada
   usuariosAreas UsuarioAreaTrabalho[] // Relação adicionada
+  convitesCriados ConviteWorkspace[] // Convites criados pelo usuário
+  solicitacoesEnviadas SolicitacaoEntrada[] // Solicitações enviadas pelo usuário
+  solicitacoesRespondidas SolicitacaoEntrada[] @relation("RespondeuSolicitacao") // Solicitações respondidas pelo usuário
 
   @@unique([email])
   @@map("user")
@@ -111,6 +114,7 @@ model AreaTrabalho {
   produtosServicos    ProdutoServico[]
   categorias          Categoria[]
   orcamentos         Orcamento[]
+  convites           ConviteWorkspace[] // Convites do workspace
 
   @@map("area_trabalho")
 }
@@ -212,4 +216,52 @@ model Categoria {
   produtosServicos    ProdutoServico[]
 
   @@map("categoria")
+}
+
+// ==================== TABELAS DE CONVITES ====================
+enum StatusConvite {
+  ATIVO
+  EXPIRADO
+  USADO
+}
+
+enum StatusSolicitacao {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+model ConviteWorkspace {
+  id                  Int            @id @default(autoincrement())
+  codigo              String         @unique @db.VarChar(255)
+  area_trabalho_id    Int
+  criado_por          String         // ID do usuário que criou o convite
+  nivel_permissao     Int            @default(1) // Nível de permissão padrão para novos usuários
+  status              StatusConvite  @default(ATIVO)
+  expira_em           DateTime       // Data de expiração do código
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
+  criadoPor           User           @relation(fields: [criado_por], references: [id], onDelete: Cascade)
+  solicitacoes        SolicitacaoEntrada[]
+
+  @@map("convite_workspace")
+}
+
+model SolicitacaoEntrada {
+  id                  Int            @id @default(autoincrement())
+  convite_id          Int
+  usuario_id          String         // ID do usuário que solicitou entrada
+  status              StatusSolicitacao @default(PENDENTE)
+  mensagem            String?        @db.Text // Mensagem opcional do usuário
+  respondido_por      String?        // ID do admin que respondeu
+  respondido_em       DateTime?      // Data da resposta
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  convite             ConviteWorkspace @relation(fields: [convite_id], references: [id], onDelete: Cascade)
+  usuario             User           @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  respondidoPor       User?          @relation("RespondeuSolicitacao", fields: [respondido_por], references: [id])
+
+  @@unique([convite_id, usuario_id]) // Um usuário não pode solicitar entrada no mesmo convite duas vezes
+  @@map("solicitacao_entrada")
 }
