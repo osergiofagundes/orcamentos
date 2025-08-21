@@ -32,6 +32,10 @@ const clientSchema = z.object({
   telefone: z.string().min(1, "Telefone é obrigatório"),
   email: z.string().email("Email inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
+  bairro: z.string().optional().or(z.literal('')),
+  cidade: z.string().optional().or(z.literal('')),
+  estado: z.string().optional().or(z.literal('')),
+  cep: z.string().optional().or(z.literal('')),
 })
 
 type ClientFormData = z.infer<typeof clientSchema>
@@ -43,6 +47,10 @@ interface Client {
   telefone: string
   email: string
   endereco: string
+  bairro?: string | null
+  cidade?: string | null
+  estado?: string | null
+  cep?: string | null
 }
 
 interface EditClientModalProps {
@@ -65,6 +73,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
       telefone: client.telefone,
       email: client.email,
       endereco: client.endereco,
+      bairro: client.bairro || "",
+      cidade: client.cidade || "",
+      estado: client.estado || "",
+      cep: client.cep || "",
     },
   })
 
@@ -97,7 +109,7 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Cliente</DialogTitle>
           <DialogDescription>
@@ -163,11 +175,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
               name="endereco"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Endereço</FormLabel>
+                  <FormLabel>Endereço *</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Endereço completo do cliente"
-                      className="resize-none"
+                    <Input 
+                      placeholder="Rua, Número, Complemento"
                       {...field}
                     />
                   </FormControl>
@@ -175,6 +186,74 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="bairro"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bairro</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Bairro"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Cidade"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="estado"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Ex: SP, RJ, MG"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cep"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CEP</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="00000-000"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

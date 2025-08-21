@@ -33,6 +33,10 @@ const clientSchema = z.object({
   telefone: z.string().min(1, "Telefone é obrigatório"),
   email: z.string().email("Email inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
+  bairro: z.string().optional().or(z.literal('')),
+  cidade: z.string().optional().or(z.literal('')),
+  estado: z.string().optional().or(z.literal('')),
+  cep: z.string().optional().or(z.literal('')),
 })
 
 type ClientFormData = z.infer<typeof clientSchema>
@@ -54,6 +58,10 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
       telefone: "",
       email: "",
       endereco: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+      cep: "",
     },
   })
 
@@ -95,7 +103,7 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
           Novo Cliente
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Novo Cliente</DialogTitle>
           <DialogDescription>
@@ -161,11 +169,10 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
               name="endereco"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Endereço</FormLabel>
+                  <FormLabel>Endereço *</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Endereço completo do cliente"
-                      className="resize-none"
+                    <Input 
+                      placeholder="Rua, Número, Complemento"
                       {...field}
                     />
                   </FormControl>
@@ -173,6 +180,74 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="bairro"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bairro</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Bairro"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cidade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Cidade"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="estado"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Ex: SP, RJ, MG"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cep"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CEP</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="00000-000"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                 Cancelar
