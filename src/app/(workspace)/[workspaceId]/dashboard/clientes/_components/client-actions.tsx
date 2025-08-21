@@ -19,6 +19,10 @@ interface Client {
   telefone: string
   email: string
   endereco: string
+  bairro?: string | null
+  cidade?: string | null
+  estado?: string | null
+  cep?: string | null
 }
 
 interface ClientActionsProps {

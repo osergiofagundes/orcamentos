@@ -67,6 +67,29 @@ export async function ClientsList({ workspaceId }: ClientsListProps) {
       return numbersOnly.length === 11 ? 'PF' : 'PJ'
     }
 
+    const formatAddress = (client: any) => {
+      const addressParts = []
+      
+      if (client.endereco) {
+        addressParts.push(client.endereco)
+      }
+      
+      const locationParts = []
+      if (client.bairro) locationParts.push(client.bairro)
+      if (client.cidade) locationParts.push(client.cidade)
+      if (client.estado) locationParts.push(client.estado)
+      
+      if (locationParts.length > 0) {
+        addressParts.push(locationParts.join(', '))
+      }
+      
+      if (client.cep) {
+        addressParts.push(`CEP: ${client.cep}`)
+      }
+      
+      return addressParts.length > 0 ? addressParts.join(' - ') : 'Não informado'
+    }
+
     return (
       <Card>
         <CardHeader>
@@ -88,6 +111,7 @@ export async function ClientsList({ workspaceId }: ClientsListProps) {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Telefone</TableHead>
+                  <TableHead>Endereço</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -103,6 +127,9 @@ export async function ClientsList({ workspaceId }: ClientsListProps) {
                     </TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.telefone}</TableCell>
+                    <TableCell className="max-w-xs truncate" title={formatAddress(client)}>
+                      {formatAddress(client)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <ClientActions client={client} workspaceId={workspaceId} />
                     </TableCell>

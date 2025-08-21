@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from "@/lib/auth"
 import { headers } from 'next/headers'
+import { PrismaClientKnownRequestError } from '@/generated/prisma/runtime/library'
 
 // GET /api/workspace/[workspaceId]/clientes/[clienteId] - Obter cliente específico
 export async function GET(
@@ -81,7 +82,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { nome, cpf_cnpj, telefone, email, endereco } = await req.json()
+        const { nome, cpf_cnpj, telefone, email, endereco, bairro, cidade, estado, cep } = await req.json()
 
         // Verificar se o cliente existe
         const existingClient = await prisma.cliente.findFirst({
@@ -122,15 +123,28 @@ export async function PUT(
                 cpf_cnpj,
                 telefone,
                 email,
-                endereco
+                endereco,
+                bairro: bairro && bairro.trim() !== '' ? bairro : null,
+                cidade: cidade && cidade.trim() !== '' ? cidade : null,
+                estado: estado && estado.trim() !== '' ? estado : null,
+                cep: cep && cep.trim() !== '' ? cep : null,
             }
         })
 
         return NextResponse.json(cliente)
     } catch (error) {
         console.error('Failed to update client:', error)
+        
+        // Verificar se é erro de constraint única (CPF/CNPJ duplicado)
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+            return NextResponse.json(
+                { error: 'Outro cliente com este CPF/CNPJ já existe neste workspace' },
+                { status: 400 }
+            )
+        }
+        
         return NextResponse.json(
-            { error: 'Failed to update client' },
+            { error: 'Erro interno do servidor ao atualizar cliente' },
             { status: 500 }
         )
     }
