@@ -106,6 +106,7 @@ model AreaTrabalho {
   cidade              String?
   estado              String?
   cep                 String?
+  logo_url            String?        // URL do logotipo da empresa
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
