@@ -57,16 +57,30 @@ async function main() {
     }
   }
 
-  // Buscar categorias existentes
-  const categorias = await prisma.categoria.findMany({
-    where: {
-      area_trabalho_id: areaTrabalho.id
-    }
-  })
+  // Criar categorias básicas se não existem
+  const categoriasBasicas = ["Produtos", "Serviços", "Materiais"]
+  const categorias = []
+  
+  for (const nomeCategoria of categoriasBasicas) {
+    let categoria = await prisma.categoria.findFirst({
+      where: {
+        nome: nomeCategoria,
+        area_trabalho_id: areaTrabalho.id
+      }
+    })
 
-  if (categorias.length === 0) {
-    console.log('Nenhuma categoria encontrada.')
-    return
+    if (!categoria) {
+      categoria = await prisma.categoria.create({
+        data: {
+          nome: nomeCategoria,
+          descricao: `Categoria ${nomeCategoria}`,
+          area_trabalho_id: areaTrabalho.id
+        }
+      })
+      console.log(`Categoria criada: ${categoria.nome}`)
+    }
+    
+    categorias.push(categoria)
   }
 
   // Criar produtos/serviços de exemplo
@@ -75,31 +89,36 @@ async function main() {
       nome: "Instalação de Calhas",
       descricao: "Serviço completo de instalação de calhas residenciais",
       valor: 25000, // R$ 250,00 em centavos
-      categoria_nome: "Tenis"
+      tipo: 'SERVICO' as const,
+      categoria_nome: "Serviços"
     },
     {
       nome: "Manutenção de Calhas",
       descricao: "Serviço de limpeza e manutenção de calhas",
       valor: 8000, // R$ 80,00 em centavos
-      categoria_nome: "Tenis"
+      tipo: 'SERVICO' as const,
+      categoria_nome: "Serviços"
     },
     {
       nome: "Calha de Alumínio - Metro",
       descricao: "Calha de alumínio branca - preço por metro linear",
       valor: 4500, // R$ 45,00 em centavos
-      categoria_nome: "Tenis"
+      tipo: 'PRODUTO' as const,
+      categoria_nome: "Produtos"
     },
     {
       nome: "Rufos e Condutores",
       descricao: "Conjunto de rufos e condutores para acabamento",
       valor: 12000, // R$ 120,00 em centavos
-      categoria_nome: "Tenis"
+      tipo: 'PRODUTO' as const,
+      categoria_nome: "Materiais"
     },
     {
       nome: "Consultoria Técnica",
       descricao: "Avaliação técnica e orçamento personalizado",
       valor: 15000, // R$ 150,00 em centavos
-      categoria_nome: "Tenis"
+      tipo: 'SERVICO' as const,
+      categoria_nome: "Serviços"
     }
   ]
 
@@ -124,6 +143,7 @@ async function main() {
           nome: produto.nome,
           descricao: produto.descricao,
           valor: produto.valor,
+          tipo: produto.tipo,
           categoria_id: categoria.id,
           area_trabalho_id: areaTrabalho.id
         }
