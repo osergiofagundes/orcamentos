@@ -6,9 +6,10 @@ import path from 'path'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  context: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
+    const { workspaceId: workspaceIdString } = await context.params
     const session = await auth.api.getSession({
       headers: request.headers,
     })
@@ -17,7 +18,7 @@ export async function POST(
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const workspaceId = parseInt(params.workspaceId)
+    const workspaceId = parseInt(workspaceIdString)
 
     // Verificar se o usuário tem permissão para editar o workspace
     const userWorkspace = await prisma.usuarioAreaTrabalho.findFirst({
