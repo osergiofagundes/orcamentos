@@ -11,7 +11,7 @@ const createProductSchema = z.object({
   tipo: z.enum(["PRODUTO", "SERVICO"], {
     required_error: "Tipo é obrigatório",
   }),
-  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO", "HORA", "DIA"], {
+  tipo_valor: z.enum(["UNIDADE", "METRO", "METRO_QUADRADO", "METRO_CUBICO", "CENTIMETRO", "DUZIA", "QUILO", "GRAMA", "QUILOMETRO", "LITRO", "MINUTO", "HORA", "DIA", "MES", "ANO"], {
     required_error: "Tipo de valor é obrigatório",
   }),
   categoria_id: z.number().int().positive("Categoria é obrigatória"),

@@ -91,9 +91,19 @@ enum TipoProdutoServico {
 enum TipoValor {
   UNIDADE
   METRO
-  PESO
+  METRO_QUADRADO
+  METRO_CUBICO
+  CENTIMETRO
+  DUZIA
+  QUILO
+  GRAMA
+  QUILOMETRO
+  LITRO
+  MINUTO
   HORA
   DIA
+  MES
+  ANO
 }
 
 model AreaTrabalho {
