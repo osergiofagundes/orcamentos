@@ -22,7 +22,7 @@ interface Product {
   descricao?: string | null
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
-  tipo_valor: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA"
+  tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
   categoria_id: number
   createdAt: string
   categoria: {
@@ -87,13 +87,23 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     }).format(value / 100)
   }
 
-  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA") => {
+  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO") => {
     const tipoLabels = {
-      UNIDADE: "Unidade",
-      METRO: "Metro", 
-      PESO: "Peso",
-      HORA: "Hora",
-      DIA: "Dia"
+      UNIDADE: "Unidades",
+      METRO: "Metros", 
+      METRO_QUADRADO: "Metros Quadrados",
+      METRO_CUBICO: "Metro Cúbico",
+      CENTIMETRO: "Centímetros",
+      DUZIA: "Dúzias",
+      QUILO: "Quilo",
+      GRAMA: "Grama",
+      QUILOMETRO: "Quilômetro",
+      LITRO: "Litros",
+      MINUTO: "Minutos",
+      HORA: "Horas",
+      DIA: "Dias",
+      MES: "Meses",
+      ANO: "Anos"
     }
     return tipoLabels[tipo]
   }

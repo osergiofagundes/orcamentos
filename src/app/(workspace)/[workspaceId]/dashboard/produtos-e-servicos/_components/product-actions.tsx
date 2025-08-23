@@ -18,7 +18,7 @@ interface Product {
   descricao?: string | null
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
-  tipo_valor: "UNIDADE" | "METRO" | "PESO" | "HORA" | "DIA"
+  tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
   categoria_id: number
   categoria: {
     id: number

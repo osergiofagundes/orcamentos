@@ -40,7 +40,7 @@ const productSchema = z.object({
   tipo: z.enum(["PRODUTO", "SERVICO"], {
     required_error: "Tipo é obrigatório",
   }),
-  tipo_valor: z.enum(["UNIDADE", "METRO", "PESO", "HORA", "DIA"], {
+  tipo_valor: z.enum(["UNIDADE", "METRO", "METRO_QUADRADO", "METRO_CUBICO", "CENTIMETRO", "DUZIA", "QUILO", "GRAMA", "QUILOMETRO", "LITRO", "MINUTO", "HORA", "DIA", "MES", "ANO"], {
     required_error: "Tipo de valor é obrigatório",
   }),
   categoria_id: z.string().min(1, "Categoria é obrigatória"),
@@ -121,14 +121,25 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
   const getTipoValorOptions = (tipo: "PRODUTO" | "SERVICO") => {
     if (tipo === "PRODUTO") {
       return [
-        { value: "UNIDADE", label: "Unidade" },
-        { value: "METRO", label: "Metro" },
-        { value: "PESO", label: "Peso" },
+        { value: "UNIDADE", label: "Unidades" },
+        { value: "DUZIA", label: "Dúzias" },
+        { value: "METRO", label: "Metros" },
+        { value: "METRO_QUADRADO", label: "Metros Quadrados" },
+        { value: "METRO_CUBICO", label: "Metro Cúbico" },
+        { value: "CENTIMETRO", label: "Centímetros" },
+        { value: "QUILOMETRO", label: "Quilômetro" },
+        { value: "QUILO", label: "Quilo" },
+        { value: "GRAMA", label: "Grama" },
+        { value: "LITRO", label: "Litros" },
       ]
     } else {
       return [
-        { value: "HORA", label: "Hora" },
-        { value: "DIA", label: "Dia" },
+        { value: "UNIDADE", label: "Unidades" },
+        { value: "MINUTO", label: "Minutos" },
+        { value: "HORA", label: "Horas" },
+        { value: "DIA", label: "Dias" },
+        { value: "MES", label: "Meses" },
+        { value: "ANO", label: "Anos" },
       ]
     }
   }
@@ -254,7 +265,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
               name="tipo_valor"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo Valor</FormLabel>
+                  <FormLabel>Tipo de Medida</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
