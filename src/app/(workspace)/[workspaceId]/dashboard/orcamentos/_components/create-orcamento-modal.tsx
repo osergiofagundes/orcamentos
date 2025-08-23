@@ -41,6 +41,9 @@ const createOrcamentoSchema = z.object({
     produtoServicoId: z.string().min(1, "Selecione um produto/serviço"),
     quantidade: z.number().min(1, "Quantidade deve ser maior que 0"),
     precoUnitario: z.number().min(0, "Preço deve ser maior ou igual a 0"),
+    descontoPercentual: z.number().min(0).max(100).optional(),
+    descontoValor: z.number().min(0).optional(),
+    tipoDesconto: z.enum(["percentual", "valor", "nenhum"]).optional(),
   })).min(1, "Adicione pelo menos um item"),
 })
 
@@ -77,7 +80,14 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     defaultValues: {
       clienteId: "",
       observacoes: "",
-      itens: [{ produtoServicoId: "", quantidade: 1, precoUnitario: 0 }],
+      itens: [{ 
+        produtoServicoId: "", 
+        quantidade: 1, 
+        precoUnitario: 0,
+        descontoPercentual: 0,
+        descontoValor: 0,
+        tipoDesconto: "nenhum"
+      }],
     },
   })
 
@@ -149,10 +159,23 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     }
   }
 
+  const calculateItemTotal = (item: any) => {
+    const subtotal = item.quantidade * item.precoUnitario
+    let desconto = 0
+    
+    if (item.tipoDesconto === "percentual" && item.descontoPercentual > 0) {
+      desconto = subtotal * (item.descontoPercentual / 100)
+    } else if (item.tipoDesconto === "valor" && item.descontoValor > 0) {
+      desconto = item.descontoValor
+    }
+    
+    return Math.max(0, subtotal - desconto)
+  }
+
   const calculateTotal = () => {
     const itens = form.watch("itens")
     return itens.reduce((total, item) => {
-      return total + (item.quantidade * item.precoUnitario)
+      return total + calculateItemTotal(item)
     }, 0)
   }
 
@@ -164,7 +187,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
           Novo Orçamento
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Novo Orçamento</DialogTitle>
           <DialogDescription>
@@ -205,7 +228,14 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ produtoServicoId: "", quantidade: 1, precoUnitario: 0 })}
+                  onClick={() => append({ 
+                    produtoServicoId: "", 
+                    quantidade: 1, 
+                    precoUnitario: 0,
+                    descontoPercentual: 0,
+                    descontoValor: 0,
+                    tipoDesconto: "nenhum"
+                  })}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Item
@@ -213,98 +243,191 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
               </div>
 
               {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-12 gap-4 items-end p-4 border rounded-lg">
-                  <div className="col-span-5">
-                    <FormField
-                      control={form.control}
-                      name={`itens.${index}.produtoServicoId`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Produto/Serviço</FormLabel>
-                          <Select 
-                            onValueChange={(value) => {
-                              field.onChange(value)
-                              updatePrecoFromProduto(index, value)
-                            }} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione um produto/serviço" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {produtosServicos.map((produto) => (
-                                <SelectItem key={produto.id} value={produto.id.toString()}>
-                                  {produto.nome} - {produto.categoria.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name={`itens.${index}.quantidade`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantidade</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="1"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-3">
-                    <FormField
-                      control={form.control}
-                      name={`itens.${index}.precoUnitario`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Preço Unitário (R$)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-2 flex justify-between items-center">
-                    <div className="text-sm font-medium">
-                      Total: R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`)).toFixed(2)}
+                <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+                  <div className="grid grid-cols-12 gap-4 items-end">
+                    <div className="col-span-4">
+                      <FormField
+                        control={form.control}
+                        name={`itens.${index}.produtoServicoId`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Produto/Serviço</FormLabel>
+                            <Select 
+                              onValueChange={(value) => {
+                                field.onChange(value)
+                                updatePrecoFromProduto(index, value)
+                              }} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione um produto/serviço" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {produtosServicos.map((produto) => (
+                                  <SelectItem key={produto.id} value={produto.id.toString()}>
+                                    {produto.nome} - {produto.categoria.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name={`itens.${index}.quantidade`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quantidade</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name={`itens.${index}.precoUnitario`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Preço Unitário (R$)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name={`itens.${index}.tipoDesconto`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo de Desconto</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="nenhum">Sem Desconto</SelectItem>
+                                <SelectItem value="percentual">Percentual (%)</SelectItem>
+                                <SelectItem value="valor">Valor Fixo (R$)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-span-2 flex justify-between items-center">
+                      <div className="text-sm font-medium">
+                        Total: R$ {calculateItemTotal(form.watch(`itens.${index}`)).toFixed(2)}
+                      </div>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Campos de desconto condicionais */}
+                  {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
+                    <div className="grid grid-cols-12 gap-4">
+                      <div className="col-span-3">
+                        <FormField
+                          control={form.control}
+                          name={`itens.${index}.descontoPercentual`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Desconto (%)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  max="100"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="col-span-9 flex items-end pb-2">
+                        <span className="text-sm text-muted-foreground">
+                          Desconto de R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`) * (form.watch(`itens.${index}.descontoPercentual`) || 0) / 100).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
+                    <div className="grid grid-cols-12 gap-4">
+                      <div className="col-span-3">
+                        <FormField
+                          control={form.control}
+                          name={`itens.${index}.descontoValor`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Desconto (R$)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="col-span-9 flex items-end pb-2">
+                        <span className="text-sm text-muted-foreground">
+                          Valor com desconto: R$ {Math.max(0, (form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`)) - (form.watch(`itens.${index}.descontoValor`) || 0)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -52,6 +52,8 @@ interface OrcamentoDetalhado {
     id: number
     quantidade: number
     preco_unitario: number
+    desconto_percentual: number | null
+    desconto_valor: number | null
     produtoServico: {
       nome: string
       descricao?: string
@@ -127,6 +129,36 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
 
   const calculateSubtotal = (quantidade: number, precoUnitario: number) => {
     return quantidade * precoUnitario
+  }
+
+  const calculateItemTotal = (item: any) => {
+    const subtotal = item.quantidade * item.preco_unitario
+    let desconto = 0
+    
+    if (item.desconto_percentual && item.desconto_percentual > 0) {
+      desconto = subtotal * (parseFloat(item.desconto_percentual.toString()) / 100)
+    } else if (item.desconto_valor && item.desconto_valor > 0) {
+      desconto = item.desconto_valor
+    }
+    
+    return Math.max(0, subtotal - desconto)
+  }
+
+  const getDescontoInfo = (item: any) => {
+    if (item.desconto_percentual && item.desconto_percentual > 0) {
+      return {
+        tipo: "percentual",
+        valor: parseFloat(item.desconto_percentual.toString()),
+        desconto: item.quantidade * item.preco_unitario * (parseFloat(item.desconto_percentual.toString()) / 100)
+      }
+    } else if (item.desconto_valor && item.desconto_valor > 0) {
+      return {
+        tipo: "valor",
+        valor: item.desconto_valor,
+        desconto: item.desconto_valor
+      }
+    }
+    return null
   }
 
   const handleEditOrcamento = () => {
@@ -349,30 +381,54 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
                 <TableHead className="text-center">Quantidade</TableHead>
                 <TableHead className="text-right">Preço Unitário</TableHead>
                 <TableHead className="text-right">Subtotal</TableHead>
+                <TableHead className="text-right">Desconto</TableHead>
+                <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orcamento.itensOrcamento.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{item.produtoServico.nome}</div>
-                      {item.produtoServico.descricao && (
-                        <div className="text-sm text-muted-foreground">
-                          {item.produtoServico.descricao}
+              {orcamento.itensOrcamento.map((item) => {
+                const descontoInfo = getDescontoInfo(item)
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{item.produtoServico.nome}</div>
+                        {item.produtoServico.descricao && (
+                          <div className="text-sm text-muted-foreground">
+                            {item.produtoServico.descricao}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">{item.quantidade}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(item.preco_unitario)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(calculateSubtotal(item.quantidade, item.preco_unitario))}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {descontoInfo ? (
+                        <div className="text-sm">
+                          <div className="text-red-600">
+                            -{formatCurrency(Math.round(descontoInfo.desconto))}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {descontoInfo.tipo === "percentual" 
+                              ? `${descontoInfo.valor}%` 
+                              : "Valor fixo"}
+                          </div>
                         </div>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">{item.quantidade}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(item.preco_unitario)}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(calculateSubtotal(item.quantidade, item.preco_unitario))}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(Math.round(calculateItemTotal(item)))}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
           

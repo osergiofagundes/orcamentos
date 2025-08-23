@@ -152,9 +152,19 @@ export async function PUT(
     }
 
     // Calcular valor total
-    const valorTotal = itens.reduce((total: number, item: any) => {
-      return total + (item.quantidade * Math.round(item.precoUnitario * 100))
-    }, 0)
+    let valorTotal = 0
+    for (const item of itens) {
+      const subtotal = item.quantidade * item.precoUnitario * 100 // Convert to cents
+      let desconto = 0
+      
+      if (item.tipoDesconto === "percentual" && item.descontoPercentual > 0) {
+        desconto = subtotal * (item.descontoPercentual / 100)
+      } else if (item.tipoDesconto === "valor" && item.descontoValor > 0) {
+        desconto = item.descontoValor * 100 // Convert to cents
+      }
+      
+      valorTotal += Math.max(0, Math.round(subtotal - desconto))
+    }
 
     // Atualizar orçamento e itens em transação
     const orcamentoAtualizado = await prisma.$transaction(async (tx) => {
@@ -194,6 +204,8 @@ export async function PUT(
             produto_servico_id: parseInt(item.produtoServicoId),
             quantidade: item.quantidade,
             preco_unitario: Math.round(item.precoUnitario * 100), // Convert to cents
+            desconto_percentual: item.tipoDesconto === "percentual" ? item.descontoPercentual || 0 : 0,
+            desconto_valor: item.tipoDesconto === "valor" ? Math.round((item.descontoValor || 0) * 100) : 0, // Convert to cents
           },
         })
       }

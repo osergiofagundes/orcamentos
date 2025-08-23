@@ -192,6 +192,8 @@ model ItemOrcamento {
   produto_servico_id  Int
   quantidade          Int
   preco_unitario      Int            // Em centavos (R$ 10,50 = 1050)
+  desconto_percentual Decimal?       @default(0) @db.Decimal(5,2) // Desconto em percentual (0.00 a 100.00)
+  desconto_valor      Int?           @default(0) // Desconto em valor fixo em centavos
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   orcamento           Orcamento      @relation(fields: [orcamento_id], references: [id])
