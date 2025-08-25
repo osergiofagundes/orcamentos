@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus, Tag } from "lucide-react"
 import { CategoryActions } from "./category-actions"
+import { DateRange } from "react-day-picker"
 
 interface Category {
   id: number
@@ -29,9 +30,10 @@ interface CategoriesListClientProps {
   refreshTrigger?: number
   search: string
   canManageCategories: boolean
+  dateRange?: DateRange
 }
 
-export function CategoriesListClient({ workspaceId, refreshTrigger, search, canManageCategories }: CategoriesListClientProps) {
+export function CategoriesListClient({ workspaceId, refreshTrigger, search, canManageCategories, dateRange }: CategoriesListClientProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -68,23 +70,49 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
     })
   }
 
-  // Função para filtrar categorias baseado na busca
+  // Função para filtrar categorias baseado na busca e data
   const filteredCategories = categories.filter(category => {
-    if (!search || search.trim() === '') return true
-    
-    const searchTerm = search.toLowerCase().trim()
-    
-    // Função auxiliar para busca em texto
-    const matchesText = (text: string | number | null | undefined): boolean => {
-      if (text === null || text === undefined) return false
-      return text.toString().toLowerCase().includes(searchTerm)
+    // Filtro de pesquisa
+    if (search && search.trim() !== '') {
+      const searchTerm = search.toLowerCase().trim()
+      
+      // Função auxiliar para busca em texto
+      const matchesText = (text: string | number | null | undefined): boolean => {
+        if (text === null || text === undefined) return false
+        return text.toString().toLowerCase().includes(searchTerm)
+      }
+      
+      // Verifica se o termo de busca está presente em qualquer campo
+      const matchesSearch = (
+        matchesText(category.id) ||
+        matchesText(category.nome)
+      )
+      if (!matchesSearch) return false
     }
-    
-    // Verifica se o termo de busca está presente em qualquer campo
-    return (
-      matchesText(category.id) ||
-      matchesText(category.nome)
-    )
+
+    // Filtro de data
+    if (dateRange?.from || dateRange?.to) {
+      const categoryDate = new Date(category.createdAt)
+      
+      // Se só tem data inicial, filtra a partir dela
+      if (dateRange.from && !dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        fromDate.setHours(0, 0, 0, 0)
+        if (categoryDate < fromDate) return false
+      }
+      
+      // Se tem ambas as datas, filtra pelo intervalo
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        const toDate = new Date(dateRange.to)
+        fromDate.setHours(0, 0, 0, 0)
+        toDate.setHours(23, 59, 59, 999)
+        
+        if (categoryDate < fromDate || categoryDate > toDate) return false
+      }
+    }
+
+    return true
   })
 
   if (isLoading) {
@@ -124,14 +152,24 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
     )
   }
 
-  if (filteredCategories.length === 0 && search) {
+  if (filteredCategories.length === 0 && (search || dateRange?.from || dateRange?.to)) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to)
+    
     return (
       <Card>
         <CardContent className="p-12 text-center">
           <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Nenhuma categoria encontrada</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            {hasFilters
+              ? "Nenhuma categoria encontrada com os filtros aplicados"
+              : "Nenhuma categoria encontrada"
+            }
+          </h3>
           <p className="text-muted-foreground">
-            Não foram encontradas categorias que correspondam à sua busca por "{search}".
+            {hasFilters
+              ? "Tente ajustar os filtros ou termos da sua pesquisa."
+              : "Comece criando sua primeira categoria clicando no botão \"Nova Categoria\"."
+            }
           </p>
         </CardContent>
       </Card>
