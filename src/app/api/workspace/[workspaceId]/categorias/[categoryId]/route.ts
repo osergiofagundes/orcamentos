@@ -6,7 +6,6 @@ import { z } from "zod"
 
 const updateCategorySchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
-  descricao: z.string().optional(),
 })
 
 export async function PUT(
@@ -78,7 +77,6 @@ export async function PUT(
       },
       data: {
         nome: validatedData.nome,
-        descricao: validatedData.descricao || null,
       },
       include: {
         _count: {

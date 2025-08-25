@@ -18,7 +18,6 @@ import { CategoryActions } from "./category-actions"
 interface Category {
   id: number
   nome: string
-  descricao?: string | null
   createdAt: string
   _count?: {
     produtosServicos?: number
@@ -84,8 +83,7 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
     // Verifica se o termo de busca está presente em qualquer campo
     return (
       matchesText(category.id) ||
-      matchesText(category.nome) ||
-      matchesText(category.descricao)
+      matchesText(category.nome)
     )
   })
 
@@ -151,7 +149,6 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Descrição</TableHead>
                 <TableHead>Produtos</TableHead>
                 <TableHead>Criado em</TableHead>
                 {canManageCategories && <TableHead className="text-right">Ações</TableHead>}
@@ -162,9 +159,6 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">#{category.id}</TableCell>
                   <TableCell className="font-medium">{category.nome}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {category.descricao || "—"}
-                  </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
                       {category._count?.produtosServicos || 0} produto(s)

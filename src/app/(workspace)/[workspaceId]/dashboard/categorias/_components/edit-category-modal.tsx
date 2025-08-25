@@ -22,13 +22,11 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 const categorySchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
-  descricao: z.string().optional(),
 })
 
 type CategoryFormData = z.infer<typeof categorySchema>
@@ -36,7 +34,6 @@ type CategoryFormData = z.infer<typeof categorySchema>
 interface Category {
   id: number
   nome: string
-  descricao?: string | null
 }
 
 interface EditCategoryModalProps {
@@ -54,7 +51,6 @@ export function EditCategoryModal({ isOpen, onClose, category, workspaceId }: Ed
     resolver: zodResolver(categorySchema),
     defaultValues: {
       nome: category.nome,
-      descricao: category.descricao || "",
     },
   })
 
@@ -62,7 +58,6 @@ export function EditCategoryModal({ isOpen, onClose, category, workspaceId }: Ed
   useEffect(() => {
     form.reset({
       nome: category.nome,
-      descricao: category.descricao || "",
     })
   }, [category, form])
 
@@ -111,24 +106,6 @@ export function EditCategoryModal({ isOpen, onClose, category, workspaceId }: Ed
                   <FormLabel>Nome da Categoria</FormLabel>
                   <FormControl>
                     <Input placeholder="Nome da categoria" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição (Opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva do que se trata esta categoria..."
-                      className="resize-none"
-                      rows={3}
-                      {...field} 
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
