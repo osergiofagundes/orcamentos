@@ -15,6 +15,7 @@ interface WorkspaceWithPermission {
   cidade: string | null;
   estado: string | null;
   cep: string | null;
+  logo_url: string | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
