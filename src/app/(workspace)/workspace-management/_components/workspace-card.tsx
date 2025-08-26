@@ -56,9 +56,11 @@ export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdat
           <div className="flex-1">
             <h3 className="font-semibold text-lg">{workspace.nome}</h3>
             {workspace.descricao && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {workspace.descricao}
-              </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                {workspace.descricao.length > 80
+                  ? workspace.descricao.slice(0, 80) + '...'
+                  : workspace.descricao}
+                </p>
             )}
           </div>
         </div>

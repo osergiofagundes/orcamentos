@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { User, Building, Phone, Mail, Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { DateRange } from "react-day-picker"
 
 interface Client {
   id: number
@@ -31,9 +32,10 @@ interface ClientsListClientProps {
   workspaceId: string
   refreshTrigger: number
   search: string
+  dateRange?: DateRange
 }
 
-export function ClientsListClient({ workspaceId, refreshTrigger, search }: ClientsListClientProps) {
+export function ClientsListClient({ workspaceId, refreshTrigger, search, dateRange }: ClientsListClientProps) {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -89,42 +91,68 @@ export function ClientsListClient({ workspaceId, refreshTrigger, search }: Clien
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR })
   }
 
-  // Função para filtrar clientes baseado na busca
+  // Função para filtrar clientes baseado na busca e data
   const filteredClients = clients.filter(client => {
-    if (!search || search.trim() === '') return true
-    
-    const searchTerm = search.toLowerCase().trim()
-    
-    // Função auxiliar para busca em texto
-    const matchesText = (text: string | number | null | undefined): boolean => {
-      if (text === null || text === undefined) return false
-      return text.toString().toLowerCase().includes(searchTerm)
+    // Filtro de pesquisa
+    if (search && search.trim() !== '') {
+      const searchTerm = search.toLowerCase().trim()
+      
+      // Função auxiliar para busca em texto
+      const matchesText = (text: string | number | null | undefined): boolean => {
+        if (text === null || text === undefined) return false
+        return text.toString().toLowerCase().includes(searchTerm)
+      }
+      
+      // Função auxiliar para busca em números (telefone, CPF/CNPJ)
+      const matchesNumber = (text: string | null | undefined): boolean => {
+        if (!text) return false
+        
+        // Busca no texto original (com formatação)
+        if (text.toLowerCase().includes(searchTerm)) return true
+        
+        // Busca apenas nos números (sem formatação)
+        const numbersOnly = text.replace(/\D/g, '')
+        const searchNumbersOnly = searchTerm.replace(/\D/g, '')
+        
+        if (searchNumbersOnly && numbersOnly.includes(searchNumbersOnly)) return true
+        
+        return false
+      }
+      
+      // Verifica se o termo de busca está presente em qualquer campo
+      const matchesSearch = (
+        matchesText(client.id) ||
+        matchesText(client.nome) ||
+        matchesNumber(client.cpf_cnpj) ||
+        matchesNumber(client.telefone) ||
+        matchesText(client.email)
+      )
+      if (!matchesSearch) return false
     }
-    
-    // Função auxiliar para busca em números (telefone, CPF/CNPJ)
-    const matchesNumber = (text: string | null | undefined): boolean => {
-      if (!text) return false
+
+    // Filtro de data
+    if (dateRange?.from || dateRange?.to) {
+      const clientDate = new Date(client.createdAt)
       
-      // Busca no texto original (com formatação)
-      if (text.toLowerCase().includes(searchTerm)) return true
+      // Se só tem data inicial, filtra a partir dela
+      if (dateRange.from && !dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        fromDate.setHours(0, 0, 0, 0)
+        if (clientDate < fromDate) return false
+      }
       
-      // Busca apenas nos números (sem formatação)
-      const numbersOnly = text.replace(/\D/g, '')
-      const searchNumbersOnly = searchTerm.replace(/\D/g, '')
-      
-      if (searchNumbersOnly && numbersOnly.includes(searchNumbersOnly)) return true
-      
-      return false
+      // Se tem ambas as datas, filtra pelo intervalo
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        const toDate = new Date(dateRange.to)
+        fromDate.setHours(0, 0, 0, 0)
+        toDate.setHours(23, 59, 59, 999)
+        
+        if (clientDate < fromDate || clientDate > toDate) return false
+      }
     }
-    
-    // Verifica se o termo de busca está presente em qualquer campo
-    return (
-      matchesText(client.id) ||
-      matchesText(client.nome) ||
-      matchesNumber(client.cpf_cnpj) ||
-      matchesNumber(client.telefone) ||
-      matchesText(client.email)
-    )
+
+    return true
   })
 
   if (loading) {
@@ -159,14 +187,24 @@ export function ClientsListClient({ workspaceId, refreshTrigger, search }: Clien
     )
   }
 
-  if (filteredClients.length === 0 && search) {
+  if (filteredClients.length === 0 && (search || dateRange?.from || dateRange?.to)) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to)
+    
     return (
       <Card>
         <CardContent className="p-12 text-center">
           <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Nenhum cliente encontrado</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            {hasFilters
+              ? "Nenhum cliente encontrado com os filtros aplicados"
+              : "Nenhum cliente encontrado"
+            }
+          </h3>
           <p className="text-muted-foreground">
-            Não foram encontrados clientes que correspondam à sua busca por "{search}".
+            {hasFilters
+              ? "Tente ajustar os filtros ou termos da sua pesquisa."
+              : "Comece criando seu primeiro cliente clicando no botão \"Novo Cliente\"."
+            }
           </p>
         </CardContent>
       </Card>

@@ -62,7 +62,7 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
 
       <CategoriesStats workspaceId={workspaceId} />
 
-      <div className="flex flex-col gap-3 md:flex-row md:space-x-3">
+      <div className="flex flex-col md:flex-row md:space-x-3">
         <div className="w-full md:w-2/3">
           <SearchInput
             value={search}

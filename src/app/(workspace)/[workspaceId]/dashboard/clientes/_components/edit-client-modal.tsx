@@ -2,9 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -23,8 +21,19 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { toast } from "sonner"
+import { formatCpfCnpj, formatPhone, formatCep } from "@/lib/formatters"
+import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -138,7 +147,14 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 <FormItem>
                   <FormLabel>CPF/CNPJ</FormLabel>
                   <FormControl>
-                    <Input placeholder="000.000.000-00 ou 00.000.000/0000-00" {...field} />
+                    <Input 
+                      placeholder="000.000.000-00 ou 00.000.000/0000-00" 
+                      {...field}
+                      onChange={(e) => {
+                        const formatted = formatCpfCnpj(e.target.value)
+                        field.onChange(formatted)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,7 +167,14 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <Input placeholder="(00) 00000-0000" {...field} />
+                    <Input 
+                      placeholder="(00) 00000-0000" 
+                      {...field}
+                      onChange={(e) => {
+                        const formatted = formatPhone(e.target.value)
+                        field.onChange(formatted)
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -225,14 +248,22 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 control={form.control}
                 name="estado"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Ex: SP, RJ, MG"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione o estado" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ESTADOS_BRASILEIROS.map((estado) => (
+                          <SelectItem key={estado.sigla} value={estado.sigla}>
+                            {estado.sigla} - {estado.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -241,12 +272,16 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 control={form.control}
                 name="cep"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>CEP</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="00000-000"
                         {...field}
+                        onChange={(e) => {
+                          const formatted = formatCep(e.target.value)
+                          field.onChange(formatted)
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -254,6 +289,7 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 )}
               />
             </div>
+            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
