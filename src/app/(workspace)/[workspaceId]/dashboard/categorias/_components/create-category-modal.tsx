@@ -23,14 +23,12 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { toast } from "sonner"
 
 const categorySchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
-  descricao: z.string().optional(),
 })
 
 type CategoryFormData = z.infer<typeof categorySchema>
@@ -49,7 +47,6 @@ export function CreateCategoryModal({ workspaceId, onCategoryCreated }: CreateCa
     resolver: zodResolver(categorySchema),
     defaultValues: {
       nome: "",
-      descricao: "",
     },
   })
 
@@ -106,24 +103,6 @@ export function CreateCategoryModal({ workspaceId, onCategoryCreated }: CreateCa
                   <FormLabel>Nome da Categoria</FormLabel>
                   <FormControl>
                     <Input placeholder="Ex: Consultoria, Produtos, Serviços..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição (Opcional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descreva do que se trata esta categoria..."
-                      className="resize-none"
-                      rows={3}
-                      {...field} 
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

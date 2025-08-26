@@ -7,6 +7,7 @@ type Workspace = {
   id: number
   nome: string
   descricao?: string
+  logo_url?: string | null
 }
 
 type User = {
@@ -52,7 +53,14 @@ export async function WorkspaceAppSidebar() {
           usuario_id: session.user.id,
         },
         include: {
-          areaTrabalho: true,
+          areaTrabalho: {
+            select: {
+              id: true,
+              nome: true,
+              descricao: true,
+              logo_url: true,
+            },
+          },
         },
       });
 
@@ -60,6 +68,7 @@ export async function WorkspaceAppSidebar() {
         id: uw.areaTrabalho.id,
         nome: uw.areaTrabalho.nome,
         descricao: uw.areaTrabalho.descricao || undefined,
+        logo_url: uw.areaTrabalho.logo_url,
       }));
     } catch (error) {
       console.error("Failed to fetch user data or workspaces:", error);

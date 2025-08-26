@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { ChevronsUpDown, Plus } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
@@ -23,6 +24,7 @@ type Workspace = {
   id: number
   nome: string
   descricao?: string
+  logo_url?: string | null
 }
 
 export function WorkspaceSwitcher({
@@ -54,8 +56,29 @@ export function WorkspaceSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <span className="text-xs font-semibold">
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                {activeWorkspace.logo_url ? (
+                  <Image
+                    src={activeWorkspace.logo_url}
+                    alt={`Logo ${activeWorkspace.nome}`}
+                    width={32}
+                    height={32}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const parent = e.currentTarget.parentElement
+                      if (parent) {
+                        e.currentTarget.style.display = 'none'
+                        const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
+                        if (fallback) {
+                          fallback.style.display = 'block'
+                        }
+                      }
+                    }}
+                  />
+                ) : null}
+                <span 
+                  className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+                >
                   {activeWorkspace.nome.substring(0, 2).toUpperCase()}
                 </span>
               </div>
@@ -85,8 +108,27 @@ export function WorkspaceSwitcher({
                 onClick={() => handleWorkspaceChange(workspace.id)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <span className="text-xs font-semibold">
+                <div className="flex size-6 items-center justify-center rounded-sm border overflow-hidden">
+                  {workspace.logo_url ? (
+                    <Image
+                      src={workspace.logo_url}
+                      alt={`Logo ${workspace.nome}`}
+                      width={24}
+                      height={24}
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
+                        const parent = e.currentTarget.parentElement
+                        if (parent) {
+                          e.currentTarget.style.display = 'none'
+                          const fallback = parent.querySelector('.workspace-dropdown-fallback') as HTMLElement
+                          if (fallback) {
+                            fallback.style.display = 'block'
+                          }
+                        }
+                      }}
+                    />
+                  ) : null}
+                  <span className={`text-xs font-semibold workspace-dropdown-fallback ${workspace.logo_url ? 'hidden' : ''}`}>
                     {workspace.nome.substring(0, 2).toUpperCase()}
                   </span>
                 </div>

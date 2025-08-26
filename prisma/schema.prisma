@@ -111,6 +111,8 @@ model AreaTrabalho {
   nome                String         @db.VarChar(255)
   descricao           String?
   cpf_cnpj            String?
+  telefone            String?
+  email               String?
   endereco            String?
   bairro              String?
   cidade              String?
@@ -224,7 +226,6 @@ model ProdutoServico {
 model Categoria {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
-  descricao           String?        @db.Text
   area_trabalho_id    Int
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt

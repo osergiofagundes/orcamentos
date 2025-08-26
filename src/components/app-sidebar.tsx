@@ -67,6 +67,7 @@ type Workspace = {
   id: number
   nome: string
   descricao?: string
+  logo_url?: string | null
 }
 
 type User = {

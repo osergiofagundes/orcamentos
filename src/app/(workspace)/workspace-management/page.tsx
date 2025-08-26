@@ -31,7 +31,22 @@ export default async function WorkspaceManagementPage() {
         }
       }
     },
-    include: {
+    select: {
+      id: true,
+      nome: true,
+      descricao: true,
+      cpf_cnpj: true,
+      telefone: true,
+      email: true,
+      endereco: true,
+      bairro: true,
+      cidade: true,
+      estado: true,
+      cep: true,
+      logo_url: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
       usuariosAreas: {
         where: {
           usuario_id: session.user.id

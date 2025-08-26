@@ -7,7 +7,7 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react"
-import { useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 
 import {
   DropdownMenu,
@@ -37,49 +37,45 @@ export function NavProjects({
 }) {
   const { isMobile } = useSidebar()
   const params = useParams()
+  const pathname = usePathname()
   const workspaceId = params.workspaceId as string
+
+  const isActiveRoute = (projectUrl: string) => {
+    const fullPath = `/${workspaceId}/dashboard${projectUrl ? `/${projectUrl}` : ''}`
+    // Remove query parameters e hash para comparação mais limpa
+    const cleanPathname = pathname.split('?')[0].split('#')[0]
+    
+    // Verifica se é a página exata ou uma subpágina
+    if (projectUrl === '') {
+      // Para dashboard, só considera ativo se for exatamente o path
+      return cleanPathname === fullPath
+    } else {
+      // Para outras páginas, considera ativo se começar com o path
+      return cleanPathname.startsWith(fullPath)
+    }
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Páginas</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={`/${workspaceId}/dashboard${item.url ? `/${item.url}` : ''}`}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
+        {projects.map((item) => {
+          const isActive = isActiveRoute(item.url)
+          return (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton 
+                asChild 
+                isActive={isActive}
+                className={isActive ? "!bg-black !text-white hover:!bg-black hover:!text-white [&>svg]:!text-white data-[active=true]:!bg-black data-[active=true]:!text-white" : ""}
               >
-                <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        ))}
+                <a href={`/${workspaceId}/dashboard${item.url ? `/${item.url}` : ''}`}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        })}
       </SidebarMenu>
     </SidebarGroup>
   )
