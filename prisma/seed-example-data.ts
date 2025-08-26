@@ -73,7 +73,6 @@ async function main() {
       categoria = await prisma.categoria.create({
         data: {
           nome: nomeCategoria,
-          descricao: `Categoria ${nomeCategoria}`,
           area_trabalho_id: areaTrabalho.id
         }
       })

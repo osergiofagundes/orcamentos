@@ -36,6 +36,8 @@ export default async function WorkspaceManagementPage() {
       nome: true,
       descricao: true,
       cpf_cnpj: true,
+      telefone: true,
+      email: true,
       endereco: true,
       bairro: true,
       cidade: true,

@@ -10,6 +10,8 @@ interface WorkspaceWithPermission {
   nome: string;
   descricao: string | null;
   cpf_cnpj: string | null;
+  telefone: string | null;
+  email: string | null;
   endereco: string | null;
   bairro: string | null;
   cidade: string | null;

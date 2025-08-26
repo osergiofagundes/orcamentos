@@ -20,6 +20,8 @@ interface AreaTrabalho {
   id: number
   nome: string
   cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
   endereco: string | null
   bairro: string | null
   cidade: string | null
@@ -127,6 +129,16 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
       const isCPF = orcamentoData.areaTrabalho.cpf_cnpj.replace(/\D/g, '').length === 11
       const label = isCPF ? 'CPF:' : 'CNPJ:'
       pdf.text(`${label} ${formatCpfCnpj(orcamentoData.areaTrabalho.cpf_cnpj)}`, textStartX, textY)
+      textY += 6
+    }
+
+    if (orcamentoData.areaTrabalho.telefone) {
+      pdf.text(`Telefone: ${formatPhone(orcamentoData.areaTrabalho.telefone)}`, textStartX, textY)
+      textY += 6
+    }
+
+    if (orcamentoData.areaTrabalho.email) {
+      pdf.text(`Email: ${orcamentoData.areaTrabalho.email}`, textStartX, textY)
       textY += 6
     }
 

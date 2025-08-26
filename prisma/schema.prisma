@@ -111,6 +111,8 @@ model AreaTrabalho {
   nome                String         @db.VarChar(255)
   descricao           String?
   cpf_cnpj            String?
+  telefone            String?
+  email               String?
   endereco            String?
   bairro              String?
   cidade              String?

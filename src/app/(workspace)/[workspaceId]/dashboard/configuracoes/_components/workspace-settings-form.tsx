@@ -8,12 +8,23 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { LogoUpload } from "@/components/ui/logo-upload"
 import { toast } from "sonner"
+import { formatCpfCnpj, formatCep, formatPhone } from "@/lib/formatters"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 interface WorkspaceInfo {
     id: number
     nome: string
     descricao?: string | null
     cpf_cnpj?: string | null
+    telefone?: string | null
+    email?: string | null
     endereco?: string | null
     bairro?: string | null
     cidade?: string | null
@@ -33,6 +44,8 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
         nome: workspace.nome || "",
         descricao: workspace.descricao || "",
         cpf_cnpj: workspace.cpf_cnpj || "",
+        telefone: workspace.telefone || "",
+        email: workspace.email || "",
         endereco: workspace.endereco || "",
         bairro: workspace.bairro || "",
         cidade: workspace.cidade || "",
@@ -95,7 +108,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="nome">Nome *</Label>
+                                <Label htmlFor="nome">Nome do Workspace*</Label>
                                 <Input
                                     id="nome"
                                     value={formData.nome}
@@ -110,8 +123,38 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                 <Input
                                     id="cpf_cnpj"
                                     value={formData.cpf_cnpj}
-                                    onChange={(e) => handleInputChange("cpf_cnpj", e.target.value)}
+                                    onChange={(e) => {
+                                        const formatted = formatCpfCnpj(e.target.value)
+                                        handleInputChange("cpf_cnpj", formatted)
+                                    }}
                                     placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                                    disabled={!canEdit}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="telefone">Telefone</Label>
+                                <Input
+                                    id="telefone"
+                                    value={formData.telefone}
+                                    onChange={(e) => {
+                                        const formatted = formatPhone(e.target.value)
+                                        handleInputChange("telefone", formatted)
+                                    }}
+                                    placeholder="(00) 00000-0000"
+                                    disabled={!canEdit}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => handleInputChange("email", e.target.value)}
+                                    placeholder="contato@empresa.com"
                                     disabled={!canEdit}
                                 />
                             </div>
@@ -156,7 +199,10 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                     <Input
                                         id="cep"
                                         value={formData.cep}
-                                        onChange={(e) => handleInputChange("cep", e.target.value)}
+                                        onChange={(e) => {
+                                            const formatted = formatCep(e.target.value)
+                                            handleInputChange("cep", formatted)
+                                        }}
                                         placeholder="00000-000"
                                         disabled={!canEdit}
                                     />
@@ -173,13 +219,24 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="estado">Estado</Label>
-                                    <Input
-                                        id="estado"
-                                        value={formData.estado}
-                                        onChange={(e) => handleInputChange("estado", e.target.value)}
-                                        placeholder="Estado"
-                                        disabled={!canEdit}
-                                    />
+                                    <div>
+                                        <Select
+                                            value={formData.estado}
+                                            onValueChange={(value) => handleInputChange("estado", value)}
+                                            disabled={!canEdit}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Selecione o estado" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {ESTADOS_BRASILEIROS.map((estado) => (
+                                                    <SelectItem key={estado.sigla} value={estado.sigla}>
+                                                        {estado.sigla} - {estado.nome}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
                         </div>

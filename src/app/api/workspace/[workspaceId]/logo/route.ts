@@ -102,9 +102,10 @@ export async function POST(
 // Permitir DELETE para remover o logo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
+    const { workspaceId: workspaceIdString } = await params
     const session = await auth.api.getSession({
       headers: request.headers,
     })
@@ -113,7 +114,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const workspaceId = parseInt(params.workspaceId)
+    const workspaceId = parseInt(workspaceIdString)
 
     // Verificar permissão
     const userWorkspace = await prisma.usuarioAreaTrabalho.findFirst({
