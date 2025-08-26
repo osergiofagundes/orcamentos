@@ -18,7 +18,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 interface Product {
   id: number
   nome: string
-  descricao?: string | null
   valor?: number | null
   categoria: {
     nome: string

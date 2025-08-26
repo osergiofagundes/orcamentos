@@ -130,11 +130,6 @@ export async function ProductsGrid({ workspaceId }: ProductsGridProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {product.descricao && (
-                      <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                        {product.descricao}
-                      </p>
-                    )}
                     <div className="border-t pt-4">
                       <div className="flex items-center justify-between">
                         <div>

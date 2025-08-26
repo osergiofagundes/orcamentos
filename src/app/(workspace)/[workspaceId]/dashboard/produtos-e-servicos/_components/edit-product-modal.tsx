@@ -29,13 +29,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
 const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  descricao: z.string().optional(),
   valor: z.string().min(1, "Valor é obrigatório"),
   tipo: z.enum(["PRODUTO", "SERVICO"], {
     required_error: "Tipo é obrigatório",
@@ -56,7 +54,6 @@ interface Category {
 interface Product {
   id: number
   nome: string
-  descricao?: string | null
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
   tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
@@ -82,6 +79,8 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
   const formatValueForInput = (value: number | null) => {
     if (!value) return ""
     return (value / 100).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
@@ -91,7 +90,6 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
     resolver: zodResolver(productSchema),
     defaultValues: {
       nome: product.nome,
-      descricao: product.descricao || "",
       valor: formatValueForInput(product.valor || null),
       tipo: product.tipo,
       tipo_valor: product.tipo_valor,
@@ -138,9 +136,14 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
     // Remove tudo que não é número
     const numbers = value.replace(/\D/g, "")
     
+    // Se não houver números, retorna vazio
+    if (!numbers) return ""
+    
     // Converte para formato de moeda
     const amount = parseFloat(numbers) / 100
     return amount.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })
@@ -231,30 +234,13 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
             />
             <FormField
               control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Descrição detalhada (opcional)"
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="valor"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="0,00"
+                      placeholder="R$ 0,00"
                       {...field}
                       onChange={(e) => {
                         const formatted = formatCurrency(e.target.value)
