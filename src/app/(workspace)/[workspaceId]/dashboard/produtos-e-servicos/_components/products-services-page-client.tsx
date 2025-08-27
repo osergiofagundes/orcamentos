@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CalendarIcon, Lock, X, Tag, Ruler } from "lucide-react"
+import { CalendarIcon, Lock, X, Tag, Ruler, Package } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -40,6 +40,7 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
   const [categories, setCategories] = React.useState<string[]>([])
   const [tipoValorFilter, setTipoValorFilter] = React.useState<string>("all")
   const [tiposValor, setTiposValor] = React.useState<string[]>([])
+  const [tipoFilter, setTipoFilter] = React.useState<string>("all")
 
   const handleDataChanged = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -97,6 +98,20 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
                     {category}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={tipoFilter} onValueChange={setTipoFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  <SelectValue placeholder="Produtos e Serviços" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Produtos e Serviços</SelectItem>
+                <SelectItem value="PRODUTO">Produtos</SelectItem>
+                <SelectItem value="SERVICO">Serviços</SelectItem>
               </SelectContent>
             </Select>
             
@@ -177,6 +192,7 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
             canManageProducts={canManageProducts}
             dateRange={dateRange}
             categoryFilter={categoryFilter}
+            tipoFilter={tipoFilter}
             tipoValorFilter={tipoValorFilter}
             onCategoriesLoaded={(loadedCategories) => {
               setCategories(loadedCategories)

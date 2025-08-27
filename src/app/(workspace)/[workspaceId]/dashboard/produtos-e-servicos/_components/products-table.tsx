@@ -41,12 +41,13 @@ interface ProductsTableProps {
   canManageProducts: boolean
   dateRange?: DateRange | undefined
   categoryFilter?: string
+  tipoFilter?: string
   tipoValorFilter?: string
   onCategoriesLoaded?: (categories: string[]) => void
   onTiposValorLoaded?: (tiposValor: string[]) => void
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, tipoValorFilter, onCategoriesLoaded, onTiposValorLoaded }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, tipoFilter, tipoValorFilter, onCategoriesLoaded, onTiposValorLoaded }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -118,6 +119,11 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     // Filtro de categoria
     if (categoryFilter && categoryFilter !== "all") {
       if (product.categoria.nome !== categoryFilter) return false
+    }
+
+    // Filtro de tipo (produto/serviço)
+    if (tipoFilter && tipoFilter !== "all") {
+      if (product.tipo !== tipoFilter) return false
     }
 
     // Filtro de tipo de valor
@@ -209,8 +215,8 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     )
   }
 
-  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all"))) {
-    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
+  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all"))) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
     
     return (
       <Card>
@@ -258,7 +264,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
               {filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
+                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
                       ? "Nenhum produto encontrado com os filtros aplicados"
                       : "Nenhum produto cadastrado"}
                   </TableCell>
