@@ -40,9 +40,11 @@ interface ProductsTableProps {
   search?: string
   canManageProducts: boolean
   dateRange?: DateRange | undefined
+  categoryFilter?: string
+  onCategoriesLoaded?: (categories: string[]) => void
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, onCategoriesLoaded }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -52,6 +54,10 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       if (response.ok) {
         const data = await response.json()
         setProducts(data)
+        
+        // Extrair categorias únicas para o filtro
+        const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria.nome))] as string[]
+        onCategoriesLoaded?.(uniqueCategories)
       }
     } catch (error) {
       console.error("Failed to fetch products:", error)
@@ -69,7 +75,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     onDataChanged?.()
   }
 
-  // Filtrar produtos baseado na pesquisa e data
+  // Filtrar produtos baseado na pesquisa, data e categoria
   const filteredProducts = products.filter(product => {
     // Filtro de pesquisa
     if (search && search.trim() !== "") {
@@ -80,6 +86,11 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
         product.categoria.nome.toLowerCase().includes(searchTerm)
       )
       if (!matchesSearch) return false
+    }
+
+    // Filtro de categoria
+    if (categoryFilter && categoryFilter !== "all") {
+      if (product.categoria.nome !== categoryFilter) return false
     }
 
     // Filtro de data
@@ -187,8 +198,8 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     )
   }
 
-  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to)) {
-    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to)
+  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all"))) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all")
     
     return (
       <Card>
@@ -236,7 +247,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
               {filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to
+                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all")
                       ? "Nenhum produto encontrado com os filtros aplicados"
                       : "Nenhum produto cadastrado"}
                   </TableCell>

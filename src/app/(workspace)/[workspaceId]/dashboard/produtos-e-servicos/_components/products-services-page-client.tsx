@@ -14,7 +14,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon, Lock, X } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { CalendarIcon, Lock, X, Tag } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -29,6 +36,8 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
   const { canManageProducts, userLevel, isLoading } = useUserPermissions(workspaceId)
   const [open, setOpen] = React.useState(false)
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined)
+  const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
+  const [categories, setCategories] = React.useState<string[]>([])
 
   const handleDataChanged = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -62,8 +71,8 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
 
       <ProductsServicesStats workspaceId={workspaceId} />
 
-      <div className="flex flex-col md:flex-row md:space-x-3">
-        <div className="w-full md:w-2/3">
+      <div className="flex flex-col md:flex-row md:space-x-3 space-y-3 md:space-y-0">
+        <div className="w-full md:flex-1">
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -71,7 +80,24 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
           />
         </div>
         <div className="w-full md:w-auto">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <div className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  <SelectValue placeholder="Todas as categorias" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as categorias</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -131,6 +157,10 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
             search={search}
             canManageProducts={canManageProducts}
             dateRange={dateRange}
+            categoryFilter={categoryFilter}
+            onCategoriesLoaded={(loadedCategories) => {
+              setCategories(loadedCategories)
+            }}
           />
         </div>
       </div>
