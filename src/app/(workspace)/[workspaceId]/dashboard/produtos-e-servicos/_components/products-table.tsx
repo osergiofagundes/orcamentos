@@ -41,12 +41,35 @@ interface ProductsTableProps {
   canManageProducts: boolean
   dateRange?: DateRange | undefined
   categoryFilter?: string
+  tipoValorFilter?: string
   onCategoriesLoaded?: (categories: string[]) => void
+  onTiposValorLoaded?: (tiposValor: string[]) => void
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, onCategoriesLoaded }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, tipoValorFilter, onCategoriesLoaded, onTiposValorLoaded }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO") => {
+    const tipoLabels = {
+      UNIDADE: "Unidades",
+      METRO: "Metros", 
+      METRO_QUADRADO: "Metros Quadrados",
+      METRO_CUBICO: "Metro Cúbico",
+      CENTIMETRO: "Centímetros",
+      DUZIA: "Dúzias",
+      QUILO: "Quilo",
+      GRAMA: "Grama",
+      QUILOMETRO: "Quilômetro",
+      LITRO: "Litros",
+      MINUTO: "Minutos",
+      HORA: "Horas",
+      DIA: "Dias",
+      MES: "Meses",
+      ANO: "Anos"
+    }
+    return tipoLabels[tipo]
+  }
 
   const fetchProducts = async () => {
     try {
@@ -58,6 +81,10 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
         // Extrair categorias únicas para o filtro
         const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria.nome))] as string[]
         onCategoriesLoaded?.(uniqueCategories)
+        
+        // Extrair tipos de valor únicos para o filtro
+        const uniqueTiposValor = [...new Set(data.map((product: Product) => formatTipoValor(product.tipo_valor)))] as string[]
+        onTiposValorLoaded?.(uniqueTiposValor)
       }
     } catch (error) {
       console.error("Failed to fetch products:", error)
@@ -93,6 +120,11 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       if (product.categoria.nome !== categoryFilter) return false
     }
 
+    // Filtro de tipo de valor
+    if (tipoValorFilter && tipoValorFilter !== "all") {
+      if (formatTipoValor(product.tipo_valor) !== tipoValorFilter) return false
+    }
+
     // Filtro de data
     if (dateRange?.from || dateRange?.to) {
       const productDate = new Date(product.createdAt)
@@ -124,27 +156,6 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       style: 'currency',
       currency: 'BRL',
     }).format(value / 100)
-  }
-
-  const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO") => {
-    const tipoLabels = {
-      UNIDADE: "Unidades",
-      METRO: "Metros", 
-      METRO_QUADRADO: "Metros Quadrados",
-      METRO_CUBICO: "Metro Cúbico",
-      CENTIMETRO: "Centímetros",
-      DUZIA: "Dúzias",
-      QUILO: "Quilo",
-      GRAMA: "Grama",
-      QUILOMETRO: "Quilômetro",
-      LITRO: "Litros",
-      MINUTO: "Minutos",
-      HORA: "Horas",
-      DIA: "Dias",
-      MES: "Meses",
-      ANO: "Anos"
-    }
-    return tipoLabels[tipo]
   }
 
   const formatDateTime = (dateString: string) => {
@@ -198,8 +209,8 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     )
   }
 
-  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all"))) {
-    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all")
+  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all"))) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
     
     return (
       <Card>
@@ -247,7 +258,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
               {filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all")
+                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
                       ? "Nenhum produto encontrado com os filtros aplicados"
                       : "Nenhum produto cadastrado"}
                   </TableCell>
