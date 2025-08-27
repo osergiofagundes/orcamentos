@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, TrendingUp, DollarSign, FileText } from "lucide-react"
+import { Package, TrendingUp, DollarSign } from "lucide-react"
 
 interface ProductsServicesStatsProps {
   workspaceId: string
@@ -13,17 +13,14 @@ export function ProductsServicesStats({ workspaceId }: ProductsServicesStatsProp
     totalProdutosServicos: 0,
     novosEstaSemana: 0,
     valorMedio: 0,
-    quantidadeOrcados: 0,
+    valorTotalCadastrado: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [productsResponse, budgetsResponse] = await Promise.all([
-          fetch(`/api/workspace/${workspaceId}/produtos`),
-          fetch(`/api/workspace/${workspaceId}/orcamentos`),
-        ])
+        const productsResponse = await fetch(`/api/workspace/${workspaceId}/produtos`)
 
         if (productsResponse.ok) {
           const products = await productsResponse.json()
@@ -44,28 +41,14 @@ export function ProductsServicesStats({ workspaceId }: ProductsServicesStatsProp
             ? produtosComValor.reduce((sum: number, product: any) => sum + (product.valor || 0), 0) / produtosComValor.length
             : 0
 
-          // Quantidade de produtos já orçados
-          let quantidadeOrcados = 0
-          if (budgetsResponse.ok) {
-            const budgets = await budgetsResponse.json()
-            const produtosOrcados = new Set()
-            budgets.forEach((budget: any) => {
-              if (budget.itens) {
-                budget.itens.forEach((item: any) => {
-                  if (item.produto_servico_id) {
-                    produtosOrcados.add(item.produto_servico_id)
-                  }
-                })
-              }
-            })
-            quantidadeOrcados = produtosOrcados.size
-          }
+          // Valor total cadastrado (soma de todos os preços dos produtos)
+          const valorTotalCadastrado = products.reduce((sum: number, product: any) => sum + (product.valor || 0), 0)
 
           setStats({
             totalProdutosServicos,
             novosEstaSemana,
             valorMedio,
-            quantidadeOrcados,
+            valorTotalCadastrado,
           })
         }
       } catch (error) {
@@ -147,13 +130,13 @@ export function ProductsServicesStats({ workspaceId }: ProductsServicesStatsProp
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Produtos Orçados</CardTitle>
-          <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Valor Total Cadastrado</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.quantidadeOrcados}</div>
+          <div className="text-2xl font-bold">{formatCurrency(stats.valorTotalCadastrado)}</div>
           <p className="text-xs text-muted-foreground">
-            Já utilizados em orçamentos
+            Soma de todos os produtos
           </p>
         </CardContent>
       </Card>
