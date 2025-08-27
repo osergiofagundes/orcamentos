@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button"
 import { Plus, Package, Mail } from "lucide-react"
 import { CreateProductButton } from "./create-product-button"
 import { ProductActions } from "./product-actions"
+import { DateRange } from "react-day-picker"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface Product {
   id: number
@@ -36,54 +39,17 @@ interface ProductsTableProps {
   onDataChanged?: () => void
   search?: string
   canManageProducts: boolean
+  dateRange?: DateRange | undefined
+  categoryFilter?: string
+  tipoFilter?: string
+  tipoValorFilter?: string
+  onCategoriesLoaded?: (categories: string[]) => void
+  onTiposValorLoaded?: (tiposValor: string[]) => void
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange, categoryFilter, tipoFilter, tipoValorFilter, onCategoriesLoaded, onTiposValorLoaded }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`/api/workspace/${workspaceId}/produtos`)
-      if (response.ok) {
-        const data = await response.json()
-        setProducts(data)
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchProducts()
-  }, [workspaceId, refreshTrigger])
-
-  const handleProductDeleted = () => {
-    fetchProducts()
-    onDataChanged?.()
-  }
-
-  // Filtrar produtos baseado na pesquisa
-  const filteredProducts = products.filter(product => {
-    if (!search || search.trim() === "") return true
-    
-    const searchTerm = search.toLowerCase().trim()
-    return (
-      product.id.toString().includes(searchTerm) ||
-      product.nome.toLowerCase().includes(searchTerm) ||
-      product.categoria.nome.toLowerCase().includes(searchTerm)
-    )
-  })
-
-  const formatCurrency = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return "R$ 0,00"
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value / 100)
-  }
 
   const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO") => {
     const tipoLabels = {
@@ -104,6 +70,98 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       ANO: "Anos"
     }
     return tipoLabels[tipo]
+  }
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`/api/workspace/${workspaceId}/produtos`)
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data)
+        
+        // Extrair categorias únicas para o filtro
+        const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria.nome))] as string[]
+        onCategoriesLoaded?.(uniqueCategories)
+        
+        // Extrair tipos de valor únicos para o filtro
+        const uniqueTiposValor = [...new Set(data.map((product: Product) => formatTipoValor(product.tipo_valor)))] as string[]
+        onTiposValorLoaded?.(uniqueTiposValor)
+      }
+    } catch (error) {
+      console.error("Failed to fetch products:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [workspaceId, refreshTrigger])
+
+  const handleProductDeleted = () => {
+    fetchProducts()
+    onDataChanged?.()
+  }
+
+  // Filtrar produtos baseado na pesquisa, data e categoria
+  const filteredProducts = products.filter(product => {
+    // Filtro de pesquisa
+    if (search && search.trim() !== "") {
+      const searchTerm = search.toLowerCase().trim()
+      const matchesSearch = (
+        product.id.toString().includes(searchTerm) ||
+        product.nome.toLowerCase().includes(searchTerm) ||
+        product.categoria.nome.toLowerCase().includes(searchTerm)
+      )
+      if (!matchesSearch) return false
+    }
+
+    // Filtro de categoria
+    if (categoryFilter && categoryFilter !== "all") {
+      if (product.categoria.nome !== categoryFilter) return false
+    }
+
+    // Filtro de tipo (produto/serviço)
+    if (tipoFilter && tipoFilter !== "all") {
+      if (product.tipo !== tipoFilter) return false
+    }
+
+    // Filtro de tipo de valor
+    if (tipoValorFilter && tipoValorFilter !== "all") {
+      if (formatTipoValor(product.tipo_valor) !== tipoValorFilter) return false
+    }
+
+    // Filtro de data
+    if (dateRange?.from || dateRange?.to) {
+      const productDate = new Date(product.createdAt)
+      
+      // Se só tem data inicial, filtra a partir dela
+      if (dateRange.from && !dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        fromDate.setHours(0, 0, 0, 0)
+        if (productDate < fromDate) return false
+      }
+      
+      // Se tem ambas as datas, filtra pelo intervalo
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        const toDate = new Date(dateRange.to)
+        fromDate.setHours(0, 0, 0, 0)
+        toDate.setHours(23, 59, 59, 999)
+        
+        if (productDate < fromDate || productDate > toDate) return false
+      }
+    }
+
+    return true
+  })
+
+  const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return "R$ 0,00"
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value / 100)
   }
 
   const formatDateTime = (dateString: string) => {
@@ -143,6 +201,44 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     )
   }
 
+  if (products.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhum produto encontrado</h3>
+          <p className="text-muted-foreground">
+            Comece criando seu primeiro produto ou serviço.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all"))) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
+    
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">
+            {hasFilters
+              ? "Nenhum produto encontrado com os filtros aplicados"
+              : "Nenhum produto encontrado"
+            }
+          </h3>
+          <p className="text-muted-foreground">
+            {hasFilters
+              ? "Tente ajustar os filtros ou termos da sua pesquisa."
+              : "Comece criando seu primeiro produto ou serviço."
+            }
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <>
       {/* Tabela de produtos */}
@@ -168,8 +264,8 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
               {filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    {search && search.trim() !== "" 
-                      ? `Nenhum produto encontrado para "${search}"` 
+                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
+                      ? "Nenhum produto encontrado com os filtros aplicados"
                       : "Nenhum produto cadastrado"}
                   </TableCell>
                 </TableRow>
