@@ -64,6 +64,7 @@ interface OrcamentoData {
 }
 
 export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
+
   const pdf = new jsPDF()
   let y = 30
   const pageWidth = pdf.internal.pageSize.width
@@ -87,6 +88,9 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
 
   try {
     // 1. CABEÇALHO COM LOGOTIPO DA EMPRESA (se disponível)
+    let hasLogo = false
+    let logoHeight = 0
+    
     if (orcamentoData.areaTrabalho.logo_url) {
       try {
         // Tentar carregar e adicionar o logo
@@ -101,12 +105,13 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
         // Adicionar logo (redimensionado)
         const logoWidth = 30
         const aspectRatio = img.width / img.height
-        const logoHeight = logoWidth / aspectRatio
+        logoHeight = logoWidth / aspectRatio
         pdf.addImage(img, 'JPEG', margin, y, logoWidth, logoHeight)
-        y += logoHeight + 10
+        hasLogo = true
       } catch (error) {
         console.warn('Erro ao carregar logo:', error)
         // Continuar sem o logo
+        hasLogo = false
       }
     }
 
@@ -114,17 +119,26 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
     pdf.setFontSize(12)
     pdf.setFont(undefined, 'bold')
     
-    // Se há logo, posicionar texto ao lado direito dela
+    // Definir posicionamento do texto
     const logoWidth = 30
-    const textStartX = orcamentoData.areaTrabalho.logo_url ? margin + logoWidth + 10 : margin
-    const currentY = orcamentoData.areaTrabalho.logo_url ? y - logoWidth - 10 : y
-    
-    pdf.text(orcamentoData.areaTrabalho.nome, textStartX, currentY)
-    let textY = currentY + 8
+    const textStartX = hasLogo ? margin + logoWidth + 10 : margin
+    const textStartY = hasLogo ? y : y
 
-    pdf.setFontSize(10)
+    pdf.setFontSize(12)
+    pdf.setFont(undefined, 'bold')
+    pdf.text('DADOS DO CONTRATADO', textStartX, textStartY)
+    y += 8
+
+    let textY = textStartY + 8
     pdf.setFont(undefined, 'normal')
+    pdf.setFontSize(10)
+    pdf.text(`Nome: ${orcamentoData.areaTrabalho.nome}`, textStartX, textY)
+    textY += 6
+
     
+    
+    
+    // Sempre exibir os dados da empresa
     if (orcamentoData.areaTrabalho.cpf_cnpj) {
       const isCPF = orcamentoData.areaTrabalho.cpf_cnpj.replace(/\D/g, '').length === 11
       const label = isCPF ? 'CPF:' : 'CNPJ:'
@@ -158,15 +172,9 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
       textY += 6
       })
     }
-
-    if (orcamentoData.areaTrabalho.descricao) {
-      textY += 2
-      pdf.text(`Descrição: ${orcamentoData.areaTrabalho.descricao}`, textStartX, textY)
-      textY += 6
-    }
     
     // Ajustar y para a próxima seção
-    y = Math.max(y, textY)
+    y = Math.max(hasLogo ? y + logoHeight + 10 : y + 20, textY)
 
     y += 10
 
