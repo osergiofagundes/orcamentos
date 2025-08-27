@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button"
 import { Plus, Package, Mail } from "lucide-react"
 import { CreateProductButton } from "./create-product-button"
 import { ProductActions } from "./product-actions"
+import { DateRange } from "react-day-picker"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface Product {
   id: number
@@ -36,9 +39,10 @@ interface ProductsTableProps {
   onDataChanged?: () => void
   search?: string
   canManageProducts: boolean
+  dateRange?: DateRange | undefined
 }
 
-export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts }: ProductsTableProps) {
+export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, search, canManageProducts, dateRange }: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -65,16 +69,42 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     onDataChanged?.()
   }
 
-  // Filtrar produtos baseado na pesquisa
+  // Filtrar produtos baseado na pesquisa e data
   const filteredProducts = products.filter(product => {
-    if (!search || search.trim() === "") return true
-    
-    const searchTerm = search.toLowerCase().trim()
-    return (
-      product.id.toString().includes(searchTerm) ||
-      product.nome.toLowerCase().includes(searchTerm) ||
-      product.categoria.nome.toLowerCase().includes(searchTerm)
-    )
+    // Filtro de pesquisa
+    if (search && search.trim() !== "") {
+      const searchTerm = search.toLowerCase().trim()
+      const matchesSearch = (
+        product.id.toString().includes(searchTerm) ||
+        product.nome.toLowerCase().includes(searchTerm) ||
+        product.categoria.nome.toLowerCase().includes(searchTerm)
+      )
+      if (!matchesSearch) return false
+    }
+
+    // Filtro de data
+    if (dateRange?.from || dateRange?.to) {
+      const productDate = new Date(product.createdAt)
+      
+      // Se só tem data inicial, filtra a partir dela
+      if (dateRange.from && !dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        fromDate.setHours(0, 0, 0, 0)
+        if (productDate < fromDate) return false
+      }
+      
+      // Se tem ambas as datas, filtra pelo intervalo
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from)
+        const toDate = new Date(dateRange.to)
+        fromDate.setHours(0, 0, 0, 0)
+        toDate.setHours(23, 59, 59, 999)
+        
+        if (productDate < fromDate || productDate > toDate) return false
+      }
+    }
+
+    return true
   })
 
   const formatCurrency = (value: number | null | undefined) => {
@@ -143,6 +173,44 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     )
   }
 
+  if (products.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhum produto encontrado</h3>
+          <p className="text-muted-foreground">
+            Comece criando seu primeiro produto ou serviço.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to)) {
+    const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to)
+    
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">
+            {hasFilters
+              ? "Nenhum produto encontrado com os filtros aplicados"
+              : "Nenhum produto encontrado"
+            }
+          </h3>
+          <p className="text-muted-foreground">
+            {hasFilters
+              ? "Tente ajustar os filtros ou termos da sua pesquisa."
+              : "Comece criando seu primeiro produto ou serviço."
+            }
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <>
       {/* Tabela de produtos */}
@@ -168,8 +236,8 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
               {filteredProducts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
-                    {search && search.trim() !== "" 
-                      ? `Nenhum produto encontrado para "${search}"` 
+                    {(search && search.trim() !== "") || dateRange?.from || dateRange?.to
+                      ? "Nenhum produto encontrado com os filtros aplicados"
                       : "Nenhum produto cadastrado"}
                   </TableCell>
                 </TableRow>
