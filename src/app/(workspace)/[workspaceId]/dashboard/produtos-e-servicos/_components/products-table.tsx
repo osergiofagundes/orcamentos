@@ -19,7 +19,6 @@ import { ProductActions } from "./product-actions"
 interface Product {
   id: number
   nome: string
-  descricao?: string | null
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
   tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
@@ -74,7 +73,6 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     return (
       product.id.toString().includes(searchTerm) ||
       product.nome.toLowerCase().includes(searchTerm) ||
-      (product.descricao && product.descricao.toLowerCase().includes(searchTerm)) ||
       product.categoria.nome.toLowerCase().includes(searchTerm)
     )
   })
@@ -158,10 +156,9 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Descrição</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Tipo</TableHead>
-                    <TableHead>Tipo Valor</TableHead>
+                    <TableHead>Tipo Medida</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Criado em</TableHead>
                     {canManageProducts && <TableHead className="text-right">Ações</TableHead>}
@@ -170,7 +167,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={canManageProducts ? 9 : 8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={canManageProducts ? 8 : 7} className="text-center text-muted-foreground py-8">
                     {search && search.trim() !== "" 
                       ? `Nenhum produto encontrado para "${search}"` 
                       : "Nenhum produto cadastrado"}
@@ -181,7 +178,6 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">#{product.id}</TableCell>
                   <TableCell>{product.nome}</TableCell>
-                  <TableCell>{product.descricao}</TableCell>
                   <TableCell>{formatCurrency(product.valor)}</TableCell>
                   <TableCell>
                     <Badge variant={product.tipo === "PRODUTO" ? "default" : "secondary"}>

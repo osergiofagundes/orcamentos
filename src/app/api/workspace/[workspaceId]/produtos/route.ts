@@ -6,7 +6,6 @@ import { z } from "zod"
 
 const createProductSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  descricao: z.string().optional(),
   valor: z.number().int().positive("Valor deve ser positivo"),
   tipo: z.enum(["PRODUTO", "SERVICO"], {
     required_error: "Tipo é obrigatório",
@@ -120,7 +119,6 @@ export async function POST(
     const produto = await prisma.produtoServico.create({
       data: {
         nome: validatedData.nome,
-        descricao: validatedData.descricao,
         valor: validatedData.valor,
         tipo: validatedData.tipo,
         tipo_valor: validatedData.tipo_valor,

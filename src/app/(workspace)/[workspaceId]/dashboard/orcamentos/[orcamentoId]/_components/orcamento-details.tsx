@@ -56,7 +56,6 @@ interface OrcamentoDetalhado {
     desconto_valor: number | null
     produtoServico: {
       nome: string
-      descricao?: string
     }
   }[]
 }
@@ -393,11 +392,6 @@ export function OrcamentoDetails({ workspaceId, orcamentoId }: OrcamentoDetailsP
                     <TableCell>
                       <div>
                         <div className="font-medium">{item.produtoServico.nome}</div>
-                        {item.produtoServico.descricao && (
-                          <div className="text-sm text-muted-foreground">
-                            {item.produtoServico.descricao}
-                          </div>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{item.quantidade}</TableCell>

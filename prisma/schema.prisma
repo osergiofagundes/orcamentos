@@ -207,7 +207,6 @@ model ItemOrcamento {
 model ProdutoServico {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
-  descricao           String?        @db.Text
   valor               Int?           // Em centavos (R$ 10,50 = 1050)
   tipo                TipoProdutoServico @default(PRODUTO)
   tipo_valor          TipoValor      @default(UNIDADE)
