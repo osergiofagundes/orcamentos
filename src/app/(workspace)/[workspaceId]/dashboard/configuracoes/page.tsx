@@ -53,10 +53,44 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
         redirect('/workspace-management')
     }
 
+    // Buscar informações adicionais do workspace
+    const workspaceWithDetails = await prisma.areaTrabalho.findFirst({
+        where: {
+            id: parseInt(workspaceId)
+        },
+        include: {
+            usuariosAreas: {
+                include: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            }
+        }
+    })
+
+    if (!userAccess) {
+        redirect('/workspace-management')
+    }
+
     const workspace = userAccess.areaTrabalho
     const userPermission = userAccess.nivel_permissao
     const canEdit = userPermission >= 3 // Apenas Owner (Nível 3)
     const canManageUsers = userPermission >= 3 // Apenas Owner (Nível 3)
+
+    // Preparar dados do workspace com informações extras
+    const workspaceData = {
+        ...workspace,
+        criador: workspaceWithDetails?.usuariosAreas[0]?.usuario || null, // Primeiro usuário é o criador
+        totalParticipantes: workspaceWithDetails?.usuariosAreas.length || 0
+    }
 
     return (
         <SidebarProvider>
@@ -119,7 +153,7 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
                             </TabsContent>
                             
                             <TabsContent value="info" className="space-y-6">
-                                <WorkspaceInfo workspace={workspace} />
+                                <WorkspaceInfo workspace={workspaceData} />
                             </TabsContent>
                             
                             <TabsContent value="permissions" className="space-y-6">

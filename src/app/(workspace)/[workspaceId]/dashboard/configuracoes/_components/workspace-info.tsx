@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Copy, Check } from "lucide-react"
+import { Copy, Check, User, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -13,6 +13,12 @@ interface WorkspaceInfoProps {
         nome: string
         createdAt: Date
         updatedAt: Date
+        criador: {
+            id: string
+            name: string
+            email: string
+        } | null
+        totalParticipantes: number
     }
 }
 
@@ -63,6 +69,33 @@ export function WorkspaceInfo({ workspace }: WorkspaceInfoProps) {
                     <div className="space-y-2">
                         <div className="text-sm font-medium text-muted-foreground">Nome</div>
                         <div className="text-sm">{workspace.nome}</div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            Criado por
+                        </div>
+                        <div className="text-sm">
+                            {workspace.criador ? (
+                                <div className="flex flex-col">
+                                    <span className="font-medium">{workspace.criador.name}</span>
+                                    <span className="text-xs text-muted-foreground">{workspace.criador.email}</span>
+                                </div>
+                            ) : (
+                                <span className="text-muted-foreground">Não identificado</span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            Participantes
+                        </div>
+                        <div className="text-sm">
+                            <Badge variant="secondary">
+                                {workspace.totalParticipantes} {workspace.totalParticipantes === 1 ? 'participante' : 'participantes'}
+                            </Badge>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <div className="text-sm font-medium text-muted-foreground">Criado em</div>
