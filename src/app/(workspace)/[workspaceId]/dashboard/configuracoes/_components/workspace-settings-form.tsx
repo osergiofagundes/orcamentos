@@ -21,7 +21,6 @@ import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 interface WorkspaceInfo {
     id: number
     nome: string
-    descricao?: string | null
     cpf_cnpj?: string | null
     telefone?: string | null
     email?: string | null
@@ -42,7 +41,6 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
     const [isLoading, setIsLoading] = useState(false)
     const [formData, setFormData] = useState({
         nome: workspace.nome || "",
-        descricao: workspace.descricao || "",
         cpf_cnpj: workspace.cpf_cnpj || "",
         telefone: workspace.telefone || "",
         email: workspace.email || "",
@@ -158,17 +156,6 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                     disabled={!canEdit}
                                 />
                             </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="descricao">Descrição</Label>
-                            <Textarea
-                                id="descricao"
-                                value={formData.descricao}
-                                onChange={(e) => handleInputChange("descricao", e.target.value)}
-                                placeholder="Descrição do workspace"
-                                disabled={!canEdit}
-                            />
                         </div>
 
                         <div className="space-y-4">

@@ -20,7 +20,6 @@ interface EditWorkspaceModalProps {
   workspace: {
     id: number
     nome: string
-    descricao: string | null
     cpf_cnpj: string | null
   }
   onWorkspaceUpdated?: () => void
@@ -31,7 +30,6 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     nome: workspace.nome,
-    descricao: workspace.descricao || '',
     cpf_cnpj: workspace.cpf_cnpj || ''
   })
 
@@ -82,7 +80,6 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
       // Reset form when closing
       setFormData({
         nome: workspace.nome,
-        descricao: workspace.descricao || '',
         cpf_cnpj: workspace.cpf_cnpj || ''
       })
     }
@@ -118,18 +115,6 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
               onChange={handleChange}
               placeholder="Ex: Meu Negócio"
               required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              name="descricao"
-              value={formData.descricao}
-              onChange={handleChange}
-              placeholder="Descreva o propósito desta área de trabalho"
-              rows={3}
             />
           </div>
 

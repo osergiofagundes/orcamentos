@@ -109,7 +109,6 @@ enum TipoValor {
 model AreaTrabalho {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
-  descricao           String?
   cpf_cnpj            String?
   telefone            String?
   email               String?

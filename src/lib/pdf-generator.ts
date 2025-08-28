@@ -27,14 +27,12 @@ interface AreaTrabalho {
   cidade: string | null
   estado: string | null
   cep: string | null
-  descricao: string | null
   logo_url: string | null
 }
 
 interface ProdutoServico {
   id: number
   nome: string
-  descricao: string | null
   tipo_valor: string
 }
 

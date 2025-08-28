@@ -1,12 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import {
-  BadgeCheck,
-  Bell,
+  User,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -26,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auh-client"
 import { useRouter } from "next/navigation"
+import { UserProfileModal } from "./user-profile-modal"
 
 export function WorkspaceManagementNavbar({
   user,
@@ -37,6 +36,7 @@ export function WorkspaceManagementNavbar({
   }
 }) {
   const router = useRouter()
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -45,6 +45,10 @@ export function WorkspaceManagementNavbar({
     } catch (error) {
       console.error('Erro ao fazer logout:', error)
     }
+  }
+
+  const handleProfileClick = () => {
+    setIsProfileModalOpen(true)
   }
 
   return (
@@ -92,24 +96,9 @@ export function WorkspaceManagementNavbar({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
+              <DropdownMenuItem onClick={handleProfileClick}>
+                <User />
                 Perfil
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Configurações
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notificações
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -121,6 +110,12 @@ export function WorkspaceManagementNavbar({
         </DropdownMenu>
         </div>
       </div>
+      
+      <UserProfileModal 
+        open={isProfileModalOpen}
+        onOpenChange={setIsProfileModalOpen}
+        user={user}
+      />
     </nav>
   )
 }

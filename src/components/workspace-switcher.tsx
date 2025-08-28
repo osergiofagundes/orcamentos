@@ -23,7 +23,6 @@ import {
 type Workspace = {
   id: number
   nome: string
-  descricao?: string
   logo_url?: string | null
 }
 
@@ -87,7 +86,7 @@ export function WorkspaceSwitcher({
                   {activeWorkspace.nome}
                 </span>
                 <span className="truncate text-xs">
-                  {activeWorkspace.descricao || "Workspace"}
+                  Workspace
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -134,11 +133,6 @@ export function WorkspaceSwitcher({
                 </div>
                 <div className="flex flex-col">
                   <span className="font-medium">{workspace.nome}</span>
-                  {workspace.descricao && (
-                    <span className="text-xs text-muted-foreground">
-                      {workspace.descricao}
-                    </span>
-                  )}
                 </div>
               </DropdownMenuItem>
             ))}
