@@ -78,9 +78,6 @@ export function PermissionLevelsInfo() {
                                         <Badge className={level.color}>
                                             {level.name}
                                         </Badge>
-                                        <span className="text-sm text-muted-foreground">
-                                            Nível {level.level}
-                                        </span>
                                     </div>
                                     <p className="text-sm text-muted-foreground mt-1">
                                         {level.description}
@@ -101,18 +98,6 @@ export function PermissionLevelsInfo() {
                         </div>
                     )
                 })}
-                
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="text-sm font-medium text-yellow-800 mb-2">
-                        ⚠️ Importante
-                    </div>
-                    <ul className="text-sm text-yellow-700 space-y-1">
-                        <li>• Apenas usuários Nível 2 e Nível 3 podem alterar permissões</li>
-                        <li>• Usuários Nível 3 não podem alterar suas próprias permissões</li>
-                        <li>• Usuários não podem se remover do workspace</li>
-                        <li>• Sempre deve haver pelo menos um usuário Nível 3 no workspace</li>
-                    </ul>
-                </div>
             </CardContent>
         </Card>
     )

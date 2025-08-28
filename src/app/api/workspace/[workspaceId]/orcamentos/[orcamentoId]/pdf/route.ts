@@ -61,6 +61,8 @@ export async function GET(
             id: true,
             nome: true,
             cpf_cnpj: true,
+            telefone: true,
+            email: true,
             endereco: true,
             bairro: true,
             cidade: true,
