@@ -34,7 +34,6 @@ export default async function WorkspaceManagementPage() {
     select: {
       id: true,
       nome: true,
-      descricao: true,
       cpf_cnpj: true,
       telefone: true,
       email: true,

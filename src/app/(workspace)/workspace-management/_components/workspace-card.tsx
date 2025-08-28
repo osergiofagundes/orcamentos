@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { AreaTrabalho } from '@/generated/prisma'
 import { EditWorkspaceModal } from './edit-workspace-modal'
 import { DeleteWorkspaceModal } from './delete-workspace-modal'
 
@@ -16,8 +15,25 @@ const formatDate = (date: Date) => {
   })
 }
 
+interface WorkspaceData {
+  id: number;
+  nome: string;
+  cpf_cnpj: string | null;
+  telefone: string | null;
+  email: string | null;
+  endereco: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  logo_url: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
 interface WorkspaceCardProps {
-  workspace: AreaTrabalho & {
+  workspace: WorkspaceData & {
     usuariosAreas: {
       nivel_permissao: number
     }[]
@@ -55,13 +71,6 @@ export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdat
           )}
           <div className="flex-1">
             <h3 className="font-semibold text-lg">{workspace.nome}</h3>
-            {workspace.descricao && (
-                <p className="text-sm text-muted-foreground mt-1">
-                {workspace.descricao.length > 80
-                  ? workspace.descricao.slice(0, 80) + '...'
-                  : workspace.descricao}
-                </p>
-            )}
           </div>
         </div>
         <Badge variant="outline">

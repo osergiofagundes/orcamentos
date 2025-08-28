@@ -6,7 +6,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 type Workspace = {
   id: number
   nome: string
-  descricao?: string
   logo_url?: string | null
 }
 
@@ -57,7 +56,6 @@ export async function WorkspaceAppSidebar() {
             select: {
               id: true,
               nome: true,
-              descricao: true,
               logo_url: true,
             },
           },
@@ -67,7 +65,6 @@ export async function WorkspaceAppSidebar() {
       workspaces = userWorkspaces.map((uw) => ({
         id: uw.areaTrabalho.id,
         nome: uw.areaTrabalho.nome,
-        descricao: uw.areaTrabalho.descricao || undefined,
         logo_url: uw.areaTrabalho.logo_url,
       }));
     } catch (error) {

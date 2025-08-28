@@ -8,7 +8,6 @@ import { JoinWithCodeModal } from './join-with-code-modal'
 interface WorkspaceWithPermission {
   id: number;
   nome: string;
-  descricao: string | null;
   cpf_cnpj: string | null;
   telefone: string | null;
   email: string | null;
