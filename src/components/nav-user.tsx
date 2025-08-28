@@ -1,12 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import {
-  BadgeCheck,
-  Bell,
+  User,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
+  Building2,
+  Undo2,
 } from "lucide-react"
 
 import {
@@ -29,6 +29,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { authClient } from "@/lib/auh-client"
+import { useRouter } from "next/navigation"
+import { UserProfileModal } from "./user-profile-modal"
 
 export function NavUser({
   user,
@@ -40,6 +43,25 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut()
+      router.push("/signin")
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+    }
+  }
+
+  const handleProfileClick = () => {
+    setIsProfileModalOpen(true)
+  }
+
+  const handleWorkspaceManagement = () => {
+    router.push("/workspace-management")
+  }
 
   return (
     <SidebarMenu>
@@ -52,7 +74,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user.name?.[0]?.toUpperCase() || "U"}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -71,7 +95,9 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user.name?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -81,34 +107,29 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem onClick={handleProfileClick}>
+                <User />
+                Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleWorkspaceManagement}>
+                <Undo2 />
+                Voltar para Workspaces
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOut />
-              Log out
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      
+      <UserProfileModal 
+        open={isProfileModalOpen}
+        onOpenChange={setIsProfileModalOpen}
+        user={user}
+      />
     </SidebarMenu>
   )
 }
