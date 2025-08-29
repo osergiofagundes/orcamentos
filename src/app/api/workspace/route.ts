@@ -25,7 +25,6 @@ export async function GET() {
             select: {
                 id: true,
                 nome: true,
-                descricao: true,
                 cpf_cnpj: true,
                 endereco: true,
                 bairro: true,
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-    const { nome, descricao, cpf_cnpj } = await req.json()
+    const { nome, cpf_cnpj } = await req.json()
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -74,7 +73,6 @@ export async function POST(req: Request) {
         const newWorkspace = await prisma.areaTrabalho.create({
             data: {
                 nome,
-                descricao,
                 cpf_cnpj,
                 usuariosAreas: {
                     create: {
