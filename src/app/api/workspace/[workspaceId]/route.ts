@@ -58,7 +58,7 @@ export async function PUT(
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-    const { nome, descricao, cpf_cnpj, telefone, email, endereco, bairro, cidade, estado, cep } = await req.json()
+    const { nome, cpf_cnpj, telefone, email, endereco, bairro, cidade, estado, cep } = await req.json()
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -84,7 +84,6 @@ export async function PUT(
             where: { id: parseInt(workspaceId) },
             data: { 
                 nome, 
-                descricao, 
                 cpf_cnpj,
                 telefone,
                 email,

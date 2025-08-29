@@ -19,9 +19,7 @@ import { WorkspaceUsers } from "./_components/workspace-users"
 import { WorkspaceInfo } from "./_components/workspace-info"
 import { PermissionLevelsInfo } from "./_components/permission-levels-info"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
+import { verifyWorkspacePermission } from "@/lib/workspace-access"
 
 interface PageProps {
     params: Promise<{ workspaceId: string }>
@@ -30,28 +28,8 @@ interface PageProps {
 export default async function ConfiguracoesPage({ params }: PageProps) {
     const { workspaceId } = await params
     
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
-
-    if (!session?.user?.id) {
-        redirect('/signin')
-    }
-
-    // Buscar informações do workspace e permissões do usuário
-    const userAccess = await prisma.usuarioAreaTrabalho.findFirst({
-        where: {
-            usuario_id: session.user.id,
-            area_trabalho_id: parseInt(workspaceId),
-        },
-        include: {
-            areaTrabalho: true
-        }
-    })
-
-    if (!userAccess) {
-        redirect('/workspace-management')
-    }
+    // Verificar se o usuário tem permissão de nível 3 (gerenciar workspace)
+    const { user, access, workspace } = await verifyWorkspacePermission(workspaceId, 3)
 
     // Buscar informações adicionais do workspace
     const workspaceWithDetails = await prisma.areaTrabalho.findFirst({
@@ -76,12 +54,7 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
         }
     })
 
-    if (!userAccess) {
-        redirect('/workspace-management')
-    }
-
-    const workspace = userAccess.areaTrabalho
-    const userPermission = userAccess.nivel_permissao
+    const userPermission = access.nivel_permissao
     const canEdit = userPermission >= 3 // Apenas Owner (Nível 3)
     const canManageUsers = userPermission >= 3 // Apenas Owner (Nível 3)
 
@@ -147,7 +120,7 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
                             <TabsContent value="users" className="space-y-6">
                                 <WorkspaceUsers 
                                     workspaceId={workspaceId}
-                                    currentUserId={session.user.id}
+                                    currentUserId={user.id}
                                     canManageUsers={canManageUsers}
                                 />
                             </TabsContent>

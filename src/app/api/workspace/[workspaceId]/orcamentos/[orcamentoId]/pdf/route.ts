@@ -68,7 +68,6 @@ export async function GET(
             cidade: true,
             estado: true,
             cep: true,
-            descricao: true,
             logo_url: true,
           },
         },
