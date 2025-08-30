@@ -66,7 +66,7 @@ export default async function WorkspaceManagementPage() {
       <WorkspaceManagementNavbar user={user} />
       <Separator />
       {/* Conteúdo principal */}
-      <main className="flex-1">
+      <main className="flex-1 py-4 sm:py-6 lg:py-8">
         <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
       </main>
     </div>

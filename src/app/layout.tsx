@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Orçamentos",
+  title: "Sky - Orçamentos",
   description: "Gerencimando de Orçamentos",
 };
 

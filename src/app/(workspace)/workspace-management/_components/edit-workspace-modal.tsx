@@ -91,13 +91,13 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="p-2 hover:bg-blue-50 hover:text-blue-600"
+        className="p-2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-600 cursor-pointer"
         title="Editar área de trabalho"
       >
         <Pencil className="h-4 w-4" />
       </Button>
       
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-blue-800">
         <DialogHeader>
           <DialogTitle>Editar Área de Trabalho</DialogTitle>
           <DialogDescription>
@@ -135,11 +135,13 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
               variant="outline"
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
+              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
               {isLoading ? 'Atualizando...' : 'Atualizar Área de Trabalho'}
+              <Pencil className="h-4 w-4" />
             </Button>
           </DialogFooter>
         </form>

@@ -52,24 +52,27 @@ export function WorkspaceManagementNavbar({
   }
 
   return (
-    <nav className="w-full border-b bg-white dark:bg-background py-3">
-      <div className="container mx-auto px-4 flex items-center justify-between">
+    <nav className="w-full border-b bg-white dark:bg-background py-4">
+      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* Logo */}
-          <span className="font-bold text-xl tracking-tight text-primary">Orçamentos</span>
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src="/images/logo.png" alt='Logo' />
+          </Avatar>
+          <span className="font-bold text-lg sm:text-xl tracking-tight text-primary hidden xs:block">Sky Orçamentos</span>
+          <span className="font-bold text-lg tracking-tight text-primary xs:hidden">Sky Orçamentos</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
         {/* Menu do usuário */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+            <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3 py-2">
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
                   {user.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight hidden sm:block">
                 <span className="truncate font-medium">{user.name}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
