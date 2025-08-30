@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { KeyRound } from 'lucide-react'
+import { KeyRound, MailPlus } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface JoinWithCodeModalProps {
@@ -80,12 +80,12 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <KeyRound className="h-4 w-4 mr-2" />
+        <Button variant="outline" className='cursor-pointer hover:text-blue-600 hover:border-blue-600'>
           {buttonText}
+          <KeyRound className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-blue-800">
         <DialogHeader>
           <DialogTitle>Entrar em Workspace</DialogTitle>
           <DialogDescription>
@@ -123,11 +123,13 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={isLoading}
+              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
               {isLoading ? 'Enviando...' : 'Solicitar Entrada'}
+              <MailPlus className="h-4 w-4" />
             </Button>
           </div>
         </form>

@@ -59,13 +59,13 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+        className="p-2 hover:text-red-600 hover:bg-red-50 hover:border-red-600 cursor-pointer"
         title="Excluir área de trabalho"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
       
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
         <DialogHeader>
           <DialogTitle>Excluir Área de Trabalho</DialogTitle>
           <DialogDescription>
@@ -83,6 +83,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isLoading}
+            className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
           >
             Cancelar
           </Button>
@@ -91,8 +92,10 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             variant="destructive"
             onClick={handleDelete}
             disabled={isLoading}
+            className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
             {isLoading ? 'Excluindo...' : 'Excluir'}
+            <Trash2 className="h-4 w-4" />
           </Button>
         </DialogFooter>
       </DialogContent>

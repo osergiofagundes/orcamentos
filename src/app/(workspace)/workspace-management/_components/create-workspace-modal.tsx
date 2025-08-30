@@ -16,6 +16,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
+import { Plus } from 'lucide-react'
 
 interface CreateWorkspaceModalProps {
   onWorkspaceCreated?: () => void
@@ -102,11 +103,12 @@ export function CreateWorkspaceModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant}>
+        <Button variant={buttonVariant} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
           {buttonText}
+          <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-blue-800">
         <DialogHeader>
           <DialogTitle>Criar Nova Área de Trabalho</DialogTitle>
           <DialogDescription>
@@ -144,11 +146,13 @@ export function CreateWorkspaceModal({
               variant="outline"
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
+              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
               {isLoading ? 'Criando...' : 'Criar Área de Trabalho'}
+              <Plus className="h-4 w-4" />
             </Button>
           </DialogFooter>
         </form>

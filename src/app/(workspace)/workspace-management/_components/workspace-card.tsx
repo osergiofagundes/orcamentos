@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EditWorkspaceModal } from './edit-workspace-modal'
 import { DeleteWorkspaceModal } from './delete-workspace-modal'
+import { ArrowRight, CornerDownRight } from 'lucide-react'
 
 // Função para formatar data de forma consistente entre servidor e cliente
 const formatDate = (date: Date) => {
@@ -45,63 +46,64 @@ interface WorkspaceCardProps {
 export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdated }: WorkspaceCardProps) {
   const getPermissionLabel = (level: number) => {
     switch(level) {
-      case 3: return 'Dono'
-      case 2: return 'Admin'
-      default: return 'Membro'
+      case 3: return 'Admin'
+      case 2: return 'Membro 2'
+      default: return 'Membro 1'
     }
   }
 
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow border-l-8 border-l-blue-800">
       <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-3 flex-1">
-          {workspace.logo_url && (
-            <div className="flex-shrink-0">
-              <Image
-                src={workspace.logo_url}
-                alt={`Logo ${workspace.nome}`}
-                width={48}
-                height={48}
-                className="rounded-md object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none'
-                }}
-              />
-            </div>
-          )}
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg">{workspace.nome}</h3>
-          </div>
+      <div className="flex items-center gap-3 flex-1">
+        {workspace.logo_url && (
+        <div className="flex-shrink-0">
+          <Image
+          src={workspace.logo_url}
+          alt={`Logo ${workspace.nome}`}
+          width={48}
+          height={48}
+          className="rounded-md object-contain"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+          />
         </div>
-        <Badge variant="outline">
-          {getPermissionLabel(userPermissionLevel)}
-        </Badge>
+        )}
+        <div className="flex-1">
+        <h3 className="font-semibold text-lg">{workspace.nome}</h3>
+        </div>
+      </div>
+      <Badge variant="outline">
+        {getPermissionLabel(userPermissionLevel)}
+      </Badge>
       </div>
 
       <div className="flex justify-between items-center">
-        <span className="text-sm text-muted-foreground">
-          Criado em: {formatDate(workspace.createdAt)}
-        </span>
-        <div className="flex gap-1">
-          {/* Apenas donos podem editar e excluir */}
-          {userPermissionLevel === 3 && (
-            <>
-              <EditWorkspaceModal 
-                workspace={workspace} 
-                onWorkspaceUpdated={onWorkspaceUpdated}
-              />
-              <DeleteWorkspaceModal 
-                workspace={workspace} 
-                onWorkspaceDeleted={onWorkspaceUpdated}
-              />
-            </>
-          )}
-          <Link href={`/${workspace.id}/dashboard`}>
-            <Button variant="outline" size="sm">
-              Acessar
-            </Button>
-          </Link>
-        </div>
+      <span className="text-sm text-muted-foreground">
+        Criado em: {formatDate(workspace.createdAt)}
+      </span>
+      <div className="flex gap-1">
+        {/* Apenas donos podem editar e excluir */}
+        {userPermissionLevel === 3 && (
+        <>
+          <EditWorkspaceModal 
+          workspace={workspace} 
+          onWorkspaceUpdated={onWorkspaceUpdated}
+          />
+          <DeleteWorkspaceModal 
+          workspace={workspace} 
+          onWorkspaceDeleted={onWorkspaceUpdated}
+          />
+        </>
+        )}
+        <Link href={`/${workspace.id}/dashboard`}>
+        <Button size="sm" className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+          Acessar
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+        </Link>
+      </div>
       </div>
     </div>
   )
