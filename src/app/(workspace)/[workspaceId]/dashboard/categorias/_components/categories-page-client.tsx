@@ -39,7 +39,7 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Categorias</h1>
-          <p className="text-muted-foreground">
+          <p className="hidden text-muted-foreground sm:block">
             Gerencie as categorias dos seus produtos e serviços
           </p>
         </div>
@@ -62,8 +62,8 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
 
       <CategoriesStats workspaceId={workspaceId} />
 
-      <div className="flex flex-col md:flex-row md:space-x-3">
-        <div className="w-full md:w-2/3">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="w-full md:w-1/3">
           <SearchInput
             value={search}
             onChange={setSearch}
