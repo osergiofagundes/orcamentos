@@ -20,6 +20,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 // This is sample data.
@@ -84,8 +85,22 @@ export function AppSidebar({
   user?: User
 }) {
   const userData = user || data.user;
+  const { open } = useSidebar();
+  
   return (
     <Sidebar collapsible="icon" {...props}>
+      {open && (
+        <div className="flex items-center gap-2 p-4 border-b bg-sky-600 justify-center">
+          <img 
+            src="/images/logo.png" 
+            alt="Sky Orçamentos Logo" 
+            className="h-8 w-8 rounded"
+          />
+          <span className="font-semibold text-lg text-foreground text-white">
+            Sky Orçamentos
+          </span>
+        </div>
+      )}
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={workspaces} />
       </SidebarHeader>

@@ -85,7 +85,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="border-l-8 border-l-sky-600">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
@@ -97,8 +97,8 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
           </p>
         </CardContent>
       </Card>
-      
-      <Card>
+
+      <Card className="border-l-8 border-l-sky-600">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Novos Esta Semana</CardTitle>
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -111,7 +111,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-l-8 border-l-sky-600">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Pessoas Físicas</CardTitle>
           <User className="h-4 w-4 text-muted-foreground" />
@@ -124,7 +124,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-l-8 border-l-sky-600">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Pessoas Jurídicas</CardTitle>
           <Building className="h-4 w-4 text-muted-foreground" />
