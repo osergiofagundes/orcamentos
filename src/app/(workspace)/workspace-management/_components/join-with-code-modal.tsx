@@ -80,12 +80,12 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className='cursor-pointer hover:text-blue-600 hover:border-blue-600'>
+        <Button variant="outline" className='cursor-pointer hover:text-sky-600 hover:border-sky-600'>
           {buttonText}
           <KeyRound className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg border-l-8 border-l-blue-800">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600">
         <DialogHeader>
           <DialogTitle>Entrar em Workspace</DialogTitle>
           <DialogDescription>
@@ -127,7 +127,7 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+            <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
               {isLoading ? 'Enviando...' : 'Solicitar Entrada'}
               <MailPlus className="h-4 w-4" />
             </Button>

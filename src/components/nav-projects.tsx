@@ -66,7 +66,7 @@ export function NavProjects({
               <SidebarMenuButton 
                 asChild 
                 isActive={isActive}
-                className={isActive ? "!bg-black !text-white hover:!bg-black hover:!text-white [&>svg]:!text-white data-[active=true]:!bg-black data-[active=true]:!text-white" : ""}
+                className={isActive ? "!bg-sky-600 !text-white hover:!bg-sky-600 hover:!text-white [&>svg]:!text-white data-[active=true]:!bg-sky-600 data-[active=true]:!text-white" : ""}
               >
                 <a href={`/${workspaceId}/dashboard${item.url ? `/${item.url}` : ''}`}>
                   <item.icon />

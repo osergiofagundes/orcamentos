@@ -53,7 +53,7 @@ export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdat
   }
 
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow border-l-8 border-l-blue-800">
+    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow border-l-8 border-l-sky-600">
       <div className="flex justify-between items-start mb-3">
       <div className="flex items-center gap-3 flex-1">
         {workspace.logo_url && (
@@ -98,7 +98,7 @@ export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdat
         </>
         )}
         <Link href={`/${workspace.id}/dashboard`}>
-        <Button size="sm" className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+        <Button size="sm" className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
           Acessar
           <ArrowRight className="h-4 w-4" />
         </Button>

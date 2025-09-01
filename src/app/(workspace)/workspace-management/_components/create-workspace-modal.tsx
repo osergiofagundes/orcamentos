@@ -103,12 +103,12 @@ export function CreateWorkspaceModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+        <Button variant={buttonVariant} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
           {buttonText}
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg border-l-8 border-l-blue-800">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600">
         <DialogHeader>
           <DialogTitle>Criar Nova Área de Trabalho</DialogTitle>
           <DialogDescription>
@@ -150,7 +150,7 @@ export function CreateWorkspaceModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+            <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
               {isLoading ? 'Criando...' : 'Criar Área de Trabalho'}
               <Plus className="h-4 w-4" />
             </Button>

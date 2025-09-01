@@ -55,7 +55,7 @@ export function WorkspaceSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+              <div className="bg-sky-600 text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
                 {activeWorkspace.logo_url ? (
                   <Image
                     src={activeWorkspace.logo_url}
@@ -85,9 +85,6 @@ export function WorkspaceSwitcher({
                 <span className="truncate font-semibold">
                   {activeWorkspace.nome}
                 </span>
-                <span className="truncate text-xs">
-                  Workspace
-                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -98,16 +95,13 @@ export function WorkspaceSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Workspaces
-            </DropdownMenuLabel>
             {workspaces.map((workspace) => (
               <DropdownMenuItem
                 key={workspace.id}
                 onClick={() => handleWorkspaceChange(workspace.id)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border overflow-hidden">
+                <div className="bg-sky-600 flex size-6 items-center justify-center rounded-sm border overflow-hidden">
                   {workspace.logo_url ? (
                     <Image
                       src={workspace.logo_url}
@@ -127,7 +121,7 @@ export function WorkspaceSwitcher({
                       }}
                     />
                   ) : null}
-                  <span className={`text-xs font-semibold workspace-dropdown-fallback ${workspace.logo_url ? 'hidden' : ''}`}>
+                  <span className={`text-white text-xs font-semibold workspace-dropdown-fallback ${workspace.logo_url ? 'hidden' : ''}`}>
                     {workspace.nome.substring(0, 2).toUpperCase()}
                   </span>
                 </div>
@@ -145,7 +139,7 @@ export function WorkspaceSwitcher({
                 <Plus className="size-4" />
               </div>
               <div className="font-medium text-muted-foreground">
-                Adicionar workspace
+                Adicionar Área de Trabalho
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
