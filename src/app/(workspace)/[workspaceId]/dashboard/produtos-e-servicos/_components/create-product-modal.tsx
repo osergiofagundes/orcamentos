@@ -31,6 +31,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { Plus } from "lucide-react"
 
 const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -182,10 +183,10 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Novo Produto/Serviço</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Novo Produto/Serviço</DialogTitle>
+          <DialogDescription className="text-left">
             Adicione um novo produto ou serviço ao seu workspace.
           </DialogDescription>
         </DialogHeader>
@@ -232,7 +233,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                   <FormLabel>Tipo</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                     </FormControl>
@@ -253,7 +254,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                   <FormLabel>Tipo de Medida</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione o tipo de valor" />
                       </SelectTrigger>
                     </FormControl>
@@ -277,7 +278,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                   <FormLabel>Categoria</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                     </FormControl>
@@ -294,11 +295,12 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
                 {isLoading ? "Criando..." : "Criar Produto/Serviço"}
+                <Plus className="h-4 w-4" />
               </Button>
             </DialogFooter>
           </form>

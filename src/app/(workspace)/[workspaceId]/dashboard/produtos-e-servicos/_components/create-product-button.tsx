@@ -20,9 +20,9 @@ export function CreateProductButton({ workspaceId, onProductCreated }: CreatePro
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
-        <Plus className="h-4 w-4 mr-2" />
+      <Button onClick={() => setIsOpen(true)} className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">
         Novo Produto/Serviço
+        <Plus className="h-4 w-4" />
       </Button>
       <CreateProductModal 
         isOpen={isOpen} 

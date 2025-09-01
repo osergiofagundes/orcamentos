@@ -51,7 +51,7 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Produtos & Serviços</h1>
-          <p className="text-muted-foreground">
+          <p className="hidden text-muted-foreground sm:block">
             Gerencie seu catálogo completo de produtos e serviços
           </p>
         </div>
@@ -74,7 +74,7 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
 
       <ProductsServicesStats workspaceId={workspaceId} />
 
-      <div className="flex flex-col md:flex-row md:space-x-3 space-y-3 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="w-full md:flex-1">
           <SearchInput
             value={search}

@@ -81,15 +81,15 @@ export function CreateCategoryModal({ workspaceId, onCategoryCreated }: CreateCa
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">
           Nova Categoria
+          <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Nova Categoria</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Nova Categoria</DialogTitle>
+          <DialogDescription className="text-left">
             Crie uma nova categoria para organizar seus produtos e serviços.
           </DialogDescription>
         </DialogHeader>
@@ -109,11 +109,12 @@ export function CreateCategoryModal({ workspaceId, onCategoryCreated }: CreateCa
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
                 {isLoading ? "Criando..." : "Criar Categoria"}
+                <Plus className="h-4 w-4" />
               </Button>
             </DialogFooter>
           </form>
