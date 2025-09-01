@@ -198,7 +198,7 @@ export function CategoriesListClient({ workspaceId, refreshTrigger, search, canM
                   <TableCell className="font-medium">#{category.id}</TableCell>
                   <TableCell className="font-medium">{category.nome}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">
+                    <Badge className="outline outline-gray-300 bg-transparent text-black">
                       {category._count?.produtosServicos || 0} produto(s)
                     </Badge>
                   </TableCell>

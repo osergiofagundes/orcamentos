@@ -68,6 +68,33 @@ export function ProductsServicesStats({ workspaceId }: ProductsServicesStatsProp
     }).format(value / 100)
   }
 
+  const statsCards = [
+    {
+      title: "Total de Produtos/Serviços",
+      value: stats.totalProdutosServicos.toString(),
+      icon: Package,
+      description: "Itens cadastrados",
+    },
+    {
+      title: "Novos Esta Semana",
+      value: stats.novosEstaSemana.toString(),
+      icon: TrendingUp,
+      description: "Nos últimos 7 dias",
+    },
+    {
+      title: "Valor Médio",
+      value: formatCurrency(stats.valorMedio),
+      icon: DollarSign,
+      description: "Por produto/serviço",
+    },
+    {
+      title: "Valor Total Cadastrado",
+      value: formatCurrency(stats.valorTotalCadastrado),
+      icon: DollarSign,
+      description: "Soma de todos os produtos",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -89,57 +116,22 @@ export function ProductsServicesStats({ workspaceId }: ProductsServicesStatsProp
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Produtos/Serviços</CardTitle>
-          <Package className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalProdutosServicos}</div>
-          <p className="text-xs text-muted-foreground">
-            Itens cadastrados
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Novos Esta Semana</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.novosEstaSemana}</div>
-          <p className="text-xs text-muted-foreground">
-            Nos últimos 7 dias
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor Médio</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.valorMedio)}</div>
-          <p className="text-xs text-muted-foreground">
-            Por produto/serviço
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor Total Cadastrado</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.valorTotalCadastrado)}</div>
-          <p className="text-xs text-muted-foreground">
-            Soma de todos os produtos
-          </p>
-        </CardContent>
-      </Card>
+      {statsCards.map((card, index) => (
+        <Card key={index} className="border-l-8 border-l-sky-600">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {card.title}
+            </CardTitle>
+            <card.icon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{card.value}</div>
+            <p className="text-xs text-muted-foreground">
+              {card.description}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

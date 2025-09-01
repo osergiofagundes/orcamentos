@@ -54,7 +54,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
   const formatTipoValor = (tipo: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO") => {
     const tipoLabels = {
       UNIDADE: "Unidades",
-      METRO: "Metros", 
+      METRO: "Metros",
       METRO_QUADRADO: "Metros Quadrados",
       METRO_CUBICO: "Metro Cúbico",
       CENTIMETRO: "Centímetros",
@@ -78,11 +78,11 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       if (response.ok) {
         const data = await response.json()
         setProducts(data)
-        
+
         // Extrair categorias únicas para o filtro
         const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria.nome))] as string[]
         onCategoriesLoaded?.(uniqueCategories)
-        
+
         // Extrair tipos de valor únicos para o filtro
         const uniqueTiposValor = [...new Set(data.map((product: Product) => formatTipoValor(product.tipo_valor)))] as string[]
         onTiposValorLoaded?.(uniqueTiposValor)
@@ -134,21 +134,21 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
     // Filtro de data
     if (dateRange?.from || dateRange?.to) {
       const productDate = new Date(product.createdAt)
-      
+
       // Se só tem data inicial, filtra a partir dela
       if (dateRange.from && !dateRange.to) {
         const fromDate = new Date(dateRange.from)
         fromDate.setHours(0, 0, 0, 0)
         if (productDate < fromDate) return false
       }
-      
+
       // Se tem ambas as datas, filtra pelo intervalo
       if (dateRange.from && dateRange.to) {
         const fromDate = new Date(dateRange.from)
         const toDate = new Date(dateRange.to)
         fromDate.setHours(0, 0, 0, 0)
         toDate.setHours(23, 59, 59, 999)
-        
+
         if (productDate < fromDate || productDate > toDate) return false
       }
     }
@@ -217,7 +217,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
 
   if (filteredProducts.length === 0 && (search || dateRange?.from || dateRange?.to || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all"))) {
     const hasFilters = (search && search.trim() !== "") || (dateRange?.from || dateRange?.to) || (categoryFilter && categoryFilter !== "all") || (tipoFilter && tipoFilter !== "all") || (tipoValorFilter && tipoValorFilter !== "all")
-    
+
     return (
       <Card>
         <CardContent className="p-12 text-center">
@@ -249,17 +249,17 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
         <CardContent>
           <Table>
             <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Tipo Medida</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    {canManageProducts && <TableHead className="text-right">Ações</TableHead>}
-                  </TableRow>
-                </TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Valor</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Tipo Medida</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Criado em</TableHead>
+                {canManageProducts && <TableHead className="text-right">Ações</TableHead>}
+              </TableRow>
+            </TableHeader>
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
@@ -271,33 +271,34 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                 </TableRow>
               ) : (
                 filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">#{product.id}</TableCell>
-                  <TableCell>{product.nome}</TableCell>
-                  <TableCell>{formatCurrency(product.valor)}</TableCell>
-                  <TableCell>
-                    <Badge variant={product.tipo === "PRODUTO" ? "default" : "secondary"}>
-                      {product.tipo === "PRODUTO" ? "Produto" : "Serviço"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{formatTipoValor(product.tipo_valor)}</Badge>
-                  </TableCell>
-                  <TableCell>{product.categoria.nome}</TableCell>
-                                      <TableCell className="text-muted-foreground">
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">#{product.id}</TableCell>
+                    <TableCell>{product.nome}</TableCell>
+                    <TableCell>{formatCurrency(product.valor)}</TableCell>
+                    <TableCell>
+                      <Badge className={product.tipo === "PRODUTO" ? "bg-sky-600" : "outline outline-gray-300 bg-transparent text-black"}>
+                        {product.tipo === "PRODUTO" ? "Produto" : "Serviço"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="outline outline-gray-300 bg-transparent text-black">{formatTipoValor(product.tipo_valor)}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="outline outline-gray-300 bg-transparent text-black">{product.categoria.nome}</Badge></TableCell>
+                    <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}
                     </TableCell>
-                  {canManageProducts && (
-                    <TableCell className="text-right">
-                      <ProductActions
-                        product={product}
-                        workspaceId={workspaceId}
-                        onProductDeleted={handleProductDeleted}
-                      />
-                    </TableCell>
-                  )}
-                </TableRow>
-              )))}
+                    {canManageProducts && (
+                      <TableCell className="text-right">
+                        <ProductActions
+                          product={product}
+                          workspaceId={workspaceId}
+                          onProductDeleted={handleProductDeleted}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )))}
             </TableBody>
           </Table>
         </CardContent>
