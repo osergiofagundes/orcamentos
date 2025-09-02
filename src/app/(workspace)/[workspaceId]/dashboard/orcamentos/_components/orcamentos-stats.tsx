@@ -76,20 +76,45 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
     }).format(value / 100) // Converter de centavos para reais
   }
 
+  const statsData = [
+    {
+      title: "Total de Orçamentos",
+      value: stats.totalOrcamentos.toString(),
+      icon: FileText,
+      description: "orçamentos cadastrados",
+    },
+    {
+      title: "Criados esta semana",
+      value: stats.orcamentosUltimaSemana.toString(),
+      icon: TrendingUp,
+      description: "nos últimos 7 dias",
+    },
+    {
+      title: "Valor Total (Mês)",
+      value: formatCurrency(stats.valorTotalMes),
+      icon: DollarSign,
+      description: "orçamentos aprovados",
+    },
+    {
+      title: "Em Rascunho",
+      value: stats.orcamentosRascunho.toString(),
+      icon: Clock,
+      description: "aguardando finalização",
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
+          <Card key={i} className="border-l-4 border-l-muted">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                <div className="h-4 bg-gray-200 rounded animate-pulse" />
-              </CardTitle>
-              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 bg-muted animate-pulse rounded w-24" />
+              <div className="h-8 w-8 rounded-lg bg-muted animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-200 rounded animate-pulse mb-1" />
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3" />
+              <div className="h-8 bg-muted animate-pulse rounded w-16 mb-1" />
+              <div className="h-3 bg-muted animate-pulse rounded w-20" />
             </CardContent>
           </Card>
         ))}
@@ -99,65 +124,28 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Total de Orçamentos
-          </CardTitle>
-          <FileText className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalOrcamentos}</div>
-          <p className="text-xs text-muted-foreground">
-            orçamentos cadastrados
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Criados esta semana
-          </CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.orcamentosUltimaSemana}</div>
-          <p className="text-xs text-muted-foreground">
-            nos últimos 7 dias
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Valor Total (Mês)
-          </CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(stats.valorTotalMes)}</div>
-          <p className="text-xs text-muted-foreground">
-            orçamentos aprovados
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Em Rascunho
-          </CardTitle>
-          <Clock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.orcamentosRascunho}</div>
-          <p className="text-xs text-muted-foreground">
-            aguardando finalização
-          </p>
-        </CardContent>
-      </Card>
+      {statsData.map((stat, ) => {
+        return (
+          <Card key={stat.title} className="border-l-8 border-l-sky-600">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {stat.title}
+              </CardTitle>
+              <div className={`h-8 w-8 rounded-lg  flex items-center justify-center text-muted-foreground`}>
+                <stat.icon className={`h-4 w-4`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold`}>
+                {stat.value}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {stat.description}
+              </p>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }

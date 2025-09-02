@@ -75,7 +75,7 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
       <ProductsServicesStats workspaceId={workspaceId} />
 
       <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div className="w-full md:flex-1">
+        <div className="w-full md:w-1/3">
           <SearchInput
             value={search}
             onChange={setSearch}

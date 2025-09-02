@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Save } from "lucide-react"
+import { Plus, Trash2, Save, Package, User, Calculator, FileText } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -252,12 +252,12 @@ export function EditOrcamentoModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="sm:max-w-4xl border-l-8 border-l-sky-600 rounded-lg overflow-y-auto max-h-[90vh]">
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="text-left">
             Editar Orçamento #{orcamentoId}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-left">
             {canEdit 
               ? "Modifique as informações do orçamento abaixo." 
               : "Este orçamento não pode ser editado devido ao seu status atual."
@@ -279,14 +279,19 @@ export function EditOrcamentoModal({
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Seção de Informações Básicas */}
+              <div className="space-y-6">
+                <div className="flex items-center space-x-2 pb-2 border-b">
+                  <User className="h-5 w-5 text-primary" />
+                  <DialogTitle>Cliente</DialogTitle>
+                </div>
                 <FormField
                   control={form.control}
                   name="clienteId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cliente</FormLabel>
+                      <FormLabel>Cliente *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -305,29 +310,15 @@ export function EditOrcamentoModal({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="observacoes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Observações</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Observações adicionais sobre o orçamento..."
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Itens do Orçamento</h3>
+              {/* Seção de Itens do Orçamento */}
+              <div className="space-y-6">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <div className="flex items-center space-x-2">
+                    <Package className="h-5 w-5 text-primary" />
+                    <DialogTitle>Itens do Orçamento</DialogTitle>
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
@@ -340,205 +331,296 @@ export function EditOrcamentoModal({
                       descontoValor: 0,
                       tipoDesconto: "nenhum"
                     })}
+                    className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 text-white hover:text-white'
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Item
                   </Button>
                 </div>
 
-                {fields.map((field, index) => (
-                  <div key={field.id} className="space-y-4 p-4 border rounded-lg">
-                    <div className="grid grid-cols-12 gap-4 items-end">
-                      <div className="col-span-4">
-                        <FormField
-                          control={form.control}
-                          name={`itens.${index}.produtoServicoId`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Produto/Serviço</FormLabel>
-                              <Select 
-                                onValueChange={(value) => {
-                                  field.onChange(value)
-                                  updatePrecoFromProduto(index, value)
-                                }} 
-                                value={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione um produto/serviço" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {produtosServicos.map((produto) => (
-                                    <SelectItem key={produto.id} value={produto.id.toString()}>
-                                      {produto.nome} - {produto.categoria.nome}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <FormField
-                          control={form.control}
-                          name={`itens.${index}.quantidade`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Quantidade</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  {...field}
-                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <FormField
-                          control={form.control}
-                          name={`itens.${index}.precoUnitario`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Preço Unitário (R$)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  {...field}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <FormField
-                          control={form.control}
-                          name={`itens.${index}.tipoDesconto`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Tipo de Desconto</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Tipo" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="nenhum">Sem Desconto</SelectItem>
-                                  <SelectItem value="percentual">Percentual (%)</SelectItem>
-                                  <SelectItem value="valor">Valor Fixo (R$)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="col-span-2 flex justify-between items-center">
-                        <div className="text-sm font-medium">
-                          Total: R$ {calculateItemTotal(form.watch(`itens.${index}`)).toFixed(2)}
-                        </div>
+                <div className="space-y-4">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="relative bg-muted/30 border border-border rounded-xl p-6 transition-all hover:shadow-sm">
+                      <div className="absolute top-4 right-4 flex items-center space-x-2">
+                        <span className="bg-background px-2 py-1 rounded-full font-semibold">
+                          Item {index + 1}
+                        </span>
                         {fields.length > 1 && (
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => remove(index)}
+                            className="h-8 w-8 p-0 border hover:text-red-500 hover:border-red-500 cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-8">
+                        <div className="lg:col-span-5">
+                          <FormField
+                            control={form.control}
+                            name={`itens.${index}.produtoServicoId`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">Produto/Serviço *</FormLabel>
+                                <Select 
+                                  onValueChange={(value) => {
+                                    field.onChange(value)
+                                    updatePrecoFromProduto(index, value)
+                                  }} 
+                                  value={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="h-11 w-full">
+                                      <SelectValue placeholder="Selecione um produto/serviço" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {produtosServicos.map((produto) => (
+                                      <SelectItem key={produto.id} value={produto.id.toString()}>
+                                        <div className="flex gap-2 items-center">
+                                          <span>{produto.nome}</span>
+                                          <span>-</span>
+                                          <span className="text-muted-foreground">{produto.categoria.nome}</span>
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="lg:col-span-2">
+                          <FormField
+                            control={form.control}
+                            name={`itens.${index}.quantidade`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">Quantidade *</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    className="text-right"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="lg:col-span-2">
+                          <FormField
+                            control={form.control}
+                            name={`itens.${index}.precoUnitario`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">Preço Unitário *</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      className="pl-8 text-right"
+                                      {...field}
+                                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="lg:col-span-3">
+                          <div className="flex flex-col h-full">
+                            <label className="text-sm font-medium mb-2">Total do Item</label>
+                            <div className="px-3 py-1 border rounded-md flex items-center justify-center border-sky-600 ">
+                              <span className="font-bold">
+                                R$ {calculateItemTotal(form.watch(`itens.${index}`)).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Seção de Desconto */}
+                      <div className="mt-6 pt-4 border-t border-border/50">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name={`itens.${index}.tipoDesconto`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm font-medium">Tipo de Desconto</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Sem desconto" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="nenhum">Sem Desconto</SelectItem>
+                                    <SelectItem value="percentual">Percentual (%)</SelectItem>
+                                    <SelectItem value="valor">Valor Fixo (R$)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Campo de desconto condicional */}
+                          {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
+                            <FormField
+                              control={form.control}
+                              name={`itens.${index}.descontoPercentual`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">Desconto (%)</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">%</span>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        placeholder="0.00"
+                                        className="pl-8 text-right"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
+                            <FormField
+                              control={form.control}
+                              name={`itens.${index}.descontoValor`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-sm font-medium">Desconto (R$)</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00"
+                                        className="pl-8 text-right"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {/* Informação sobre o desconto */}
+                          {form.watch(`itens.${index}.tipoDesconto`) !== "nenhum" && (
+                            <>
+                              {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
+                                <div>
+                                  <div className="flex flex-col h-full">
+                                    <label className="text-sm font-medium mb-2">Total do Desconto</label>
+                                    <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 ">
+                                      <span className="font-bold">
+                                        -R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`) * (form.watch(`itens.${index}.descontoPercentual`) || 0) / 100).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
+                                <div>
+                                  <div className="flex flex-col h-full">
+                                    <label className="text-sm font-medium mb-2">Total do Desconto</label>
+                                    <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 ">
+                                      <span className="font-bold">
+                                        -R$ {(form.watch(`itens.${index}.descontoValor`) || 0).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Campos de desconto condicionais */}
-                    {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
-                      <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-3">
-                          <FormField
-                            control={form.control}
-                            name={`itens.${index}.descontoPercentual`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Desconto (%)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="100"
-                                    placeholder="0.00"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="col-span-9 flex items-end pb-2">
-                          <span className="text-sm text-muted-foreground">
-                            Desconto de R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`) * (form.watch(`itens.${index}.descontoPercentual`) || 0) / 100).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
-                      <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-3">
-                          <FormField
-                            control={form.control}
-                            name={`itens.${index}.descontoValor`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Desconto (R$)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <div className="col-span-9 flex items-end pb-2">
-                          <span className="text-sm text-muted-foreground">
-                            Valor com desconto: R$ {Math.max(0, (form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`)) - (form.watch(`itens.${index}.descontoValor`) || 0)).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                <span className="text-lg font-semibold">Total do Orçamento:</span>
-                <span className="text-lg font-bold">R$ {calculateTotal().toFixed(2)}</span>
+              {/* Seção de Observações */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 pb-2 border-b">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <DialogTitle>Observações</DialogTitle>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="observacoes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Observações adicionais sobre o orçamento..."
+                          className="resize-none h-24"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Seção de Resumo do Orçamento */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 pb-2 border-b">
+                  <Calculator className="h-5 w-5 text-primary" />
+                  <DialogTitle>Resumo do Orçamento</DialogTitle>
+                </div>
+
+                <div className="border rounded-xl p-4 border-b">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <div className="font-bold text-primary">
+                        Total do Orçamento
+                      </div>
+                      <div className="text-muted-foreground">{fields.length} {fields.length === 1 ? 'item' : 'itens'}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-primary">
+                        R$ {calculateTotal().toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <DialogFooter>
@@ -547,11 +629,16 @@ export function EditOrcamentoModal({
                   variant="outline"
                   onClick={handleClose}
                   disabled={saving}
+                  className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'
                 >
                   Cancelar
                 </Button>
                 {canEdit && (
-                  <Button type="submit" disabled={saving}>
+                  <Button 
+                    type="submit" 
+                    disabled={saving}
+                    className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'
+                  >
                     <Save className="h-4 w-4 mr-2" />
                     {saving ? "Salvando..." : "Salvar Alterações"}
                   </Button>

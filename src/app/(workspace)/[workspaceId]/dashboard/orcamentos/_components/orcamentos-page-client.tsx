@@ -62,100 +62,100 @@ export function OrcamentosPageClient({ workspaceId }: OrcamentosPageClientProps)
         />
       </div>
       <OrcamentosStats workspaceId={workspaceId} />
-      <div className="flex flex-col gap-3 md:flex-row md:space-x-3">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="w-full md:w-1/3">
           <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Pesquisar por ID, nome do cliente, CPF/CNPJ ou responsável"
+            value={search}
+            onChange={setSearch}
+            placeholder="Pesquisar por ID, nome do cliente, CPF/CNPJ ou responsável"
           />
         </div>
         <div className="w-full md:w-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-        <SelectTrigger className="w-full md:w-auto">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos os Status</SelectItem>
-          <SelectItem value="RASCUNHO">Rascunho</SelectItem>
-          <SelectItem value="ENVIADO">Enviado</SelectItem>
-          <SelectItem value="APROVADO">Aprovado</SelectItem>
-          <SelectItem value="REJEITADO">Rejeitado</SelectItem>
-          <SelectItem value="CANCELADO">Cancelado</SelectItem>
-        </SelectContent>
+            <SelectTrigger className="w-full md:w-auto">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Status</SelectItem>
+              <SelectItem value="RASCUNHO">Rascunho</SelectItem>
+              <SelectItem value="ENVIADO">Enviado</SelectItem>
+              <SelectItem value="APROVADO">Aprovado</SelectItem>
+              <SelectItem value="REJEITADO">Rejeitado</SelectItem>
+              <SelectItem value="CANCELADO">Cancelado</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="w-full md:w-auto">
           <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
-        <SelectTrigger className="w-full md:w-auto">
-          <SelectValue placeholder="Responsável" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos os Responsáveis</SelectItem>
-          {responsaveis.map((responsavel) => (
-            <SelectItem key={responsavel} value={responsavel}>
-          {responsavel}
-            </SelectItem>
-          ))}
-        </SelectContent>
+            <SelectTrigger className="w-full md:w-auto">
+              <SelectValue placeholder="Responsável" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Responsáveis</SelectItem>
+              {responsaveis.map((responsavel) => (
+                <SelectItem key={responsavel} value={responsavel}>
+                  {responsavel}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="w-full md:w-auto">
           <div className="flex flex-col gap-3">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-          variant="outline"
-          id="date"
-          className="w-full md:w-auto justify-between font-normal gap-x-2"
-            >
-          {dateRange?.from ? (
-            dateRange.to ? (
-              <>
-            {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-            {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
-              </>
-            ) : (
-              format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
-            )
-          ) : (
-            "Selecionar período"
-          )}
-          <CalendarIcon className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-            <Calendar
-          initialFocus
-          mode="range"
-          defaultMonth={dateRange?.from}
-          selected={dateRange}
-          onSelect={setDateRange}
-          numberOfMonths={2}
-            />
-            {dateRange?.from && (
-          <div className="p-3 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => setDateRange(undefined)}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Limpar período
-            </Button>
-          </div>
-            )}
-          </PopoverContent>
-        </Popover>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-full md:w-auto justify-between font-normal gap-x-2"
+                >
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                        {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
+                    )
+                  ) : (
+                    "Selecionar período"
+                  )}
+                  <CalendarIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={2}
+                />
+                {dateRange?.from && (
+                  <div className="p-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setDateRange(undefined)}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Limpar período
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
 
 
-      <OrcamentosContent 
-        workspaceId={workspaceId} 
-        refreshTrigger={refreshTrigger} 
+      <OrcamentosContent
+        workspaceId={workspaceId}
+        refreshTrigger={refreshTrigger}
         search={search}
         statusFilter={statusFilter}
         responsavelFilter={responsavelFilter}
