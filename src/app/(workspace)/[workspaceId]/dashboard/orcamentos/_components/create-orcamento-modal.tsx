@@ -89,7 +89,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
     if (searchTerm.trim() === "") {
       setFilteredClientes(clientes.slice(0, 10)) // Mostra os primeiros 10 se não há busca
     } else {
-      const filtered = clientes.filter(cliente => 
+      const filtered = clientes.filter(cliente =>
         cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
         cliente.cpf_cnpj.includes(searchTerm) ||
         (cliente.email && cliente.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -128,7 +128,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
       <div className="relative">
         {selectedCliente ? (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-            <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+            <div className="h-2 w-2 bg-sky-600 rounded-full"></div>
           </div>
         ) : (
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -136,7 +136,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
         <Input
           type="text"
           placeholder={selectedCliente ? "Cliente selecionado - digite para alterar" : "Pesquisar cliente por nome, CPF/CNPJ, email ou telefone..."}
-          className={`h-11 pr-10 ${selectedCliente ? 'pl-6 bg-green-50 border-green-200' : 'pl-10'}`}
+          className={`pr-10 ${selectedCliente ? 'pl-6 bg-sky-50 border-sky-200' : 'pl-10'}`}
           value={selectedCliente ? selectedCliente.nome : searchTerm}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsOpen(true)}
@@ -155,7 +155,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
           </button>
         )}
       </div>
-      
+
       {isOpen && (filteredClientes.length > 0 || searchTerm.trim() !== "") && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
           {filteredClientes.map((cliente) => (
@@ -163,7 +163,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
               key={cliente.id}
               type="button"
               onClick={() => handleSelectCliente(cliente)}
-              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+              className="w-full px-4 py-2 text-left hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
             >
               <div className="flex flex-col space-y-1">
                 <span className="font-medium text-foreground">{cliente.nome}</span>
@@ -182,13 +182,13 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
           )}
         </div>
       )}
-      
+
       {/* Informações do cliente selecionado */}
       {selectedCliente && (
-        <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-          <div className="text-sm text-green-800">
+        <div className="mt-2 p-3 bg-sky-50 border border-sky-200 rounded-md">
+          <div className="text-sm">
             <div className="font-medium">{selectedCliente.nome}</div>
-            <div className="flex flex-wrap gap-2 text-xs text-green-600 mt-1">
+            <div className="flex flex-wrap gap-2 text-xs mt-1">
               <span>{selectedCliente.cpf_cnpj}</span>
               {selectedCliente.email && <span>• {selectedCliente.email}</span>}
               {selectedCliente.telefone && <span>• {selectedCliente.telefone}</span>}
@@ -211,9 +211,9 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     defaultValues: {
       clienteId: "",
       observacoes: "",
-      itens: [{ 
-        produtoServicoId: "", 
-        quantidade: 1, 
+      itens: [{
+        produtoServicoId: "",
+        quantidade: 1,
         precoUnitario: 0,
         descontoPercentual: 0,
         descontoValor: 0,
@@ -293,13 +293,13 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
   const calculateItemTotal = (item: any) => {
     const subtotal = item.quantidade * item.precoUnitario
     let desconto = 0
-    
+
     if (item.tipoDesconto === "percentual" && item.descontoPercentual > 0) {
       desconto = subtotal * (item.descontoPercentual / 100)
     } else if (item.tipoDesconto === "valor" && item.descontoValor > 0) {
       desconto = item.descontoValor
     }
-    
+
     return Math.max(0, subtotal - desconto)
   }
 
@@ -310,18 +310,35 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     }, 0)
   }
 
+  const formatCurrency = (value: string) => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, "")
+
+    // Se não houver números, retorna vazio
+    if (!numbers) return ""
+
+    // Converte para formato de moeda
+    const amount = parseFloat(numbers) / 100
+    return amount.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="hover:scale-105 transition-transform">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">
           Novo Orçamento
+          <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl border-l-8 border-l-sky-600 rounded-lg overflow-y-auto max-h-[90vh]">
         <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="text-2xl font-bold text-primary">Criar Novo Orçamento</DialogTitle>
-          <DialogDescription className="text-base text-muted-foreground">
+          <DialogTitle className="text-left">Criar Novo Orçamento</DialogTitle>
+          <DialogDescription className="text-left">
             Preencha as informações para criar um novo orçamento para seu cliente.
           </DialogDescription>
         </DialogHeader>
@@ -331,26 +348,23 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
             <div className="space-y-6">
               <div className="flex items-center space-x-2 pb-2 border-b">
                 <User className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Informações Básicas</h3>
+                <DialogTitle>Escolha o Cliente</DialogTitle>
               </div>
-              
-              <div className="grid grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="clienteId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">Cliente *</FormLabel>
-                      <ClienteSearchField 
-                        value={field.value}
-                        onChange={field.onChange}
-                        clientes={clientes}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="clienteId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cliente *</FormLabel>
+                    <ClienteSearchField
+                      value={field.value}
+                      onChange={field.onChange}
+                      clientes={clientes}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Seção de Itens do Orçamento */}
@@ -358,22 +372,21 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
               <div className="flex justify-between items-center pb-2 border-b">
                 <div className="flex items-center space-x-2">
                   <Package className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-foreground">Itens do Orçamento</h3>
-                  <span className="text-sm text-muted-foreground">({fields.length} {fields.length === 1 ? 'item' : 'itens'})</span>
+                  <DialogTitle>Escolha o Produto/Serviço</DialogTitle>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ 
-                    produtoServicoId: "", 
-                    quantidade: 1, 
+                  onClick={() => append({
+                    produtoServicoId: "",
+                    quantidade: 1,
                     precoUnitario: 0,
                     descontoPercentual: 0,
                     descontoValor: 0,
                     tipoDesconto: "nenhum"
                   })}
-                  className="h-9 hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 text-white hover:text-white'
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Item
@@ -384,8 +397,8 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 {fields.map((field, index) => (
                   <div key={field.id} className="relative bg-muted/30 border border-border rounded-xl p-6 transition-all hover:shadow-sm">
                     <div className="absolute top-4 right-4 flex items-center space-x-2">
-                      <span className="text-xs font-medium text-muted-foreground bg-background px-2 py-1 rounded-full">
-                        Item #{index + 1}
+                      <span className="bg-background px-2 py-1 rounded-full font-semibold">
+                        Item {index + 1}
                       </span>
                       {fields.length > 1 && (
                         <Button
@@ -393,13 +406,13 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                           variant="ghost"
                           size="sm"
                           onClick={() => remove(index)}
-                          className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                          className="h-8 w-8 p-0 border hover:text-red-500 hover:border-red-500 cursor-pointer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-8">
                       <div className="lg:col-span-5">
                         <FormField
@@ -408,24 +421,25 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-sm font-medium">Produto/Serviço *</FormLabel>
-                              <Select 
+                              <Select
                                 onValueChange={(value) => {
                                   field.onChange(value)
                                   updatePrecoFromProduto(index, value)
-                                }} 
+                                }}
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger className="h-11">
+                                  <SelectTrigger className="h-11 w-full">
                                     <SelectValue placeholder="Selecione um produto/serviço" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                   {produtosServicos.map((produto) => (
                                     <SelectItem key={produto.id} value={produto.id.toString()}>
-                                      <div className="flex flex-col">
-                                        <span className="font-medium">{produto.nome}</span>
-                                        <span className="text-xs text-muted-foreground">{produto.categoria.nome}</span>
+                                      <div className="flex gap-2 items-center">
+                                        <span>{produto.nome}</span>
+                                        <span>-</span>
+                                        <span className="text-muted-foreground">{produto.categoria.nome}</span>
                                       </div>
                                     </SelectItem>
                                   ))}
@@ -443,12 +457,12 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                           name={`itens.${index}.quantidade`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-medium">Qtd *</FormLabel>
+                              <FormLabel className="text-sm font-medium">Quantidade *</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
                                   min="1"
-                                  className="h-11 text-center"
+                                  className="text-right"
                                   {...field}
                                   onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                                 />
@@ -465,17 +479,17 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                           name={`itens.${index}.precoUnitario`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-medium">Preço Unit.</FormLabel>
+                              <FormLabel className="text-sm font-medium">Preço Unitário *</FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
                                   <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    className="h-11 pl-8 text-right"
+                                    className="pl-8 text-right"
                                     {...field}
-                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    onChange={(e) => {
+                                      const formatted = formatCurrency(e.target.value)
+                                      field.onChange(formatted ? parseFloat(formatted.replace(/\D/g, '')) / 100 : 0)
+                                    }}
                                   />
                                 </div>
                               </FormControl>
@@ -488,8 +502,8 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                       <div className="lg:col-span-3">
                         <div className="flex flex-col h-full">
                           <label className="text-sm font-medium mb-2">Total do Item</label>
-                          <div className="h-11 px-3 bg-primary/5 border border-primary/20 rounded-md flex items-center justify-center">
-                            <span className="font-bold text-primary text-lg">
+                          <div className="px-3 py-1 border rounded-md flex items-center justify-center border-sky-600 ">
+                            <span className="font-bold">
                               R$ {calculateItemTotal(form.watch(`itens.${index}`)).toFixed(2)}
                             </span>
                           </div>
@@ -497,7 +511,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                       </div>
                     </div>
 
-                    
+
                     {/* Seção de Desconto */}
                     <div className="mt-6 pt-4 border-t border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -509,7 +523,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                               <FormLabel className="text-sm font-medium">Tipo de Desconto</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                  <SelectTrigger className="h-10">
+                                  <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Sem desconto" />
                                   </SelectTrigger>
                                 </FormControl>
@@ -534,17 +548,17 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                                 <FormLabel className="text-sm font-medium">Desconto (%)</FormLabel>
                                 <FormControl>
                                   <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">%</span>
                                     <Input
                                       type="number"
                                       step="0.01"
                                       min="0"
                                       max="100"
                                       placeholder="0.00"
-                                      className="h-10 pr-8 text-right"
+                                      className="pl-8 text-right"
                                       {...field}
                                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                     />
-                                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">%</span>
                                   </div>
                                 </FormControl>
                                 <FormMessage />
@@ -568,7 +582,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                                       step="0.01"
                                       min="0"
                                       placeholder="0.00"
-                                      className="h-10 pl-8 text-right"
+                                      className="pl-8 text-right"
                                       {...field}
                                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                     />
@@ -582,21 +596,32 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
 
                         {/* Informação sobre o desconto */}
                         {form.watch(`itens.${index}.tipoDesconto`) !== "nenhum" && (
-                          <div className="flex flex-col h-full justify-center">
-                            <div className="text-xs text-muted-foreground space-y-1">
-                              <div>Subtotal: R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`)).toFixed(2)}</div>
-                              {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
-                                <div className="text-orange-600">
-                                  Desconto: -R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`) * (form.watch(`itens.${index}.descontoPercentual`) || 0) / 100).toFixed(2)}
+                          <>
+                            {form.watch(`itens.${index}.tipoDesconto`) === "percentual" && (
+                              <div>
+                                <div className="flex flex-col h-full">
+                                  <label className="text-sm font-medium mb-2">Total do Desconto</label>
+                                  <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 ">
+                                    <span className="font-bold">
+                                      -R$ {(form.watch(`itens.${index}.quantidade`) * form.watch(`itens.${index}.precoUnitario`) * (form.watch(`itens.${index}.descontoPercentual`) || 0) / 100).toFixed(2)}
+                                    </span>
+                                  </div>
                                 </div>
-                              )}
-                              {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
-                                <div className="text-orange-600">
-                                  Desconto: -R$ {(form.watch(`itens.${index}.descontoValor`) || 0).toFixed(2)}
+                              </div>
+                            )}
+                            {form.watch(`itens.${index}.tipoDesconto`) === "valor" && (
+                              <div>
+                                <div className="flex flex-col h-full">
+                                  <label className="text-sm font-medium mb-2">Total do Desconto</label>
+                                  <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 ">
+                                    <span className="font-bold">
+                                      -R$ {(form.watch(`itens.${index}.descontoValor`) || 0).toFixed(2)}
+                                    </span>
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                          </div>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -604,21 +629,21 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 ))}
               </div>
             </div>
-            
+
             {/* Seção de Observações */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 pb-2 border-b">
                 <FileText className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Observações</h3>
+                <DialogTitle>Observações</DialogTitle>
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="observacoes"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Observações adicionais sobre o orçamento..."
                         className="resize-none h-24"
                         {...field}
@@ -629,48 +654,45 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 )}
               />
             </div>
-            
+
             {/* Seção de Resumo do Orçamento */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 pb-2 border-b">
                 <Calculator className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Resumo do Orçamento</h3>
+                <DialogTitle>Resumo do Orçamento</DialogTitle>
               </div>
-              
-              <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-6">
+
+              <div className="border rounded-xl p-4 border-b">
                 <div className="flex justify-between items-center">
                   <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">Total de {fields.length} {fields.length === 1 ? 'item' : 'itens'}</div>
-                    <div className="text-2xl font-bold text-primary">
+                    <div className="font-bold text-primary">
                       Total do Orçamento
                     </div>
+                    <div className="text-muted-foreground">{fields.length} {fields.length === 1 ? 'item' : 'itens'}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">
+                    <div className="text-2xl font-bold text-primary">
                       R$ {calculateTotal().toFixed(2)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {calculateTotal() > 0 && `Média de R$ ${(calculateTotal() / fields.length).toFixed(2)} por item`}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={loading}
-                className="w-full sm:w-auto"
+                className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading || fields.length === 0}
-                className="w-full sm:w-auto min-w-[120px]"
+                className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'
               >
                 {loading ? "Criando..." : "Criar Orçamento"}
               </Button>

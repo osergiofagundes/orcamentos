@@ -90,13 +90,13 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       {open && (
-        <div className="flex items-center gap-2 p-4 border-b bg-sky-600 justify-center">
+        <div className="flex items-center gap-2 px-4 py-2 border-b bg-sky-600 justify-center rounded-lg m-2">
           <img 
             src="/images/logo.png" 
             alt="Sky Orçamentos Logo" 
             className="h-8 w-8 rounded"
           />
-          <span className="font-semibold text-lg text-foreground text-white">
+          <span className="font-semibold text-lg text-white">
             Sky Orçamentos
           </span>
         </div>
