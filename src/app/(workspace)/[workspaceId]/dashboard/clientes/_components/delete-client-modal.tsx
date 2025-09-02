@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { Trash2 } from "lucide-react"
 
 interface Client {
   id: number
@@ -58,17 +59,20 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={onClose}> 
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
         <DialogHeader>
           <DialogTitle>Excluir Cliente</DialogTitle>
           <DialogDescription>
             Tem certeza que deseja excluir o cliente <strong>{client.nome}</strong>?
-            Esta ação não pode ser desfeita.
+            <br />
+            <span className="text-red-600 font-medium">
+              Esta ação não pode ser desfeita.
+            </span>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
             Cancelar
           </Button>
           <Button 
@@ -76,8 +80,10 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
             variant="destructive" 
             onClick={handleDelete}
             disabled={isLoading}
+            className='bg-red-500 hover:bg-red-600 cursor-pointer'
           >
             {isLoading ? "Excluindo..." : "Excluir"}
+            <Trash2 className="h-4 w-4" />
           </Button>
         </DialogFooter>
       </DialogContent>

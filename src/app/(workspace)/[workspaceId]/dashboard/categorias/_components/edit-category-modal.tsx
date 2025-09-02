@@ -89,10 +89,10 @@ export function EditCategoryModal({ isOpen, onClose, category, workspaceId }: Ed
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Editar Categoria</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Editar Categoria</DialogTitle>
+          <DialogDescription className="text-left">
             Atualize as informações da categoria.
           </DialogDescription>
         </DialogHeader>
@@ -105,17 +105,17 @@ export function EditCategoryModal({ isOpen, onClose, category, workspaceId }: Ed
                 <FormItem>
                   <FormLabel>Nome da Categoria</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome da categoria" {...field} />
+                    <Input placeholder="Ex: Consultoria, Produtos, Serviços..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
                 {isLoading ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </DialogFooter>

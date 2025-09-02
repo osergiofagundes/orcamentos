@@ -323,6 +323,11 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
       y = addWrappedText(orcamentoData.observacoes, margin, y, pageWidth - margin * 2)
     }
 
+    y += 8
+
+    pdf.text('Gerado por: Sky Orçamentos', margin, y)
+    y += 8
+
     // Salvar o PDF
     const fileName = `Orcamento_${orcamentoData.id}_${orcamentoData.cliente.nome.replace(/\s+/g, '_')}.pdf`
     pdf.save(fileName)

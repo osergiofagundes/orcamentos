@@ -3,16 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { Trash2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 
 interface Product {
@@ -90,16 +90,18 @@ export function DeleteProductModal({ isOpen, onClose, product, workspaceId, onPr
   }
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={handleClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Produto/Serviço</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={isOpen} onOpenChange={handleClose}> 
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
+        <DialogHeader>
+          <DialogTitle>Excluir Produto/Serviço</DialogTitle>
+          <DialogDescription>
             {!showForceOption ? (
               <>
                 Tem certeza que deseja excluir <strong>{product.nome}</strong>?
                 <br />
-                Esta ação não pode ser desfeita.
+                <span className="text-red-600 font-medium">
+                  Esta ação não pode ser desfeita.
+                </span>
               </>
             ) : (
               <div className="space-y-4">
@@ -127,21 +129,24 @@ export function DeleteProductModal({ isOpen, onClose, product, workspaceId, onPr
                 </div>
               </div>
             )}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading} onClick={resetModal}>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={resetModal} disabled={isLoading} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
             Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleDelete} 
+          </Button>
+          <Button 
+            type="button" 
+            variant="destructive" 
+            onClick={handleDelete}
             disabled={isLoading || (showForceOption && !forceDelete)}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className='bg-red-500 hover:bg-red-600 cursor-pointer'
           >
             {isLoading ? "Excluindo..." : showForceOption ? "Confirmar Exclusão" : "Excluir"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

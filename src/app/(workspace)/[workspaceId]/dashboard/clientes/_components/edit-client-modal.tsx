@@ -118,10 +118,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Editar Cliente</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Editar Cliente</DialogTitle>
+          <DialogDescription className="text-left">
             Atualize as informações do cliente.
           </DialogDescription>
         </DialogHeader>
@@ -291,10 +291,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
             </div>
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
                 {isLoading ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </DialogFooter>
