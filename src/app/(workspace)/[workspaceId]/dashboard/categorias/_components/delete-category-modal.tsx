@@ -3,16 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { Trash2 } from "lucide-react"
 
 interface Category {
   id: number
@@ -58,11 +58,11 @@ export function DeleteCategoryModal({ isOpen, onClose, category, workspaceId }: 
   const hasProducts = (category._count?.produtosServicos || 0) > 0
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Categoria</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={isOpen} onOpenChange={onClose}> 
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
+        <DialogHeader>
+          <DialogTitle>Excluir Categoria</DialogTitle>
+          <DialogDescription>
             {hasProducts ? (
               <>
                 <span className="text-destructive font-medium">Atenção!</span>
@@ -76,26 +76,31 @@ export function DeleteCategoryModal({ isOpen, onClose, category, workspaceId }: 
               <>
                 Tem certeza que deseja excluir a categoria <strong>{category.nome}</strong>?
                 <br />
-                Esta ação não pode ser desfeita.
+                <span className="text-red-600 font-medium">
+                  Esta ação não pode ser desfeita.
+                </span>
               </>
             )}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
             Cancelar
-          </AlertDialogCancel>
+          </Button>
           {!hasProducts && (
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={handleDelete}
               disabled={isLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className='bg-red-500 hover:bg-red-600 cursor-pointer'
             >
               {isLoading ? "Excluindo..." : "Excluir"}
-            </AlertDialogAction>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           )}
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

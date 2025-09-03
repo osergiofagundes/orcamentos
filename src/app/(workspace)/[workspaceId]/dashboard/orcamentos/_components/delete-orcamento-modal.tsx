@@ -3,15 +3,13 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Trash2, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 
@@ -70,50 +68,37 @@ export function DeleteOrcamentoModal({
   }
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}> 
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
+        <DialogHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600" />
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
           </div>
-          <AlertDialogDescription>
+          <DialogDescription>
             Tem certeza que deseja excluir o orçamento <strong>#{orcamentoNumero}</strong>?
-          </AlertDialogDescription>
-          
-          <div className="space-y-3 mt-4">
-            <div className="bg-muted p-3 rounded-lg space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Cliente:</span>
-                <span className="text-sm font-medium">{clienteNome}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Valor Total:</span>
-                <span className="text-sm font-medium">{formatCurrency(valorTotal)}</span>
-              </div>
-            </div>
-
-            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-              <p className="text-sm text-red-800">
-                <strong>⚠️ Atenção:</strong> Esta ação não pode ser desfeita. Todos os dados do orçamento, incluindo itens e histórico, serão permanentemente removidos.
-              </p>
-            </div>
-          </div>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleting}>
+            <br />
+            <span className="text-red-600 font-medium">
+              Esta ação não pode ser desfeita.
+            </span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} disabled={deleting} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
             Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction
+          </Button>
+          <Button 
+            type="button" 
+            variant="destructive" 
             onClick={handleDelete}
             disabled={deleting}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            className='bg-red-500 hover:bg-red-600 cursor-pointer'
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            {deleting ? "Excluindo..." : "Excluir Orçamento"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            {deleting ? "Excluindo..." : "Excluir"}
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

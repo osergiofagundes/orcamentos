@@ -185,8 +185,13 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
     // 4. NÚMERO E DATA DO ORÇAMENTO
     pdf.setFontSize(12)
     pdf.setFont(undefined, 'bold')
+    const dataEmissao = new Date()
+    
+    // Número, data de emissão e data de criação na mesma linha
     pdf.text(`Orçamento Nº: ${orcamentoData.id}`, margin, y)
-    pdf.text(`Emitido em: ${formatDate(orcamentoData.data_criacao)} ${new Date(orcamentoData.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth - margin, y, { align: 'right' })
+    pdf.text(`Emissão: ${formatDate(dataEmissao)} ${dataEmissao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth / 2, y, { align: 'center' })
+    pdf.text(`Criação: ${formatDate(orcamentoData.data_criacao)} ${new Date(orcamentoData.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth - margin, y, { align: 'right' })
+    
     y += 10
 
     // 5. DADOS DO CLIENTE
@@ -322,6 +327,11 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
       pdf.setFont(undefined, 'normal')
       y = addWrappedText(orcamentoData.observacoes, margin, y, pageWidth - margin * 2)
     }
+
+    y += 8
+
+    pdf.text('Gerado por: Sky Orçamentos', margin, y)
+    y += 8
 
     // Salvar o PDF
     const fileName = `Orcamento_${orcamentoData.id}_${orcamentoData.cliente.nome.replace(/\s+/g, '_')}.pdf`

@@ -32,12 +32,14 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { formatCpfCnpj, formatPhone, formatCep } from "@/lib/formatters"
+import { formatCpfCnpj, formatPhone, formatCep, validateCpfCnpj } from "@/lib/formatters"
 import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório"),
+  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório").refine(validateCpfCnpj, {
+    message: "CPF/CNPJ inválido"
+  }),
   telefone: z.string().min(1, "Telefone é obrigatório"),
   email: z.string().email("Email inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
@@ -118,10 +120,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Editar Cliente</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-left">Editar Cliente</DialogTitle>
+          <DialogDescription className="text-left">
             Atualize as informações do cliente.
           </DialogDescription>
         </DialogHeader>
@@ -291,10 +293,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
             </div>
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
                 {isLoading ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </DialogFooter>

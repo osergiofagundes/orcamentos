@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { LogoUpload } from "@/components/ui/logo-upload"
 import { toast } from "sonner"
-import { formatCpfCnpj, formatCep, formatPhone } from "@/lib/formatters"
+import { formatCpfCnpj, formatCep, formatPhone, validateCpfCnpj } from "@/lib/formatters"
 import {
   Select,
   SelectContent,
@@ -50,9 +50,43 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
         estado: workspace.estado || "",
         cep: workspace.cep || "",
     })
+    const [errors, setErrors] = useState({
+        nome: "",
+        cpf_cnpj: "",
+        telefone: "",
+        email: "",
+    })
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        
+        // Validação
+        const newErrors = {
+            nome: "",
+            cpf_cnpj: "",
+            telefone: "",
+            email: "",
+        }
+        
+        if (!formData.nome.trim()) {
+            newErrors.nome = "Nome é obrigatório"
+        }
+        
+        if (formData.cpf_cnpj && !validateCpfCnpj(formData.cpf_cnpj)) {
+            newErrors.cpf_cnpj = "CPF/CNPJ inválido"
+        }
+        
+        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "Email inválido"
+        }
+        
+        setErrors(newErrors)
+        
+        // Se há erros, não submete
+        if (newErrors.nome || newErrors.cpf_cnpj || newErrors.telefone || newErrors.email) {
+            return
+        }
+        
         setIsLoading(true)
 
         try {
@@ -83,6 +117,14 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
             ...prev,
             [field]: value
         }))
+        
+        // Limpa erro quando o usuário começa a digitar
+        if (errors[field as keyof typeof errors]) {
+            setErrors(prev => ({
+                ...prev,
+                [field]: ""
+            }))
+        }
     }
 
     return (
@@ -114,7 +156,11 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                     placeholder="Nome do workspace"
                                     required
                                     disabled={!canEdit}
+                                    className={errors.nome ? "border-red-500" : ""}
                                 />
+                                {errors.nome && (
+                                    <p className="text-sm text-red-600">{errors.nome}</p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
@@ -127,7 +173,11 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                     }}
                                     placeholder="000.000.000-00 ou 00.000.000/0000-00"
                                     disabled={!canEdit}
+                                    className={errors.cpf_cnpj ? "border-red-500" : ""}
                                 />
+                                {errors.cpf_cnpj && (
+                                    <p className="text-sm text-red-600">{errors.cpf_cnpj}</p>
+                                )}
                             </div>
                         </div>
 
@@ -154,7 +204,11 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                                     onChange={(e) => handleInputChange("email", e.target.value)}
                                     placeholder="contato@empresa.com"
                                     disabled={!canEdit}
+                                    className={errors.email ? "border-red-500" : ""}
                                 />
+                                {errors.email && (
+                                    <p className="text-sm text-red-600">{errors.email}</p>
+                                )}
                             </div>
                         </div>
 

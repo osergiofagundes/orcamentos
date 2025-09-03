@@ -1,25 +1,19 @@
-import Link from "next/link"
-import { SignupForm } from "./_components/signup-form"
+import { GalleryVerticalEnd } from "lucide-react"
 
-export default function Signup() {
+import { RegisterForm } from "@/components/register-form"
+import { Avatar, AvatarImage } from "@radix-ui/react-avatar"
+
+export default function RegisterPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Cadastro</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Crie sua conta para começar</p>
-        </div>
-
-        <SignupForm />
-
-        <div className="text-center text-sm">
-          <p>
-            Já tem uma conta?{" "}
-            <Link href="/signin" className="font-medium text-primary hover:underline">
-              Faça login
-            </Link>
-          </p>
-        </div>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <a href="/" className="flex items-center gap-2 self-center font-medium">
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src="/images/logo.png" alt='Logo' />
+          </Avatar>
+          Sky Orçamentos
+        </a>
+        <RegisterForm />
       </div>
     </div>
   )
