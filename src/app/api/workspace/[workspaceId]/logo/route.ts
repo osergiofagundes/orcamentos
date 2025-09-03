@@ -77,7 +77,7 @@ export async function POST(
       await writeFile(path.join(uploadDir, filename), buffer)
     }
 
-    const logoUrl = `/uploads/logos/${filename}`
+    const logoUrl = `/api/uploads/logos/${filename}`
 
     // Atualizar o workspace com a URL do logo
     const updatedWorkspace = await prisma.areaTrabalho.update({
@@ -102,10 +102,10 @@ export async function POST(
 // Permitir DELETE para remover o logo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ workspaceId: string }> }
+  context: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
-    const { workspaceId: workspaceIdString } = await params
+    const { workspaceId: workspaceIdString } = await context.params
     const session = await auth.api.getSession({
       headers: request.headers,
     })

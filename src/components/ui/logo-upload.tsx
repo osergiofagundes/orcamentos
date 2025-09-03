@@ -107,11 +107,17 @@ export function LogoUpload({ workspaceId, currentLogoUrl, onLogoChange, canEdit 
                     {/* Preview do logo atual */}
                     <div className="flex items-center justify-center p-4 border rounded-lg bg-gray-50">
                         <div className="relative w-32 h-32">
-                            <Image
+                            {/* Use img tag instead of Next.js Image for uploaded files */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
                                 src={logoUrl}
                                 alt="Logo da empresa"
-                                fill
-                                className="object-contain"
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                    console.error('Erro ao carregar imagem:', logoUrl);
+                                    // Fallback se a imagem não carregar
+                                    e.currentTarget.style.display = 'none';
+                                }}
                             />
                         </div>
                     </div>
