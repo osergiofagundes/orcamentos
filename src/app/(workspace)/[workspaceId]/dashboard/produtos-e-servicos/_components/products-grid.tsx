@@ -109,12 +109,14 @@ export async function ProductsGrid({ workspaceId }: ProductsGridProps) {
                         >
                           {product.tipo === "PRODUTO" ? "Produto" : "Serviço"}
                         </Badge>
-                        <Badge 
-                          variant="secondary" 
-                          className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                        >
-                          {product.categoria.nome}
-                        </Badge>
+                        {product.categoria && (
+                          <Badge 
+                            variant="secondary" 
+                            className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                          >
+                            {product.categoria.nome}
+                          </Badge>
+                        )}
                         <Badge 
                           variant="outline"
                           className="text-xs"
