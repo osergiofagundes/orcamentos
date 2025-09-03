@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
 import { Plus } from 'lucide-react'
+import { formatCpfCnpj, validateCpfCnpj } from '@/lib/formatters'
 
 interface CreateWorkspaceModalProps {
   onWorkspaceCreated?: () => void
@@ -36,9 +37,35 @@ export function CreateWorkspaceModal({
     nome: '',
     cpf_cnpj: ''
   })
+  const [errors, setErrors] = useState({
+    nome: '',
+    cpf_cnpj: ''
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validação
+    const newErrors = {
+      nome: '',
+      cpf_cnpj: ''
+    }
+    
+    if (!formData.nome.trim()) {
+      newErrors.nome = 'Nome é obrigatório'
+    }
+    
+    if (formData.cpf_cnpj && !validateCpfCnpj(formData.cpf_cnpj)) {
+      newErrors.cpf_cnpj = 'CPF/CNPJ inválido'
+    }
+    
+    setErrors(newErrors)
+    
+    // Se há erros, não submete
+    if (newErrors.nome || newErrors.cpf_cnpj) {
+      return
+    }
+    
     setIsLoading(true)
 
     try {
@@ -63,6 +90,10 @@ export function CreateWorkspaceModal({
         nome: '',
         cpf_cnpj: ''
       })
+      setErrors({
+        nome: '',
+        cpf_cnpj: ''
+      })
 
       // Close modal
       setIsOpen(false)
@@ -83,10 +114,24 @@ export function CreateWorkspaceModal({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
+    
+    let formattedValue = value
+    if (name === 'cpf_cnpj') {
+      formattedValue = formatCpfCnpj(value)
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: formattedValue
     }))
+    
+    // Limpa erro quando o usuário começa a digitar
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -94,6 +139,10 @@ export function CreateWorkspaceModal({
     if (!open) {
       // Reset form when closing
       setFormData({
+        nome: '',
+        cpf_cnpj: ''
+      })
+      setErrors({
         nome: '',
         cpf_cnpj: ''
       })
@@ -126,7 +175,11 @@ export function CreateWorkspaceModal({
               onChange={handleChange}
               placeholder="Ex: Meu Negócio"
               required
+              className={errors.nome ? "border-red-500" : ""}
             />
+            {errors.nome && (
+              <p className="text-sm text-red-600">{errors.nome}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -136,8 +189,12 @@ export function CreateWorkspaceModal({
               name="cpf_cnpj"
               value={formData.cpf_cnpj}
               onChange={handleChange}
-              placeholder="Opcional - para identificação"
+              placeholder="000.000.000-00 ou 00.000.000/0000-00"
+              className={errors.cpf_cnpj ? "border-red-500" : ""}
             />
+            {errors.cpf_cnpj && (
+              <p className="text-sm text-red-600">{errors.cpf_cnpj}</p>
+            )}
           </div>
 
           <DialogFooter>

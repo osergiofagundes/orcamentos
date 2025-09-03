@@ -99,3 +99,77 @@ export function getTipoValorLabel(tipo: string): string {
   
   return labels[tipo] || tipo
 }
+
+export function validateCpf(cpf: string): boolean {
+  const numbers = cpf.replace(/\D/g, '')
+  
+  if (numbers.length !== 11) return false
+  
+  // Verifica se todos os dígitos são iguais
+  if (numbers.split('').every(digit => digit === numbers[0])) return false
+  
+  // Valida primeiro dígito verificador
+  let sum = 0
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(numbers[i]) * (10 - i)
+  }
+  let remainder = sum % 11
+  let digit1 = remainder < 2 ? 0 : 11 - remainder
+  
+  if (digit1 !== parseInt(numbers[9])) return false
+  
+  // Valida segundo dígito verificador
+  sum = 0
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(numbers[i]) * (11 - i)
+  }
+  remainder = sum % 11
+  let digit2 = remainder < 2 ? 0 : 11 - remainder
+  
+  return digit2 === parseInt(numbers[10])
+}
+
+export function validateCnpj(cnpj: string): boolean {
+  const numbers = cnpj.replace(/\D/g, '')
+  
+  if (numbers.length !== 14) return false
+  
+  // Verifica se todos os dígitos são iguais
+  if (numbers.split('').every(digit => digit === numbers[0])) return false
+  
+  // Valida primeiro dígito verificador
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  let sum = 0
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(numbers[i]) * weights1[i]
+  }
+  let remainder = sum % 11
+  let digit1 = remainder < 2 ? 0 : 11 - remainder
+  
+  if (digit1 !== parseInt(numbers[12])) return false
+  
+  // Valida segundo dígito verificador
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  sum = 0
+  for (let i = 0; i < 13; i++) {
+    sum += parseInt(numbers[i]) * weights2[i]
+  }
+  remainder = sum % 11
+  let digit2 = remainder < 2 ? 0 : 11 - remainder
+  
+  return digit2 === parseInt(numbers[13])
+}
+
+export function validateCpfCnpj(value: string): boolean {
+  if (!value) return true // Campo opcional
+  
+  const numbers = value.replace(/\D/g, '')
+  
+  if (numbers.length === 11) {
+    return validateCpf(value)
+  } else if (numbers.length === 14) {
+    return validateCnpj(value)
+  }
+  
+  return false
+}

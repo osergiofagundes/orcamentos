@@ -32,12 +32,14 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { formatCpfCnpj, formatPhone, formatCep } from "@/lib/formatters"
+import { formatCpfCnpj, formatPhone, formatCep, validateCpfCnpj } from "@/lib/formatters"
 import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório"),
+  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório").refine(validateCpfCnpj, {
+    message: "CPF/CNPJ inválido"
+  }),
   telefone: z.string().min(1, "Telefone é obrigatório"),
   email: z.string().email("Email inválido"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
