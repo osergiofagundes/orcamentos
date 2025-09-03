@@ -104,6 +104,11 @@ export default function LandingPage() {
                     Registrar
                   </Link>
                 </li>
+                <li>
+                  <Link href="https://forms.gle/9g9VWecm9o1HaR3M8" target="_blank" className="text-muted-foreground hover:text-sky-600 transition-colors">
+                    Sugestão de melhoria
+                  </Link>
+                </li>
               </ul>
             </div>
             
