@@ -21,7 +21,7 @@ interface Product {
   valor?: number | null
   categoria: {
     nome: string
-  }
+  } | null
 }
 
 interface DeleteProductModalProps {

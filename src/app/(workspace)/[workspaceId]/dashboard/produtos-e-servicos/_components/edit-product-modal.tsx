@@ -58,11 +58,11 @@ interface Product {
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
   tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
-  categoria_id: number
+  categoria_id: number | null
   categoria: {
     id: number
     nome: string
-  }
+  } | null
 }
 
 interface EditProductModalProps {
@@ -94,7 +94,7 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
       valor: formatValueForInput(product.valor || null),
       tipo: product.tipo,
       tipo_valor: product.tipo_valor,
-      categoria_id: product.categoria_id.toString(),
+      categoria_id: product.categoria_id === null || product.categoria_id === 0 ? "0" : product.categoria_id.toString(),
     },
   })
 
@@ -311,11 +311,18 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.nome}
+                      <SelectItem value="0">Sem categoria</SelectItem>
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.nome}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-categories" disabled>
+                          Nenhuma categoria personalizada cadastrada
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />

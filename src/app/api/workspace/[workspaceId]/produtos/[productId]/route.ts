@@ -13,7 +13,7 @@ const updateProductSchema = z.object({
   tipo_valor: z.enum(["UNIDADE", "METRO", "METRO_QUADRADO", "METRO_CUBICO", "CENTIMETRO", "DUZIA", "QUILO", "GRAMA", "QUILOMETRO", "LITRO", "MINUTO", "HORA", "DIA", "MES", "ANO"], {
     required_error: "Tipo de valor é obrigatório",
   }),
-  categoria_id: z.number().int().positive("Categoria é obrigatória"),
+  categoria_id: z.number().int().min(0, "Categoria deve ser um número válido"),
 })
 
 export async function PUT(
@@ -67,15 +67,18 @@ export async function PUT(
     }
 
     // Verificar se a categoria existe e pertence ao workspace
-    const categoria = await prisma.categoria.findFirst({
-      where: {
-        id: validatedData.categoria_id,
-        area_trabalho_id: parseInt(workspaceId),
-      },
-    })
+    // Verificar se a categoria existe e pertence ao workspace (só se categoria_id não for 0)
+    if (validatedData.categoria_id > 0) {
+      const categoria = await prisma.categoria.findFirst({
+        where: {
+          id: validatedData.categoria_id,
+          area_trabalho_id: parseInt(workspaceId),
+        },
+      })
 
-    if (!categoria) {
-      return NextResponse.json({ message: "Categoria não encontrada" }, { status: 404 })
+      if (!categoria) {
+        return NextResponse.json({ message: "Categoria não encontrada" }, { status: 404 })
+      }
     }
 
     const produto = await prisma.produtoServico.update({
@@ -87,7 +90,7 @@ export async function PUT(
         valor: validatedData.valor,
         tipo: validatedData.tipo,
         tipo_valor: validatedData.tipo_valor,
-        categoria_id: validatedData.categoria_id,
+        categoria_id: validatedData.categoria_id === 0 ? null : validatedData.categoria_id,
       },
       include: {
         categoria: true,

@@ -25,12 +25,12 @@ interface Product {
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
   tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
-  categoria_id: number
+  categoria_id: number | null
   createdAt: string
   categoria: {
     id: number
     nome: string
-  }
+  } | null
 }
 
 interface ProductsTableProps {
@@ -80,7 +80,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
         setProducts(data)
 
         // Extrair categorias únicas para o filtro
-        const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria.nome))] as string[]
+        const uniqueCategories = [...new Set(data.map((product: Product) => product.categoria?.nome || "Sem categoria").filter(Boolean))] as string[]
         onCategoriesLoaded?.(uniqueCategories)
 
         // Extrair tipos de valor únicos para o filtro
@@ -111,14 +111,15 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
       const matchesSearch = (
         product.id.toString().includes(searchTerm) ||
         product.nome.toLowerCase().includes(searchTerm) ||
-        product.categoria.nome.toLowerCase().includes(searchTerm)
+        (product.categoria?.nome || "Sem categoria").toLowerCase().includes(searchTerm)
       )
       if (!matchesSearch) return false
     }
 
     // Filtro de categoria
     if (categoryFilter && categoryFilter !== "all") {
-      if (product.categoria.nome !== categoryFilter) return false
+      const productCategoryName = product.categoria?.nome || "Sem categoria"
+      if (productCategoryName !== categoryFilter) return false
     }
 
     // Filtro de tipo (produto/serviço)
@@ -284,7 +285,7 @@ export function ProductsTable({ workspaceId, refreshTrigger, onDataChanged, sear
                       <Badge className="outline outline-gray-300 bg-transparent text-black">{formatTipoValor(product.tipo_valor)}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className="outline outline-gray-300 bg-transparent text-black">{product.categoria.nome}</Badge></TableCell>
+                      <Badge className="outline outline-gray-300 bg-transparent text-black">{product.categoria?.nome || "Sem categoria"}</Badge></TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatDateTime(product.createdAt)}
                     </TableCell>

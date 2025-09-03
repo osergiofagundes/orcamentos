@@ -18,11 +18,11 @@ interface Product {
   valor?: number | null
   tipo: "PRODUTO" | "SERVICO"
   tipo_valor: "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO"
-  categoria_id: number
+  categoria_id: number | null
   categoria: {
     id: number
     nome: string
-  }
+  } | null
 }
 
 interface ProductActionsProps {

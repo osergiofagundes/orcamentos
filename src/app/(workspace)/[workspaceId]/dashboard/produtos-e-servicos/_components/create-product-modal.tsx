@@ -70,7 +70,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
       valor: "",
       tipo: "PRODUTO",
       tipo_valor: "UNIDADE",
-      categoria_id: "",
+      categoria_id: "0",
     },
   })
 
@@ -283,11 +283,18 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.nome}
+                      <SelectItem value="0">Sem categoria</SelectItem>
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.nome}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-categories" disabled>
+                          Nenhuma categoria personalizada cadastrada
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
