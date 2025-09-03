@@ -41,10 +41,6 @@ export function OrcamentoActions({ orcamento, workspaceId, onUpdate }: Orcamento
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const router = useRouter()
 
-  const handleView = () => {
-    router.push(`/${workspaceId}/dashboard/orcamentos/${orcamento.id}`)
-  }
-
   const handleGeneratePdf = async () => {
     try {
       setIsGeneratingPdf(true)
@@ -83,10 +79,6 @@ export function OrcamentoActions({ orcamento, workspaceId, onUpdate }: Orcamento
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleView}>
-            <Eye className="mr-2 h-4 w-4" />
-            Visualizar
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleGeneratePdf} disabled={isGeneratingPdf}>
             <Download className="mr-2 h-4 w-4" />
             Gerar PDF
