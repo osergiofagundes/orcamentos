@@ -105,7 +105,7 @@ export function LogoUpload({ workspaceId, currentLogoUrl, onLogoChange, canEdit 
             {logoUrl ? (
                 <div className="space-y-4">
                     {/* Preview do logo atual */}
-                    <div className="flex items-center justify-center p-4 border rounded-lg bg-gray-50">
+                    <div className="sm:w-1/2 justify-center flex items-center p-4 border rounded-lg bg-gray-50">
                         <div className="relative w-32 h-32">
                             {/* Use img tag instead of Next.js Image for uploaded files */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,26 +123,26 @@ export function LogoUpload({ workspaceId, currentLogoUrl, onLogoChange, canEdit 
                     </div>
 
                     {canEdit && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 sm:w-1/2">
                             <Button
                                 variant="outline"
                                 onClick={removeLogo}
                                 disabled={isUploading}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-2 border hover:text-red-500 hover:border-red-500 cursor-pointer"
                             >
-                                <X className="h-4 w-4" />
                                 Remover Logo
+                                <X className="h-4 w-4" />
                             </Button>
 
-                            <div {...getRootProps()} className="flex-1">
+                            <div {...getRootProps()} className='w-full'>
                                 <input {...getInputProps()} />
                                 <Button
                                     variant="outline"
                                     disabled={isUploading}
-                                    className="w-full flex items-center gap-2"
+                                    className="w-full flex items-center gap-2 bg-sky-600 hover:bg-sky-700 cursor-pointer text-white hover:text-white"
                                 >
-                                    <Upload className="h-4 w-4" />
                                     Alterar Logo
+                                    <Upload className="h-4 w-4" />
                                 </Button>
                             </div>
                         </div>

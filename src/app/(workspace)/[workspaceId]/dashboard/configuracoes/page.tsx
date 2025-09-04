@@ -16,7 +16,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WorkspaceSettingsForm } from "./_components/workspace-settings-form"
 import { WorkspaceUsers } from "./_components/workspace-users"
-import { WorkspaceInfo } from "./_components/workspace-info"
 import { PermissionLevelsInfo } from "./_components/permission-levels-info"
 import { prisma } from "@/lib/prisma"
 import { verifyWorkspacePermission } from "@/lib/workspace-access"
@@ -96,18 +95,17 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
                         <div className="flex items-center justify-between">
                             <div className="space-y-1">
                                 <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
-                                <p className="text-muted-foreground">
+                                <p className="hidden text-muted-foreground sm:block">
                                     Gerencie as configurações do seu espaço de trabalho
                                 </p>
                             </div>
                         </div>
                         
                         <Tabs defaultValue="workspace" className="space-y-6">
-                            <TabsList>
-                                <TabsTrigger value="workspace">Workspace</TabsTrigger>
-                                <TabsTrigger value="users">Usuários</TabsTrigger>
-                                <TabsTrigger value="info">Informações</TabsTrigger>
-                                <TabsTrigger value="permissions">Permissões</TabsTrigger>
+                            <TabsList className="gap-2">
+                                <TabsTrigger value="workspace" className="data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">Área de trabalho</TabsTrigger>
+                                <TabsTrigger value="users" className="data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">Usuários</TabsTrigger>
+                                <TabsTrigger value="permissions" className="data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">Permissões</TabsTrigger>
                             </TabsList>
                             
                             <TabsContent value="workspace" className="space-y-6">
@@ -123,10 +121,6 @@ export default async function ConfiguracoesPage({ params }: PageProps) {
                                     currentUserId={user.id}
                                     canManageUsers={canManageUsers}
                                 />
-                            </TabsContent>
-                            
-                            <TabsContent value="info" className="space-y-6">
-                                <WorkspaceInfo workspace={workspaceData} />
                             </TabsContent>
                             
                             <TabsContent value="permissions" className="space-y-6">
