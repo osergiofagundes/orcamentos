@@ -107,17 +107,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleProfileClick}>
+              <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
                 <User />
                 Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleWorkspaceManagement}>
+              <DropdownMenuItem onClick={handleWorkspaceManagement} className="cursor-pointer">
                 <Undo2 />
-                Voltar para Workspaces
+                Voltar para Áreas de Trabalho
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
+            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
               <LogOut />
               Sair
             </DropdownMenuItem>

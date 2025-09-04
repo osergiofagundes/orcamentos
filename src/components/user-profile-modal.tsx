@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { User, Lock, Camera, Pen } from "lucide-react"
+import { User, Lock, Camera, Pen, Save } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ImageEditorModal } from "@/components/ui/image-editor-modal"
 import { useToast } from "@/hooks/use-toast"
 
 interface UserProfileModalProps {
@@ -47,6 +48,8 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isLoadingPassword, setIsLoadingPassword] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isEditorModalOpen, setIsEditorModalOpen] = useState(false)
 
   // Reset dados quando o modal abrir/fechar
   const handleOpenChange = (newOpen: boolean) => {
@@ -62,6 +65,8 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
         newPassword: "",
         confirmPassword: "",
       })
+      setSelectedFile(null)
+      setIsEditorModalOpen(false)
     }
     onOpenChange(newOpen)
   }
@@ -156,6 +161,14 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      // Instead of reading directly, open the editor modal
+      setSelectedFile(file)
+      setIsEditorModalOpen(true)
+    }
+  }
+
+  const handleImageSave = async (editedFile: File) => {
+    try {
       const reader = new FileReader()
       reader.onload = (event) => {
         setProfileData(prev => ({
@@ -163,13 +176,16 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
           avatar: event.target?.result as string
         }))
       }
-      reader.readAsDataURL(file)
+      reader.readAsDataURL(editedFile)
+    } catch (error) {
+      console.error('Erro ao processar imagem:', error)
+      toast.error('Erro ao processar imagem')
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600">
         <DialogHeader>
           <DialogTitle>Perfil do Usuário</DialogTitle>
           <DialogDescription>
@@ -179,11 +195,11 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
         
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
+            <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">
               <User className="h-4 w-4" />
               Perfil
             </TabsTrigger>
-            <TabsTrigger value="password" className="flex items-center gap-2">
+            <TabsTrigger value="password" className="flex items-center gap-2 data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">
               <Lock className="h-4 w-4" />
               Senha
             </TabsTrigger>
@@ -233,8 +249,9 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
                 />
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoadingProfile}>
+              <Button type="submit" disabled={isLoadingProfile} className='w-full bg-sky-600 hover:bg-sky-700 cursor-pointer'>
                 {isLoadingProfile ? "Salvando..." : "Salvar Alterações"}
+                <Save className="h-4 w-4" />
               </Button>
             </form>
           </TabsContent>
@@ -274,13 +291,25 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
                 />
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoadingPassword}>
+              <Button type="submit" disabled={isLoadingPassword} className='w-full bg-sky-600 hover:bg-sky-700 cursor-pointer'>
                 {isLoadingPassword ? "Alterando..." : "Alterar Senha"}
+                <Save className="h-4 w-4" />
               </Button>
             </form>
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      {/* Image Editor Modal */}
+      <ImageEditorModal
+        isOpen={isEditorModalOpen}
+        onClose={() => {
+          setIsEditorModalOpen(false)
+          setSelectedFile(null)
+        }}
+        imageFile={selectedFile}
+        onSave={handleImageSave}
+      />
     </Dialog>
   )
 }
