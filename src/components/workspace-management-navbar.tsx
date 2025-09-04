@@ -5,6 +5,7 @@ import {
   User,
   ChevronsUpDown,
   LogOut,
+  Home,
 } from "lucide-react"
 
 import {
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auh-client"
 import { useRouter } from "next/navigation"
 import { UserProfileModal } from "./user-profile-modal"
+import Link from "next/link"
 
 export function WorkspaceManagementNavbar({
   user,
@@ -54,13 +56,15 @@ export function WorkspaceManagementNavbar({
   return (
     <nav className="w-full border-b bg-white dark:bg-background py-4">
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src="/images/logo.png" alt='Logo' />
-          </Avatar>
-          <span className="font-bold text-lg sm:text-xl tracking-tight text-primary hidden xs:block">Sky Orçamentos</span>
-          <span className="font-bold text-lg tracking-tight text-primary xs:hidden">Sky Orçamentos</span>
-        </div>
+        <Link href="/">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage src="/images/logo.png" alt='Logo' />
+            </Avatar>
+            <span className="font-bold text-lg sm:text-xl tracking-tight text-primary hidden xs:block">Sky Orçamentos</span>
+            <span className="font-bold text-lg tracking-tight text-primary xs:hidden">Sky Orçamentos</span>
+          </div>
+        </Link>
         <div className="flex items-center gap-2 sm:gap-4">
         {/* Menu do usuário */}
         <DropdownMenu>
@@ -99,13 +103,21 @@ export function WorkspaceManagementNavbar({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleProfileClick}>
+              <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
                 <User />
                 Perfil
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <Link href="/">
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Home />
+                  Início
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
+            <DropdownMenuItem  className="cursor-pointer">
               <LogOut />
               Sair
             </DropdownMenuItem>

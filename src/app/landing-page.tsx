@@ -1,9 +1,74 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { 
+  User,
+  ChevronsUpDown,
+  LogOut,
+  Home,
+  Settings
+} from "lucide-react"
+import { authClient } from "@/lib/auh-client"
+import { UserProfileModal } from "@/components/user-profile-modal"
 import Link from "next/link";
 import Image from "next/image";
 
+interface UserData {
+  name: string
+  email: string
+  image: string
+}
+
 export default function LandingPage() {
+  const [user, setUser] = useState<UserData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await authClient.getSession()
+        if (session?.data?.user) {
+          setUser({
+            name: session.data.user.name || "Usuário",
+            email: session.data.user.email || "",
+            image: session.data.user.image || "/avatars/default.jpg"
+          })
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkSession()
+  }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut()
+      setUser(null)
+      window.location.reload()
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+    }
+  }
+
+  const handleProfileClick = () => {
+    setIsProfileModalOpen(true)
+  }
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="w-full border-b bg-white dark:bg-background py-4">
@@ -16,12 +81,71 @@ export default function LandingPage() {
             <span className="font-bold text-lg tracking-tight text-primary xs:hidden">Sky Orçamentos</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/workspace-management">
-              <Button variant="outline" className="cursor-pointer hover:bg-transparent hover:text-sky-600 hover:border-sky-600">Entrar</Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">Registrar</Button>
-            </Link>
+            {isLoading ? (
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-sky-600" />
+            ) : user ? (
+              // Menu do usuário logado
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3 py-2">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={user.image} alt={user.name} />
+                    </Avatar>
+                    <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">{user.name}</span>
+                    </div>
+                    <ChevronsUpDown className="ml-auto size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 rounded-lg"
+                  align="end"
+                  sideOffset={4}
+                >
+                  <DropdownMenuLabel className="p-0 font-normal">
+                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage src={user.image} alt={user.name} />
+                      </Avatar>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">{user.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+                      <User />
+                      Perfil
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <Link href="/workspace-management">
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Settings />
+                        Ir para Áreas de Trabalho
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </Link>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut />
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              // Botões para usuário não logado
+              <>
+                <Link href="/workspace-management">
+                  <Button variant="outline" className="cursor-pointer hover:bg-transparent hover:text-sky-600 hover:border-sky-600">Entrar</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button className="bg-sky-600 hover:bg-sky-700 text-white cursor-pointer">Registrar</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -137,6 +261,19 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Modal de perfil do usuário */}
+      {user && (
+        <UserProfileModal 
+          open={isProfileModalOpen}
+          onOpenChange={setIsProfileModalOpen}
+          user={{
+            name: user.name,
+            email: user.email,
+            avatar: user.image
+          }}
+        />
+      )}
     </div>
   );
 }
