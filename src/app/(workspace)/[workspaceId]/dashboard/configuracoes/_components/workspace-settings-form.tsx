@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ESTADOS_BRASILEIROS } from "@/lib/constants"
+import { Save, Copy, Check, User, Users } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface WorkspaceInfo {
     id: number
@@ -30,6 +32,14 @@ interface WorkspaceInfo {
     estado?: string | null
     cep?: string | null
     logo_url?: string | null
+    createdAt?: Date
+    updatedAt?: Date
+    criador?: {
+        id: string
+        name: string
+        email: string
+    } | null
+    totalParticipantes?: number
 }
 
 interface WorkspaceSettingsFormProps {
@@ -39,6 +49,7 @@ interface WorkspaceSettingsFormProps {
 
 export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsFormProps) {
     const [isLoading, setIsLoading] = useState(false)
+    const [copied, setCopied] = useState(false)
     const [formData, setFormData] = useState({
         nome: workspace.nome || "",
         cpf_cnpj: workspace.cpf_cnpj || "",
@@ -127,6 +138,17 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
         }
     }
 
+    const copyWorkspaceId = async () => {
+        try {
+            await navigator.clipboard.writeText(workspace.id.toString())
+            setCopied(true)
+            toast.success("ID do workspace copiado!")
+            setTimeout(() => setCopied(false), 2000)
+        } catch (error) {
+            toast.error("Erro ao copiar ID")
+        }
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -138,6 +160,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
 
             <CardContent>
                 <div className="mb-6">
+                    <Label htmlFor="nome" className="mb-2">Logo do Workspace</Label>
                     <LogoUpload
                         workspaceId={workspace.id}
                         currentLogoUrl={workspace.logo_url}
@@ -213,7 +236,6 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                         </div>
 
                         <div className="space-y-4">
-                            <h4 className="text-sm font-medium">Endereço</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2 md:col-span-2">
                                     <Label htmlFor="endereco">Endereço</Label>
@@ -283,8 +305,9 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                         </div>
 
                         {canEdit && (
-                            <Button type="submit" disabled={isLoading}>
+                            <Button type="submit" disabled={isLoading} className="bg-sky-600 hover:bg-sky-700 cursor-pointer text-white hover:text-white">
                                 {isLoading ? "Salvando..." : "Salvar Alterações"}
+                                <Save className="w-4 h-4" />
                             </Button>
                         )}
                     </form>

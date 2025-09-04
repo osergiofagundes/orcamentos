@@ -250,16 +250,16 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>Usuários do Workspace</CardTitle>
-                            <CardDescription>
+                            <CardDescription className="hidden sm:block">
                                 Gerencie quem tem acesso ao workspace e seus níveis de permissão
                             </CardDescription>
                         </div>
                         {canManageUsers && (
                             <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button>
-                                        <Users className="h-4 w-4 mr-2" />
+                                    <Button className="bg-sky-600 hover:bg-sky-700 cursor-pointer text-white hover:text-white">
                                         Convidar Participantes
+                                        <Users className="h-4 w-4 mr-2" />
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
