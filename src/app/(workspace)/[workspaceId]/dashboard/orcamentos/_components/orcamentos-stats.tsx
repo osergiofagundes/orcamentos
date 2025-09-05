@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, TrendingUp, DollarSign, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { FileText, TrendingUp, DollarSign, Clock, ChevronDown, ChevronUp } from "lucide-react"
 
 interface OrcamentosStatsProps {
   workspaceId: string
@@ -16,6 +17,7 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
     orcamentosRascunho: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -122,30 +124,86 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
     )
   }
 
+  // Para mobile, mostra apenas o primeiro card se showAll for false
+  const cardsToShow = showAll ? statsData : statsData.slice(0, 1)
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {statsData.map((stat, ) => {
-        return (
-          <Card key={stat.title} className="border-l-8 border-l-sky-600">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <div className={`h-8 w-8 rounded-lg  flex items-center justify-center text-muted-foreground`}>
-                <stat.icon className={`h-4 w-4`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold`}>
-                {stat.value}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
-        )
-      })}
+    <div className="space-y-4">
+      {/* Grid dos cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Desktop: mostra todos os cards */}
+        <div className="hidden md:contents">
+          {statsData.map((stat) => {
+            return (
+              <Card key={stat.title} className="border-l-8 border-l-sky-600">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`h-8 w-8 rounded-lg  flex items-center justify-center text-muted-foreground`}>
+                    <stat.icon className={`h-4 w-4`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold`}>
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+
+        {/* Mobile: mostra cards baseado no estado showAll */}
+        <div className="md:hidden space-y-4">
+          {cardsToShow.map((stat) => {
+            return (
+              <Card key={stat.title} className="border-l-8 border-l-sky-600">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`h-8 w-8 rounded-lg  flex items-center justify-center text-muted-foreground`}>
+                    <stat.icon className={`h-4 w-4`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold`}>
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Botão "Mostrar mais" apenas no mobile */}
+      <div className="md:hidden flex justify-center">
+        <Button
+          variant="outline"
+          onClick={() => setShowAll(!showAll)}
+          className="flex items-center gap-2"
+        >
+          {showAll ? (
+            <>
+              Mostrar menos
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Mostrar mais
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
