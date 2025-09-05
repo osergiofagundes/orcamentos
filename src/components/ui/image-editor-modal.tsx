@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Square, Circle, Scissors } from "lucide-react"
+import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Square, Circle, Scissors, Save } from "lucide-react"
 import ReactCrop, { type Crop as ReactCropType, centerCrop, makeAspectCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
 
@@ -25,8 +25,6 @@ interface AspectRatioOption {
 const aspectRatioOptions: AspectRatioOption[] = [
     { label: "Livre", value: undefined, icon: <Scissors className="w-4 h-4" /> },
     { label: "Quadrado", value: 1, icon: <Square className="w-4 h-4" /> },
-    { label: "16:9", value: 16 / 9, icon: <div className="w-4 h-3 border border-current rounded-sm" /> },
-    { label: "4:3", value: 4 / 3, icon: <div className="w-4 h-3 border border-current rounded-sm" /> },
     { label: "Circular", value: 1, icon: <Circle className="w-4 h-4" /> },
 ]
 
@@ -269,7 +267,11 @@ export function ImageEditorModal({ isOpen, onClose, imageFile, onSave }: ImageEd
                                         option.value, 
                                         option.label === "Circular"
                                     )}
-                                    className="flex items-center gap-2"
+                                    className={`flex items-center gap-2 cursor-pointer ${
+                                        (option.label === "Circular" ? isCircular : selectedAspectRatio === option.value && !isCircular)
+                                            ? "bg-sky-600 hover:bg-sky-700 text-white hover:text-white"
+                                            : ""
+                                    }`}
                                 >
                                     {option.icon}
                                     {option.label}
@@ -348,9 +350,10 @@ export function ImageEditorModal({ isOpen, onClose, imageFile, onSave }: ImageEd
                                     setRotation(0)
                                     setZoom(1)
                                 }}
-                                className="w-full"
+                                className="w-full border hover:text-red-500 hover:border-red-500 cursor-pointer"
                             >
                                 Resetar Transformações
+                                <RotateCcw className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
@@ -387,11 +390,12 @@ export function ImageEditorModal({ isOpen, onClose, imageFile, onSave }: ImageEd
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={handleCancel}>
+                    <Button variant="outline" onClick={handleCancel} className="border hover:text-red-500 hover:border-red-500 cursor-pointer">
                         Cancelar
                     </Button>
-                    <Button onClick={handleSave}>
+                    <Button onClick={handleSave} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
                         Salvar Alterações
+                        <Save className="w-4 h-4" />
                     </Button>
                 </DialogFooter>
             </DialogContent>
