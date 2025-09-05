@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { UserPlus, MoreHorizontal, Trash2, Edit, Copy, Check, Users, Clock } from "lucide-react"
+import { UserPlus, MoreHorizontal, Trash2, Edit, Copy, Check, Users, Clock, KeyRound } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 
@@ -205,7 +205,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
             }
 
             const updatedUser = await response.json()
-            setUsers(prev => prev.map(user => 
+            setUsers(prev => prev.map(user =>
                 user.usuario_id === userId ? updatedUser : user
             ))
             toast.success("Permissões atualizadas com sucesso!")
@@ -262,7 +262,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                         <Users className="h-4 w-4 mr-2" />
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="sm:max-w-lg border-l-8 border-l-sky-600">
                                     <DialogHeader>
                                         <DialogTitle>Convidar Participantes</DialogTitle>
                                         <DialogDescription>
@@ -274,24 +274,18 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                             <div className="space-y-2">
                                                 <Label htmlFor="permission">Nível de Permissão Padrão</Label>
                                                 <Select value={invitePermission} onValueChange={setInvitePermission}>
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="cursor-pointer">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="1">
+                                                        <SelectItem value="1" className="cursor-pointer">
                                                             <div>
                                                                 <div className="font-medium">Usuário Nível 1</div>
-                                                                <div className="text-sm text-muted-foreground">
-                                                                    Pode visualizar/criar orçamentos e gerenciar clientes
-                                                                </div>
                                                             </div>
                                                         </SelectItem>
-                                                        <SelectItem value="2">
+                                                        <SelectItem value="2" className="cursor-pointer">
                                                             <div>
                                                                 <div className="font-medium">Usuário Nível 2</div>
-                                                                <div className="text-sm text-muted-foreground">
-                                                                    Pode gerenciar produtos, categorias e todos os orçamentos
-                                                                </div>
                                                             </div>
                                                         </SelectItem>
                                                     </SelectContent>
@@ -302,11 +296,13 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                                     type="button"
                                                     variant="outline"
                                                     onClick={() => setIsInviteDialogOpen(false)}
+                                                    className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
                                                 >
                                                     Cancelar
                                                 </Button>
-                                                <Button type="submit" disabled={isGeneratingCode}>
+                                                <Button type="submit" disabled={isGeneratingCode} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
                                                     {isGeneratingCode ? "Gerando..." : "Gerar Código"}
+                                                    <KeyRound className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </form>
@@ -315,21 +311,22 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                             <div className="space-y-2">
                                                 <Label>Código de Convite</Label>
                                                 <div className="flex items-center gap-2">
-                                                    <Input 
-                                                        value={inviteCode} 
-                                                        readOnly 
+                                                    <Input
+                                                        value={inviteCode}
+                                                        readOnly
                                                         className="font-mono text-sm"
                                                     />
                                                     <Button
                                                         size="sm"
                                                         onClick={copyInviteCode}
                                                         variant="outline"
+                                                        className="cursor-pointer"
                                                     >
                                                         {copiedCode ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                                     </Button>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Compartilhe este código com a pessoa que deseja convidar. 
+                                                    Compartilhe este código com a pessoa que deseja convidar.
                                                     O código expira em 7 dias.
                                                 </p>
                                             </div>
@@ -339,6 +336,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                                         setInviteCode("")
                                                         setIsInviteDialogOpen(false)
                                                     }}
+                                                    className='bg-sky-600 hover:bg-sky-700 cursor-pointer'
                                                 >
                                                     Fechar
                                                 </Button>
@@ -355,27 +353,27 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                         {users.map((user) => {
                             const permission = getPermissionLabel(user.nivel_permissao)
                             const isCurrentUser = user.usuario_id === currentUserId
-                            
+
                             return (
                                 <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar>
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <Avatar className="flex-shrink-0">
                                             <AvatarImage src={user.usuario.image} alt={user.usuario.name} />
                                             <AvatarFallback>
                                                 {user.usuario.name.charAt(0).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div>
-                                            <div className="font-medium">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">
                                                 {user.usuario.name}
                                                 {isCurrentUser && (
                                                     <span className="text-sm text-muted-foreground ml-2">(Você)</span>
                                                 )}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">
+                                            <div className="text-sm text-muted-foreground truncate">
                                                 {user.usuario.email}
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-1">
+                                            <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
                                                 {getPermissionDescription(user.nivel_permissao)}
                                             </div>
                                         </div>

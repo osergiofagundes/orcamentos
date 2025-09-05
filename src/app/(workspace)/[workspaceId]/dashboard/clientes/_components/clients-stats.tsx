@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, TrendingUp, Building, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Users, TrendingUp, Building, User, ChevronDown, ChevronUp } from "lucide-react"
 
 interface ClientsStatsProps {
   workspaceId: string
@@ -16,6 +17,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
     pessoasJuridicas: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -110,24 +112,74 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
     )
   }
 
+  // Para mobile, mostra apenas o primeiro card se showAll for false
+  const cardsToShow = showAll ? statsCards : statsCards.slice(0, 1)
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {statsCards.map((card, index) => (
-        <Card key={index} className="border-l-8 border-l-sky-600">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {card.title}
-            </CardTitle>
-            <card.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{card.value}</div>
-            <p className="text-xs text-muted-foreground">
-              {card.description}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-4">
+      {/* Grid dos cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Desktop: mostra todos os cards */}
+        <div className="hidden md:contents">
+          {statsCards.map((card, index) => (
+            <Card key={index} className="border-l-8 border-l-sky-600">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {card.title}
+                </CardTitle>
+                <card.icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{card.value}</div>
+                <p className="text-xs text-muted-foreground">
+                  {card.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Mobile: mostra cards baseado no estado showAll */}
+        <div className="md:hidden space-y-4">
+          {cardsToShow.map((card, index) => (
+            <Card key={index} className="border-l-8 border-l-sky-600">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {card.title}
+                </CardTitle>
+                <card.icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{card.value}</div>
+                <p className="text-xs text-muted-foreground">
+                  {card.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Botão "Mostrar mais" apenas no mobile */}
+      <div className="md:hidden flex justify-center">
+        <Button
+          variant="outline"
+          onClick={() => setShowAll(!showAll)}
+          className="flex items-center gap-2"
+        >
+          {showAll ? (
+            <>
+              Mostrar menos
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Mostrar mais
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   )
 }

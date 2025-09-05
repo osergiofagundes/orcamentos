@@ -52,7 +52,7 @@ export function OrcamentosPageClient({ workspaceId }: OrcamentosPageClientProps)
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Orçamentos</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground hidden sm:block">
             Gerencie seus orçamentos e acompanhe estatísticas importantes
           </p>
         </div>
