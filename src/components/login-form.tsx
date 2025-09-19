@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { authClient } from "@/lib/auh-client"
+import { ForgotPasswordModal } from "@/app/(auth)/signin/_components/forgot-password-modal"
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -34,6 +35,7 @@ export function LoginForm({
 
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
   const router = useRouter()
 
   const form = useForm<LoginFormValues>({
@@ -130,12 +132,13 @@ export function LoginForm({
                     <FormItem>
                       <div className="flex items-center">
                         <FormLabel>Senha</FormLabel>
-                        <a
-                          href="#"
-                          className="ml-auto text-sm underline-offset-4 hover:underline hover:text-sky-600"
+                        <button
+                          type="button"
+                          onClick={() => setForgotPasswordOpen(true)}
+                          className="ml-auto text-sm underline-offset-4 hover:underline hover:text-sky-600 hover:cursor-pointer"
                         >
                           Esqueceu sua senha?
-                        </a>
+                        </button>
                       </div>
                       <FormControl>
                         <div className="relative">
@@ -188,6 +191,11 @@ export function LoginForm({
           </Form>
         </CardContent>
       </Card>
+      
+      <ForgotPasswordModal 
+        open={forgotPasswordOpen} 
+        onOpenChange={setForgotPasswordOpen} 
+      />
     </div>
   )
 }
