@@ -13,9 +13,23 @@ const resetPasswordSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 INICIANDO RESET DE SENHA - endpoint chamado')
+  
   try {
     const body = await request.json()
+    console.log('📨 Dados recebidos do cliente:', {
+      hasToken: !!body.token,
+      tokenLength: body.token?.length || 0,
+      hasPassword: !!body.password,
+      hasConfirmPassword: !!body.confirmPassword,
+      tokenPreview: body.token ? body.token.substring(0, 10) + '...' : 'null'
+    })
+    
     const { token, password } = resetPasswordSchema.parse(body)
+    console.log('✅ Validação dos dados passou - token e senha validados')
+
+    console.log('🔍 Iniciando busca do usuário pelo token:', token.substring(0, 10) + '...')
+    console.log('🕐 Data atual para comparação:', new Date().toISOString())
 
     // Buscar usuário pelo token de reset
     const user = await prisma.user.findFirst({
@@ -26,6 +40,58 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    console.log('📋 Resultado da busca do usuário:', {
+      usuarioEncontrado: !!user,
+      email: user?.email || 'N/A',
+      id: user?.id || 'N/A',
+      tokenBanco: user?.resetToken ? user.resetToken.substring(0, 10) + '...' : 'N/A',
+      tokenExpiracao: user?.resetTokenExpiry?.toISOString() || 'N/A',
+      tokenValido: user?.resetTokenExpiry ? user.resetTokenExpiry > new Date() : false
+    })
+
+    // Se não encontrou, vamos fazer uma busca mais ampla para debug
+    if (!user) {
+      console.log('🔍 Usuário não encontrado! Fazendo busca de debug...')
+      
+      // Buscar usuário apenas pelo token (ignorando expiração)
+      const userByTokenOnly = await prisma.user.findFirst({
+        where: {
+          resetToken: token,
+        },
+      })
+      
+      if (userByTokenOnly) {
+        console.log('⚠️ Token encontrado mas EXPIRADO:', {
+          email: userByTokenOnly.email,
+          tokenExpiracao: userByTokenOnly.resetTokenExpiry?.toISOString(),
+          agora: new Date().toISOString(),
+          diferenca: userByTokenOnly.resetTokenExpiry ? 
+            `${(userByTokenOnly.resetTokenExpiry.getTime() - new Date().getTime()) / 1000 / 60} minutos` : 'N/A'
+        })
+      } else {
+        console.log('❌ Token não existe no banco de dados')
+        
+        // Vamos ver todos os tokens de reset ativos para debug
+        const allActiveTokens = await prisma.user.findMany({
+          where: {
+            resetToken: { not: null },
+            resetTokenExpiry: { gt: new Date() }
+          },
+          select: {
+            email: true,
+            resetToken: true,
+            resetTokenExpiry: true
+          }
+        })
+        
+        console.log('📊 Tokens de reset ativos no banco:', allActiveTokens.map(u => ({
+          email: u.email,
+          tokenPreview: u.resetToken?.substring(0, 10) + '...',
+          expiracao: u.resetTokenExpiry?.toISOString()
+        })))
+      }
+    }
 
     if (!user) {
       console.log('❌ Token não encontrado ou expirado:', token)
