@@ -51,13 +51,16 @@ export function ResetPasswordForm({
 
   async function onSubmit(formData: ResetPasswordFormValues) {
     if (!token) {
+      console.log('Erro: Token inválido ou ausente')
       toast.error("Token inválido")
       return
     }
 
+    console.log('🔄 Iniciando processo de reset de senha...')
     setIsLoading(true)
 
     try {
+      console.log('Enviando requisição para alterar senha...')
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
@@ -70,18 +73,28 @@ export function ResetPasswordForm({
         }),
       })
 
+      console.log('Resposta recebida do servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
       const result = await response.json()
+      console.log('Dados da resposta:', result)
 
       if (response.ok) {
+        console.log('Senha alterada com sucesso!')
         toast.success("Senha alterada com sucesso!")
-        router.push("/signin")
+        // router.push("/signin")
       } else {
+        console.log('Erro na alteração de senha:', result.error)
         toast.error(result.error || "Erro ao alterar senha")
       }
     } catch (error) {
-      console.error("Erro ao resetar senha:", error)
+      console.error("ERRO CRÍTICO ao resetar senha:", error)
       toast.error("Erro interno do servidor")
     } finally {
+      console.log('🏁 Finalizando processo de reset de senha')
       setIsLoading(false)
     }
   }
