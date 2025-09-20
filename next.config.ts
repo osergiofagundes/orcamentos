@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'www.skyorcamentos.site',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
         hostname: '*.up.railway.app',
         pathname: '/uploads/**',
       },

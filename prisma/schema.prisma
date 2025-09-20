@@ -17,6 +17,8 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  resetToken    String?   // Token para reset de senha
+  resetTokenExpiry DateTime? // Expiração do token de reset
   sessions      Session[]
   accounts      Account[]
   orcamentos    Orcamento[] // Relação adicionada
