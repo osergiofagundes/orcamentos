@@ -28,31 +28,52 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
+      console.log('Token não encontrado ou expirado:', token)
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
         { status: 400 }
       )
     }
 
+    console.log('Usuário encontrado:', user.email)
+
     // Hash da nova senha
     const hashedPassword = await bcrypt.hash(password, 12)
+    console.log('Senha hasheada:', hashedPassword.substring(0, 20) + '...')
 
     // Buscar a conta associada ao usuário (better-auth armazena senhas na tabela account)
     const account = await prisma.account.findFirst({
       where: {
         userId: user.id,
-        providerId: 'email', // Para autenticação por email/senha
+        providerId: 'credential', // Para autenticação por email/senha
       },
     })
 
+    console.log('Conta credential encontrada:', !!account)
+
     if (account) {
-      // Atualizar senha na tabela account
+      // Atualizar senha na tabela account existente
       await prisma.account.update({
         where: { id: account.id },
         data: {
           password: hashedPassword,
         },
       })
+      console.log('Senha atualizada na conta existente')
+    } else {
+      // Criar nova conta credential se não existir (caso do usuário Google)
+      const newAccount = await prisma.account.create({
+        data: {
+          id: `credential_${user.id}_${Date.now()}`,
+          accountId: user.id,
+          providerId: 'credential',
+          userId: user.id,
+          password: hashedPassword,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      })
+      console.log('Nova conta credential criada:', newAccount.id)
     }
 
     // Limpar token de reset do usuário
