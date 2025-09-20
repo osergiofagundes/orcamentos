@@ -49,7 +49,7 @@ export const ResetPasswordEmail = ({
           </Button>
         </Section>
         <Text style={text}>
-          Se você não solicitou a redefinição de senha, pode ignorar este email com segurança.
+          Se você não solicitou a redefinição de senha, pode ignorar este email.
         </Text>
         <Text style={text}>
           Para sua segurança, este link expirará em 1 hora.
@@ -82,6 +82,7 @@ const container = {
   margin: '0 auto',
   padding: '20px 0 48px',
   maxWidth: '580px',
+  textAlign: 'center' as const,
 }
 
 const logoContainer = {
@@ -109,6 +110,7 @@ const heroText = {
   lineHeight: '28px',
   marginBottom: '30px',
   color: '#374151', // gray-700
+  textAlign: 'center' as const,
 }
 
 const text = {
@@ -116,6 +118,7 @@ const text = {
   fontSize: '16px',
   lineHeight: '26px',
   marginBottom: '16px',
+  textAlign: 'center' as const,
 }
 
 const buttonContainer = {
