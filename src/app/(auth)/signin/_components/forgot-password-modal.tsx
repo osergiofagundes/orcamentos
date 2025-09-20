@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { authClient } from "@/lib/auh-client"
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -52,16 +51,30 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
     setIsLoading(true)
     
     try {
-      await authClient.forgetPassword({
-        email: formData.email,
-        redirectTo: "/reset-password",
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+        }),
       })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setEmailSent(true)
+      } else {
+        console.error("Erro ao enviar email:", data.message)
+        // Aqui você pode adicionar um toast de erro se tiver
+      }
       
-      setEmailSent(true)
       setIsLoading(false)
     } catch (error) {
       console.error("Erro ao enviar email de reset:", error)
       setIsLoading(false)
+      // Aqui você pode adicionar um toast de erro se tiver
     }
   }
 
