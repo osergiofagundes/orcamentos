@@ -15,16 +15,13 @@ const resetPasswordSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
     const { token, password } = resetPasswordSchema.parse(body)
 
-    // Buscar usuário pelo token de reset
+    // 1. Buscar usuário pelo token válido
     const user = await prisma.user.findFirst({
       where: {
         resetToken: token,
-        resetTokenExpiry: {
-          gt: new Date(), // Token ainda válido
-        },
+        resetTokenExpiry: { gt: new Date() },
       },
     })
 
@@ -35,72 +32,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash da nova senha
+    // 2. Gerar hash da nova senha
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Buscar a conta associada ao usuário (better-auth armazena senhas na tabela account)
-    // Better-auth com emailAndPassword usa 'email-password' como providerId
+    // 3. Buscar conta com providerId = email-password (Better Auth padrão)
     let account = await prisma.account.findFirst({
       where: {
         userId: user.id,
-        providerId: 'email-password', // Better-auth padrão para email/senha
+        providerId: 'email-password',
       },
     })
 
-    // Se não encontrou com 'email-password', tentar outros providerIds comuns
+    // 4. Se não existir conta com email-password, criar uma
     if (!account) {
-      account = await prisma.account.findFirst({
-        where: {
-          userId: user.id,
-          providerId: 'credential', // Fallback para credential
-        },
-      })
-    }
-
-    // Se ainda não encontrou, procurar qualquer conta que já tenha senha
-    if (!account) {
-      account = await prisma.account.findFirst({
-        where: {
-          userId: user.id,
-          password: { not: null }
-        },
-      })
-    }
-
-    let passwordUpdateResult;
-    
-    if (account) {
-      // Atualizar senha na tabela account existente
-      passwordUpdateResult = await prisma.account.update({
-        where: { id: account.id },
+      account = await prisma.account.create({
         data: {
-          password: hashedPassword,
-        },
-      })
-    } else {
-      // Criar nova conta email-password se não existir
-      passwordUpdateResult = await prisma.account.create({
-        data: {
-          id: `email-password_${user.id}_${Date.now()}`,
-          accountId: user.email, // Usar email como accountId
-          providerId: 'email-password', // Usar o padrão do better-auth
+          id: crypto.randomUUID(), // como o id não tem default, precisa gerar aqui
+          accountId: user.email,   // no Better Auth, o email é o identificador da conta
+          providerId: 'email-password',
           userId: user.id,
           password: hashedPassword,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       })
+    } else {
+      // 5. Se existir, atualizar a senha
+      await prisma.account.update({
+        where: { id: account.id },
+        data: {
+          password: hashedPassword,
+          updatedAt: new Date(),
+        },
+      })
     }
 
-    // Verificar se a operação foi bem-sucedida
-    if (!passwordUpdateResult) {
-      return NextResponse.json(
-        { error: 'Erro ao alterar senha' },
-        { status: 500 }
-      )
-    }
-
-    // Limpar token de reset do usuário
+    // 6. Limpar token de reset
     await prisma.user.update({
       where: { id: user.id },
       data: {
