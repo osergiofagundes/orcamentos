@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { hashPassword } from "better-auth"
+import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
 const resetPasswordSchema = z.object({
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Gerar hash da nova senha
-    const hashedPassword = await hashPassword(password)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     // 3. Buscar conta com providerId = email-password (Better Auth padrão)
     let account = await prisma.account.findFirst({
