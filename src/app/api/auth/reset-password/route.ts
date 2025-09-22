@@ -13,23 +13,10 @@ const resetPasswordSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 INICIANDO RESET DE SENHA - endpoint chamado')
-  
   try {
     const body = await request.json()
-    console.log('📨 Dados recebidos do cliente:', {
-      hasToken: !!body.token,
-      tokenLength: body.token?.length || 0,
-      hasPassword: !!body.password,
-      hasConfirmPassword: !!body.confirmPassword,
-      tokenPreview: body.token ? body.token.substring(0, 10) + '...' : 'null'
-    })
     
     const { token, password } = resetPasswordSchema.parse(body)
-    console.log('✅ Validação dos dados passou - token e senha validados')
-
-    console.log('🔍 Iniciando busca do usuário pelo token:', token.substring(0, 10) + '...')
-    console.log('🕐 Data atual para comparação:', new Date().toISOString())
 
     // Buscar usuário pelo token de reset
     const user = await prisma.user.findFirst({
@@ -41,207 +28,79 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log('📋 Resultado da busca do usuário:', {
-      usuarioEncontrado: !!user,
-      email: user?.email || 'N/A',
-      id: user?.id || 'N/A',
-      tokenBanco: user?.resetToken ? user.resetToken.substring(0, 10) + '...' : 'N/A',
-      tokenExpiracao: user?.resetTokenExpiry?.toISOString() || 'N/A',
-      tokenValido: user?.resetTokenExpiry ? user.resetTokenExpiry > new Date() : false
-    })
-
-    // Se não encontrou, vamos fazer uma busca mais ampla para debug
     if (!user) {
-      console.log('🔍 Usuário não encontrado! Fazendo busca de debug...')
-      
-      // Buscar usuário apenas pelo token (ignorando expiração)
-      const userByTokenOnly = await prisma.user.findFirst({
-        where: {
-          resetToken: token,
-        },
-      })
-      
-      if (userByTokenOnly) {
-        console.log('⚠️ Token encontrado mas EXPIRADO:', {
-          email: userByTokenOnly.email,
-          tokenExpiracao: userByTokenOnly.resetTokenExpiry?.toISOString(),
-          agora: new Date().toISOString(),
-          diferenca: userByTokenOnly.resetTokenExpiry ? 
-            `${(userByTokenOnly.resetTokenExpiry.getTime() - new Date().getTime()) / 1000 / 60} minutos` : 'N/A'
-        })
-      } else {
-        console.log('❌ Token não existe no banco de dados')
-        
-        // Vamos ver todos os tokens de reset ativos para debug
-        const allActiveTokens = await prisma.user.findMany({
-          where: {
-            resetToken: { not: null },
-            resetTokenExpiry: { gt: new Date() }
-          },
-          select: {
-            email: true,
-            resetToken: true,
-            resetTokenExpiry: true
-          }
-        })
-        
-        console.log('📊 Tokens de reset ativos no banco:', allActiveTokens.map(u => ({
-          email: u.email,
-          tokenPreview: u.resetToken?.substring(0, 10) + '...',
-          expiracao: u.resetTokenExpiry?.toISOString()
-        })))
-      }
-    }
-
-    if (!user) {
-      console.log('❌ Token não encontrado ou expirado:', token)
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
         { status: 400 }
       )
     }
 
-    console.log('✅ Usuário encontrado para reset de senha:', user.email, '| ID:', user.id)
-
     // Hash da nova senha
     const hashedPassword = await bcrypt.hash(password, 12)
-    console.log('🔐 Nova senha hasheada gerada:', hashedPassword.substring(0, 20) + '...')
-
-    // Primeiro, vamos listar TODAS as contas do usuário para debug
-    const allAccounts = await prisma.account.findMany({
-      where: {
-        userId: user.id,
-      },
-    })
-    console.log('🔍 TODAS as contas do usuário:', allAccounts.map(acc => ({
-      id: acc.id,
-      providerId: acc.providerId,
-      accountId: acc.accountId,
-      hasPassword: !!acc.password
-    })))
 
     // Buscar a conta associada ao usuário (better-auth armazena senhas na tabela account)
-    const account = await prisma.account.findFirst({
+    // Better-auth com emailAndPassword usa 'email-password' como providerId
+    let account = await prisma.account.findFirst({
       where: {
         userId: user.id,
-        providerId: 'credential', // Para autenticação por email/senha
+        providerId: 'email-password', // Better-auth padrão para email/senha
       },
     })
 
-    console.log('🔍 Conta credential encontrada:', !!account, account ? `| ID: ${account.id}` : '')
-
-    // Se não encontrou, vamos tentar outros providerIds comuns do better-auth
+    // Se não encontrou com 'email-password', tentar outros providerIds comuns
     if (!account) {
-      const emailAccount = await prisma.account.findFirst({
+      account = await prisma.account.findFirst({
         where: {
           userId: user.id,
-          providerId: 'email-password', // Outro possível nome
+          providerId: 'credential', // Fallback para credential
         },
       })
-      console.log('🔍 Conta email-password encontrada:', !!emailAccount)
-      
-      const emailOnlyAccount = await prisma.account.findFirst({
-        where: {
-          userId: user.id,
-          providerId: 'email', // Outro possível nome
-        },
-      })
-      console.log('🔍 Conta email encontrada:', !!emailOnlyAccount)
     }
 
-    let passwordUpdateResult;
-    let targetAccount = account;
-    
-    // Se não encontrou conta credential, vamos procurar por qualquer conta que possa ter senha
-    if (!targetAccount) {
-      // Vamos tentar encontrar uma conta que já tenha senha ou que seja do tipo email
-      const accountWithPassword = await prisma.account.findFirst({
+    // Se ainda não encontrou, procurar qualquer conta que já tenha senha
+    if (!account) {
+      account = await prisma.account.findFirst({
         where: {
           userId: user.id,
           password: { not: null }
         },
       })
-      
-      if (accountWithPassword) {
-        console.log('🔍 Encontrada conta existente com senha:', accountWithPassword.id, '| Provider:', accountWithPassword.providerId)
-        targetAccount = accountWithPassword;
-      } else {
-        // Vamos verificar se há uma conta sem senha que possamos usar
-        const anyAccount = await prisma.account.findFirst({
-          where: {
-            userId: user.id,
-          },
-        })
-        
-        if (anyAccount) {
-          console.log('🔍 Encontrada conta sem senha, vamos adicionar senha:', anyAccount.id, '| Provider:', anyAccount.providerId)
-          targetAccount = anyAccount;
-        }
-      }
     }
+
+    let passwordUpdateResult;
     
-    if (targetAccount) {
+    if (account) {
       // Atualizar senha na tabela account existente
-      console.log('📝 Iniciando atualização da senha na conta existente...')
       passwordUpdateResult = await prisma.account.update({
-        where: { id: targetAccount.id },
+        where: { id: account.id },
         data: {
           password: hashedPassword,
         },
       })
-      console.log('✅ Senha atualizada com sucesso na conta existente:', targetAccount.id)
     } else {
-      // Criar nova conta credential se não existir (caso do usuário Google sem conta de senha)
-      console.log('📝 Criando nova conta credential para usuário sem conta de senha...')
-      const newAccount = await prisma.account.create({
+      // Criar nova conta email-password se não existir
+      passwordUpdateResult = await prisma.account.create({
         data: {
-          id: `credential_${user.id}_${Date.now()}`,
-          accountId: user.email, // Usar email como accountId para credential
-          providerId: 'credential',
+          id: `email-password_${user.id}_${Date.now()}`,
+          accountId: user.email, // Usar email como accountId
+          providerId: 'email-password', // Usar o padrão do better-auth
           userId: user.id,
           password: hashedPassword,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       })
-      passwordUpdateResult = newAccount;
-      console.log('✅ Nova conta credential criada com sucesso:', newAccount.id)
     }
 
     // Verificar se a operação foi bem-sucedida
     if (!passwordUpdateResult) {
-      console.log('❌ Erro: Falha ao alterar a senha - resultado vazio')
       return NextResponse.json(
         { error: 'Erro ao alterar senha' },
         { status: 500 }
       )
     }
 
-    console.log('🔒 Confirmação: Senha alterada com sucesso no banco de dados')
-
-    // Vamos fazer uma verificação final para confirmar que a senha foi realmente salva
-    const verifyAccount = await prisma.account.findUnique({
-      where: { id: passwordUpdateResult.id },
-      select: { id: true, password: true, providerId: true }
-    })
-    
-    if (verifyAccount && verifyAccount.password) {
-      console.log('✅ VERIFICAÇÃO FINAL: Senha confirmada no banco de dados', {
-        accountId: verifyAccount.id,
-        providerId: verifyAccount.providerId,
-        hasPassword: !!verifyAccount.password,
-        passwordHash: verifyAccount.password.substring(0, 20) + '...'
-      })
-    } else {
-      console.log('❌ ERRO: Verificação final falhou - senha não encontrada no banco')
-      return NextResponse.json(
-        { error: 'Erro ao verificar senha alterada' },
-        { status: 500 }
-      )
-    }
-
     // Limpar token de reset do usuário
-    console.log('🧹 Limpando token de reset do usuário...')
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -249,9 +108,6 @@ export async function POST(request: NextRequest) {
         resetTokenExpiry: null,
       },
     })
-    console.log('✅ Token de reset removido com sucesso')
-
-    console.log('🎉 SUCESSO COMPLETO: Processo de reset de senha finalizado para usuário:', user.email)
 
     return NextResponse.json(
       { message: 'Senha alterada com sucesso' },
@@ -259,14 +115,13 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.log('❌ Erro de validação:', error.errors)
       return NextResponse.json(
         { error: 'Dados inválidos', details: error.errors },
         { status: 400 }
       )
     }
 
-    console.error('❌ ERRO CRÍTICO ao resetar senha:', error)
+    console.error('Erro ao resetar senha:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
