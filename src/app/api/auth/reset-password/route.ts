@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Gerar hash da nova senha
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await hashPassword(password)
 
     // 3. Buscar conta com providerId = email-password (Better Auth padrão)
     let account = await prisma.account.findFirst({
@@ -43,21 +43,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // 4. Se não existir conta com email-password, criar uma
-    if (!account) {
-      account = await prisma.account.create({
-        data: {
-          id: crypto.randomUUID(), // como o id não tem default, precisa gerar aqui
-          accountId: user.email,   // no Better Auth, o email é o identificador da conta
-          providerId: 'credential',
-          userId: user.id,
-          password: hashedPassword,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      })
-    } else {
-      // 5. Se existir, atualizar a senha
+    // 4. Se existir, atualizar a senha
+    if (account){
       await prisma.account.update({
         where: { id: account.id },
         data: {
@@ -67,7 +54,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 6. Limpar token de reset
+    // 5. Limpar token de reset
     await prisma.user.update({
       where: { id: user.id },
       data: {
