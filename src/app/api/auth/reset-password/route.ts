@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import bcrypt from 'bcryptjs'
+import { hashPassword } from "better-auth"
 import { prisma } from '@/lib/prisma'
 
 const resetPasswordSchema = z.object({
