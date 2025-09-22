@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     let account = await prisma.account.findFirst({
       where: {
         userId: user.id,
-        providerId: 'email-password',
+        providerId: 'credential',
       },
     })
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         data: {
           id: crypto.randomUUID(), // como o id não tem default, precisa gerar aqui
           accountId: user.email,   // no Better Auth, o email é o identificador da conta
-          providerId: 'email-password',
+          providerId: 'credential',
           userId: user.id,
           password: hashedPassword,
           createdAt: new Date(),
