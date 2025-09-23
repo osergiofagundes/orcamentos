@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { User, Lock, Camera, Pen, Save } from "lucide-react"
+import { User, Lock, Camera, Pen, Save, Send } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -257,45 +257,38 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
           </TabsContent>
           
           <TabsContent value="password">
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Senha Atual</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  placeholder="Digite sua senha atual"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="new-password">Nova Senha</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  placeholder="Digite a nova senha"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  placeholder="Confirme a nova senha"
-                />
-              </div>
-              
-              <Button type="submit" disabled={isLoadingPassword} className='w-full bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-                {isLoadingPassword ? "Alterando..." : "Alterar Senha"}
-                <Save className="h-4 w-4" />
+            <div className="space-y-4 flex flex-col items-center justify-center">
+              <p className="text-center text-gray-700">
+                Para alterar sua senha, enviaremos um link de redefinição para seu email cadastrado.
+              </p>
+              <Button
+                type="button"
+                disabled={isLoadingPassword}
+                className="w-full bg-sky-600 hover:bg-sky-700 cursor-pointer"
+                onClick={async () => {
+                  setIsLoadingPassword(true)
+                  try {
+                    const response = await fetch('/api/auth/forgot-password', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: profileData.email }),
+                    })
+                    const data = await response.json()
+                    if (!response.ok || !data.success) {
+                      throw new Error(data.message || 'Erro ao enviar email de redefinição')
+                    }
+                    toast.success('Enviamos um email para redefinir sua senha!')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Erro ao enviar email de redefinição')
+                  } finally {
+                    setIsLoadingPassword(false)
+                  }
+                }}
+              >
+                {isLoadingPassword ? 'Enviando...' : 'Enviar email de redefinição'}
+                <Send className="h-4 w-4" />
               </Button>
-            </form>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
