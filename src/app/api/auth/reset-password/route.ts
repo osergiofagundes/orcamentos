@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
 
 const resetPasswordSchema = z.object({
@@ -12,7 +12,21 @@ const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 })
 
-export async function POST(request: NextRequest) {
+function hashPassword(password) {
+  // 1. Gerar um salt aleatório de 16 bytes
+  const salt = crypto.randomBytes(16).toString('hex')
+
+  // 2. Criar o hash usando SHA-512 + salt
+  const hash = crypto
+    .createHmac('sha512', salt)
+    .update(password)
+    .digest('hex')
+
+  // 3. Retornar no formato salt:hash
+  return `${salt}:${hash}`
+}
+
+export async function POST(request) {
   try {
     const body = await request.json()
     const { token, password } = resetPasswordSchema.parse(body)
@@ -32,8 +46,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. Gerar hash da nova senha
-    const hashedPassword = await bcrypt.hash(password, 12)
+    // 2. Gerar hash da nova senha no formato salt:hash
+    const hashedPassword = hashPassword(password)
 
     // 3. Buscar conta com providerId = email-password (Better Auth padrão)
     let account = await prisma.account.findFirst({
