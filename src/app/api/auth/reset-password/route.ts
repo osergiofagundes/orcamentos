@@ -26,7 +26,7 @@ function hashPassword(password: string): string {
   return `${salt}:${hash}`
 }
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { token, password } = resetPasswordSchema.parse(body)
@@ -50,7 +50,7 @@ export async function POST(request) {
     const hashedPassword = hashPassword(password)
 
     // 3. Buscar conta com providerId = email-password (Better Auth padrão)
-    let account = await prisma.account.findFirst({
+    const account = await prisma.account.findFirst({
       where: {
         userId: user.id,
         providerId: 'credential',
@@ -58,7 +58,7 @@ export async function POST(request) {
     })
 
     // 4. Se existir, atualizar a senha
-    if (account){
+    if (account) {
       await prisma.account.update({
         where: { id: account.id },
         data: {
