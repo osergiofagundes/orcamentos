@@ -12,7 +12,7 @@ const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 })
 
-function hashPassword(password) {
+function hashPassword(password: string): string {
   // 1. Gerar um salt aleatório de 16 bytes
   const salt = crypto.randomBytes(16).toString('hex')
 
