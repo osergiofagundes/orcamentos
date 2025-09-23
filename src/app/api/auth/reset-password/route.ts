@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { scryptAsync } from '@noble/hashes/scrypt.js'
 
 const resetPasswordSchema = z.object({
   token: z.string(),
@@ -12,18 +12,41 @@ const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 })
 
-function hashPassword(password: string): string {
-  // 1. Gerar um salt aleatório de 16 bytes
-  const salt = crypto.randomBytes(16).toString('hex')
+// Configuração scrypt idêntica ao Better Auth
+const config = {
+  N: 16384,
+  r: 16,
+  p: 1,
+  dkLen: 64,
+}
 
-  // 2. Criar o hash usando SHA-512 + salt
-  const hash = crypto
-    .createHmac('sha512', salt)
-    .update(password)
-    .digest('hex')
+// Função para converter bytes para hex (compatível com Better Auth)
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')
+}
 
-  // 3. Retornar no formato salt:hash
-  return `${salt}:${hash}`
+// Função para gerar salt aleatório em hex
+function generateSalt(): string {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16))
+  return bytesToHex(saltBytes)
+}
+
+// Função para gerar key usando scrypt (mesmo algoritmo do Better Auth)
+async function generateKey(password: string, salt: string): Promise<Uint8Array> {
+  return await scryptAsync(password.normalize("NFKC"), salt, {
+    N: config.N,
+    p: config.p,
+    r: config.r,
+    dkLen: config.dkLen,
+    maxmem: 128 * config.N * config.r * 2,
+  })
+}
+
+// Função hashPassword compatível com Better Auth
+async function hashPassword(password: string): Promise<string> {
+  const salt = generateSalt()
+  const key = await generateKey(password, salt)
+  return `${salt}:${bytesToHex(key)}`
 }
 
 export async function POST(request: NextRequest) {
@@ -46,8 +69,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. Gerar hash da nova senha no formato salt:hash
-    const hashedPassword = hashPassword(password)
+    // 2. Gerar hash da nova senha no formato salt:hash (mesma implementação do Better Auth)
+    const hashedPassword = await hashPassword(password)
 
     // 3. Buscar conta com providerId = email-password (Better Auth padrão)
     const account = await prisma.account.findFirst({
