@@ -11,6 +11,7 @@ Sistema Web para Gestão de Orçamentos Voltado a Pequenos Negócios
 - [Prisma ORM](https://www.prisma.io/docs)
 - [PostgreSQL](https://www.postgresql.org/docs/)
 - [BetterAuth](https://www.better-auth.com/docs)
+- [Resend](https://resend.com/docs/introduction)
 
 ## Clonar o projeto
 
