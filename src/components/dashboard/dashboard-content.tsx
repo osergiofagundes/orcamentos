@@ -6,18 +6,31 @@ import { OrcamentosMesChart } from "@/components/dashboard/orcamentos-mes-chart"
 import { ProdutosServicosChart } from "@/components/dashboard/produtos-servicos-chart"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { Skeleton } from "@/components/ui/skeleton"
+import { DatabaseQuotaError } from "@/components/database-quota-error"
 import { Users, Package, FileText, CheckCircle, Clock, DollarSign, BarChart3 } from "lucide-react"
 
 export function DashboardContent() {
   const { data, loading, error } = useDashboardData()
 
   if (error) {
+    // Check if it's a database quota error
+    const isQuotaError = error.toLowerCase().includes('data transfer quota') || 
+                        error.toLowerCase().includes('exceeded') ||
+                        error.toLowerCase().includes('quota');
+
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 className="text-red-800 font-semibold">Erro ao carregar dados</h3>
-          <p className="text-red-600">{error}</p>
-        </div>
+        {isQuotaError ? (
+          <DatabaseQuotaError 
+            onRetry={() => window.location.reload()}
+            className="mb-4"
+          />
+        ) : (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h3 className="text-red-800 font-semibold">Erro ao carregar dados</h3>
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
       </div>
     )
   }

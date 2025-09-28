@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Save, Package, User, Calculator, FileText } from "lucide-react"
+import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -109,6 +109,7 @@ export function EditOrcamentoModal({
   const [produtosServicos, setProdutosServicos] = useState<ProdutoServico[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   const form = useForm<EditOrcamentoForm>({
     resolver: zodResolver(editOrcamentoSchema),
@@ -175,9 +176,12 @@ export function EditOrcamentoModal({
         const produtosData = await produtosRes.json()
         setProdutosServicos(produtosData)
       }
+      
+      setDataLoaded(true)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
       toast.error("Erro ao carregar dados")
+      setDataLoaded(true)
       onClose()
     } finally {
       setLoading(false)
@@ -275,6 +279,22 @@ export function EditOrcamentoModal({
           <div className="text-center py-8">
             <p className="text-muted-foreground">
               Orçamentos com status "{orcamento?.status}" não podem ser modificados.
+            </p>
+          </div>
+        ) : dataLoaded && (clientes.length === 0 || produtosServicos.length === 0) ? (
+          <div className="text-center py-12">
+            <AlertCircle className="h-16 w-16 text-sky-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Dados necessários não encontrados</h3>
+            <div className="space-y-2 text-muted-foreground">
+              {clientes.length === 0 && (
+                <p>• Você precisa cadastrar pelo menos um cliente antes de editar o orçamento.</p>
+              )}
+              {produtosServicos.length === 0 && (
+                <p>• Você precisa cadastrar pelo menos um produto/serviço antes de editar o orçamento.</p>
+              )}
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Cadastre os dados necessários e tente novamente.
             </p>
           </div>
         ) : (
@@ -384,7 +404,7 @@ export function EditOrcamentoModal({
                                         <div className="flex gap-2 items-center">
                                           <span>{produto.nome}</span>
                                           <span>-</span>
-                                          <span className="text-muted-foreground">{produto.categoria.nome}</span>
+                                          <span className="text-muted-foreground">{produto.categoria?.nome || 'Sem categoria'}</span>
                                         </div>
                                       </SelectItem>
                                     ))}

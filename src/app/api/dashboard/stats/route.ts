@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { isDatabaseQuotaError } from '@/lib/database-error-handler'
 
 export async function GET(request: NextRequest) {
   try {
@@ -224,6 +225,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response)
   } catch (error) {
     console.error('Erro ao buscar estatísticas do dashboard:', error)
+    
+    if (isDatabaseQuotaError(error)) {
+      return NextResponse.json(
+        { error: 'Your project has exceeded the data transfer quota. Upgrade your plan to increase limits.' },
+        { status: 503 } // Service Unavailable
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

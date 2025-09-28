@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Package, User, Calculator, Search, X, FileText } from "lucide-react"
+import { Plus, Trash2, Package, User, Calculator, Search, X, FileText, AlertCircle } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -205,6 +205,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
   const [loading, setLoading] = useState(false)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [produtosServicos, setProdutosServicos] = useState<ProdutoServico[]>([])
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   const form = useForm<CreateOrcamentoForm>({
     resolver: zodResolver(createOrcamentoSchema),
@@ -249,9 +250,12 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
         const produtosData = await produtosRes.json()
         setProdutosServicos(produtosData)
       }
+      
+      setDataLoaded(true)
     } catch (error) {
       console.error("Erro ao carregar dados:", error)
       toast.error("Erro ao carregar dados")
+      setDataLoaded(true)
     }
   }
 
@@ -342,14 +346,37 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
             Preencha as informações para criar um novo orçamento para seu cliente.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Seção de Informações Básicas */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2 pb-2 border-b">
-                <User className="h-5 w-5 text-primary" />
-                <DialogTitle>Escolha o Cliente</DialogTitle>
-              </div>
+        {!dataLoaded ? (
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+          </div>
+        ) : clientes.length === 0 || produtosServicos.length === 0 ? (
+          <div className="text-center py-12">
+            <AlertCircle className="h-16 w-16 text-sky-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Dados necessários não encontrados</h3>
+            <div className="space-y-2 text-muted-foreground">
+              {clientes.length === 0 && (
+                <p>• Você precisa cadastrar pelo menos um cliente antes de criar um orçamento.</p>
+              )}
+              {produtosServicos.length === 0 && (
+                <p>• Você precisa cadastrar pelo menos um produto/serviço antes de criar um orçamento.</p>
+              )}
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Cadastre os dados necessários e tente novamente.
+            </p>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Seção de Informações Básicas */}
+              <div className="space-y-6">
+                <div className="flex items-center space-x-2 pb-2 border-b">
+                  <User className="h-5 w-5 text-primary" />
+                  <DialogTitle>Escolha o Cliente</DialogTitle>
+                </div>
               <FormField
                 control={form.control}
                 name="clienteId"
@@ -439,7 +466,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                                       <div className="flex gap-2 items-center">
                                         <span>{produto.nome}</span>
                                         <span>-</span>
-                                        <span className="text-muted-foreground">{produto.categoria.nome}</span>
+                                        <span className="text-muted-foreground">{produto.categoria?.nome || 'Sem categoria'}</span>
                                       </div>
                                     </SelectItem>
                                   ))}
@@ -699,6 +726,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
             </DialogFooter>
           </form>
         </Form>
+        )}
       </DialogContent>
     </Dialog>
   )
