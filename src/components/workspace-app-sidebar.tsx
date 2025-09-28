@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { AppSidebar } from "@/components/app-sidebar";
+import { withDatabaseErrorHandling, isDatabaseQuotaError } from "@/lib/database-error-handler";
 
 type Workspace = {
   id: number
@@ -16,10 +17,7 @@ type User = {
 }
 
 export async function WorkspaceAppSidebar() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  let session = null;
   let workspaces: Workspace[] = [];
   let user: User = {
     name: "Usuário",
@@ -27,48 +25,90 @@ export async function WorkspaceAppSidebar() {
     avatar: "/avatars/default.jpg",
   };
 
-  if (session?.user?.id) {
-    try {
-      // Buscar dados do usuário
-      const userData = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          name: true,
-          email: true,
-          image: true,
-        },
+  // Try to get session with database error handling
+  const sessionResult = await withDatabaseErrorHandling(
+    async () => {
+      return await auth.api.getSession({
+        headers: await headers(),
       });
+    },
+    null
+  );
 
-      if (userData) {
+  if (sessionResult.isQuotaError) {
+    console.warn("Database quota exceeded - returning fallback sidebar");
+    return <AppSidebar workspaces={[]} user={user} />;
+  }
+
+  session = sessionResult.data;
+
+  if (session?.user?.id) {
+    // Fetch user data
+    const userResult = await withDatabaseErrorHandling(
+      async () => {
+        return await prisma.user.findUnique({
+          where: { id: session!.user.id },
+          select: {
+            name: true,
+            email: true,
+            image: true,
+          },
+        });
+      },
+      null
+    );
+
+    // Fetch user workspaces
+    const workspacesResult = await withDatabaseErrorHandling(
+      async () => {
+        return await prisma.usuarioAreaTrabalho.findMany({
+          where: {
+            usuario_id: session!.user.id,
+          },
+          include: {
+            areaTrabalho: {
+              select: {
+                id: true,
+                nome: true,
+                logo_url: true,
+              },
+            },
+          },
+        });
+      },
+      []
+    );
+
+    // Handle results
+    if (userResult.isQuotaError || workspacesResult.isQuotaError) {
+      console.warn("Database quota exceeded - using session data for fallback");
+      // Use session data for basic user info when database is unavailable
+      if (session?.user) {
         user = {
-          name: userData.name || "Usuário",
-          email: userData.email,
-          avatar: userData.image || "/avatars/default.jpg",
+          name: session.user.name || "Usuário",
+          email: session.user.email || "user@example.com", 
+          avatar: session.user.image || "/avatars/default.jpg",
+        };
+      }
+      // Return empty workspaces when quota exceeded
+      workspaces = [];
+    } else {
+      // Normal case - use database data
+      if (userResult.success && userResult.data) {
+        user = {
+          name: userResult.data.name || "Usuário",
+          email: userResult.data.email,
+          avatar: userResult.data.image || "/avatars/default.jpg",
         };
       }
 
-      const userWorkspaces = await prisma.usuarioAreaTrabalho.findMany({
-        where: {
-          usuario_id: session.user.id,
-        },
-        include: {
-          areaTrabalho: {
-            select: {
-              id: true,
-              nome: true,
-              logo_url: true,
-            },
-          },
-        },
-      });
-
-      workspaces = userWorkspaces.map((uw) => ({
-        id: uw.areaTrabalho.id,
-        nome: uw.areaTrabalho.nome,
-        logo_url: uw.areaTrabalho.logo_url,
-      }));
-    } catch (error) {
-      console.error("Failed to fetch user data or workspaces:", error);
+      if (workspacesResult.success && workspacesResult.data) {
+        workspaces = workspacesResult.data.map((uw) => ({
+          id: uw.areaTrabalho.id,
+          nome: uw.areaTrabalho.nome,
+          logo_url: uw.areaTrabalho.logo_url,
+        }));
+      }
     }
   }
 

@@ -78,7 +78,6 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
     const [isLoading, setIsLoading] = useState(true)
     const [isGeneratingCode, setIsGeneratingCode] = useState(false)
     const [inviteCode, setInviteCode] = useState("")
-    const [invitePermission, setInvitePermission] = useState("1")
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
     const [copiedCode, setCopiedCode] = useState(false)
 
@@ -124,7 +123,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    nivel_permissao: parseInt(invitePermission)
+                    nivel_permissao: 1
                 }),
             })
 
@@ -266,31 +265,11 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                     <DialogHeader>
                                         <DialogTitle>Convidar Participantes</DialogTitle>
                                         <DialogDescription>
-                                            Gere um código de convite para que outros usuários possam solicitar entrada no workspace
+                                            Gere um código de convite para que outros usuários possam solicitar entrada no workspace.
                                         </DialogDescription>
                                     </DialogHeader>
                                     {!inviteCode ? (
                                         <form onSubmit={generateInviteCode} className="space-y-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="permission">Nível de Permissão Padrão</Label>
-                                                <Select value={invitePermission} onValueChange={setInvitePermission}>
-                                                    <SelectTrigger className="cursor-pointer">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="1" className="cursor-pointer">
-                                                            <div>
-                                                                <div className="font-medium">Usuário Nível 1</div>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="2" className="cursor-pointer">
-                                                            <div>
-                                                                <div className="font-medium">Usuário Nível 2</div>
-                                                            </div>
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
                                             <div className="flex justify-end gap-2">
                                                 <Button
                                                     type="button"
