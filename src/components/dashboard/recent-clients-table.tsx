@@ -48,7 +48,7 @@ export function RecentClientsTable({ clients, workspaceId }: RecentClientsTableP
     return phone
   }
 
-  const formatCpfCnpj = (cpfCnpj: string) => {
+  const formatCpfCnpj = (cpfCnpj: string | null) => {
     if (!cpfCnpj) return '-'
     
     // Remove todos os caracteres não numéricos

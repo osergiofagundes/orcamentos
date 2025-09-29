@@ -38,13 +38,15 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
             new Date(cliente.createdAt) >= oneWeekAgo
           ).length
 
-          // Contar tipos de pessoa
+          // Contar tipos de pessoa (apenas clientes com CPF/CNPJ preenchido)
           const pessoasFisicas = clientes.filter((cliente: any) => {
+            if (!cliente.cpf_cnpj) return false
             const cpfCnpj = cliente.cpf_cnpj.replace(/\D/g, '')
             return cpfCnpj.length === 11
           }).length
 
           const pessoasJuridicas = clientes.filter((cliente: any) => {
+            if (!cliente.cpf_cnpj) return false
             const cpfCnpj = cliente.cpf_cnpj.replace(/\D/g, '')
             return cpfCnpj.length === 14
           }).length
@@ -83,13 +85,13 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
       title: "Pessoas Físicas",
       value: stats.pessoasFisicas.toString(),
       icon: User,
-      description: "CPF cadastrados",
+      description: "Com CPF cadastrado",
     },
     {
       title: "Pessoas Jurídicas",
       value: stats.pessoasJuridicas.toString(),
       icon: Building,
-      description: "CNPJ cadastrados",
+      description: "Com CNPJ cadastrado",
     },
   ]
 

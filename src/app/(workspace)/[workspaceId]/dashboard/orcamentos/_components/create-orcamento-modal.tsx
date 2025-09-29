@@ -52,9 +52,9 @@ type CreateOrcamentoForm = z.infer<typeof createOrcamentoSchema>
 interface Cliente {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone?: string
-  email?: string
+  cpf_cnpj: string | null
+  telefone?: string | null
+  email?: string | null
 }
 
 interface ProdutoServico {
@@ -91,7 +91,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
     } else {
       const filtered = clientes.filter(cliente =>
         cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cliente.cpf_cnpj.includes(searchTerm) ||
+        (cliente.cpf_cnpj && cliente.cpf_cnpj.includes(searchTerm)) ||
         (cliente.email && cliente.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (cliente.telefone && cliente.telefone.includes(searchTerm))
       ).slice(0, 10) // Limita a 10 resultados
@@ -168,7 +168,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
               <div className="flex flex-col space-y-1">
                 <span className="font-medium text-foreground">{cliente.nome}</span>
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span>{cliente.cpf_cnpj}</span>
+                  <span>{cliente.cpf_cnpj || 'Sem CPF/CNPJ'}</span>
                   {cliente.email && <span>• {cliente.email}</span>}
                   {cliente.telefone && <span>• {cliente.telefone}</span>}
                 </div>
@@ -189,7 +189,7 @@ function ClienteSearchField({ value, onChange, clientes }: ClienteSearchFieldPro
           <div className="text-sm">
             <div className="font-medium">{selectedCliente.nome}</div>
             <div className="flex flex-wrap gap-2 text-xs mt-1">
-              <span>{selectedCliente.cpf_cnpj}</span>
+              <span>{selectedCliente.cpf_cnpj || 'Sem CPF/CNPJ'}</span>
               {selectedCliente.email && <span>• {selectedCliente.email}</span>}
               {selectedCliente.telefone && <span>• {selectedCliente.telefone}</span>}
             </div>

@@ -38,12 +38,20 @@ import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório").refine(validateCpfCnpj, {
+  cpf_cnpj: z.string().optional().or(z.literal('')).refine((value) => {
+    if (!value || value === '') return true
+    return validateCpfCnpj(value)
+  }, {
     message: "CPF/CNPJ inválido"
   }),
-  telefone: z.string().min(1, "Telefone é obrigatório"),
-  email: z.string().email("Email inválido"),
-  endereco: z.string().min(1, "Endereço é obrigatório"),
+  telefone: z.string().optional().or(z.literal('')),
+  email: z.string().optional().or(z.literal('')).refine((value) => {
+    if (!value || value === '') return true
+    return z.string().email().safeParse(value).success
+  }, {
+    message: "Email inválido"
+  }),
+  endereco: z.string().optional().or(z.literal('')),
   bairro: z.string().optional().or(z.literal('')),
   cidade: z.string().optional().or(z.literal('')),
   estado: z.string().optional().or(z.literal('')),
@@ -79,7 +87,6 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
   const onSubmit = async (data: ClientFormData) => {
     setIsLoading(true)
     try {
-      console.log('Sending data:', data)
       const response = await fetch(`/api/workspace/${workspaceId}/clientes`, {
         method: "POST",
         headers: {
@@ -194,7 +201,7 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
               name="endereco"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Endereço *</FormLabel>
+                  <FormLabel>Endereço</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Rua, Número, Complemento"

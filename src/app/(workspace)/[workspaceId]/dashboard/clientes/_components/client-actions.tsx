@@ -15,10 +15,10 @@ import { DeleteClientModal } from "./delete-client-modal"
 interface Client {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone: string
-  email: string
-  endereco: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
   bairro?: string | null
   cidade?: string | null
   estado?: string | null

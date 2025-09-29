@@ -150,10 +150,10 @@ model UsuarioAreaTrabalho {
 model Cliente {
   id                  Int            @id @default(autoincrement())
   nome                String         @db.VarChar(255)
-  cpf_cnpj            String         @db.VarChar(255)
-  telefone            String         @db.VarChar(255)
-  email               String         @db.Text
-  endereco            String         @db.Text
+  cpf_cnpj            String?        @db.VarChar(255)
+  telefone            String?        @db.VarChar(255)
+  email               String?        @db.Text
+  endereco            String?        @db.Text
   bairro              String?        @db.VarChar(255)
   cidade              String?        @db.VarChar(255)
   estado              String?        @db.VarChar(255)
@@ -165,7 +165,6 @@ model Cliente {
   areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
   orcamentos         Orcamento[]
 
-  @@unique([cpf_cnpj, area_trabalho_id])
   @@map("cliente")
 }
 

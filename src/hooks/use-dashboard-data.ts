@@ -42,10 +42,10 @@ export interface DashboardCharts {
 export interface RecentClient {
   id: number
   nome: string
-  email: string
+  email: string | null
   telefone: string | null
   data_criacao: string
-  cpf_cnpj: string
+  cpf_cnpj: string | null
 }
 
 export interface RecentProduct {

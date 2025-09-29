@@ -17,10 +17,10 @@ import { Trash2 } from "lucide-react"
 interface Client {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone: string
-  email: string
-  endereco: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
 }
 
 interface DeleteClientModalProps {

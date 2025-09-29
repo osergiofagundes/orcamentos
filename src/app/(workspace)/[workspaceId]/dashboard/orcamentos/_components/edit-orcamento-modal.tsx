@@ -52,7 +52,7 @@ type EditOrcamentoForm = z.infer<typeof editOrcamentoSchema>
 interface Cliente {
   id: number
   nome: string
-  cpf_cnpj: string
+  cpf_cnpj: string | null
 }
 
 interface ProdutoServico {
@@ -73,7 +73,7 @@ interface OrcamentoDetalhado {
   cliente: {
     id: number
     nome: string
-    cpf_cnpj: string
+    cpf_cnpj: string | null
   }
   usuario: {
     name: string
@@ -321,7 +321,7 @@ export function EditOrcamentoModal({
                         <SelectContent>
                           {clientes.map((cliente) => (
                             <SelectItem key={cliente.id} value={cliente.id.toString()}>
-                              {cliente.nome} - {cliente.cpf_cnpj}
+                              {cliente.nome} - {cliente.cpf_cnpj || 'Sem CPF/CNPJ'}
                             </SelectItem>
                           ))}
                         </SelectContent>
