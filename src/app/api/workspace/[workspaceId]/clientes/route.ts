@@ -85,38 +85,40 @@ export async function POST(
         
         const { nome, cpf_cnpj, telefone, email, endereco, bairro, cidade, estado, cep } = body
 
-        // Validação básica
-        if (!nome || !cpf_cnpj || !telefone || !email || !endereco) {
-            console.log('Missing fields:', { nome: !!nome, cpf_cnpj: !!cpf_cnpj, telefone: !!telefone, email: !!email, endereco: !!endereco })
+        // Validação básica - apenas nome é obrigatório
+        if (!nome || nome.trim() === '') {
+            console.log('Missing required field nome:', { nome: !!nome })
             return NextResponse.json(
-                { error: 'Todos os campos obrigatórios devem ser preenchidos' },
+                { error: 'Nome é obrigatório' },
                 { status: 400 }
             )
         }
 
-        // Verificar se CPF/CNPJ já existe no workspace
-        const existingClient = await prisma.cliente.findFirst({
-            where: {
-                cpf_cnpj,
-                area_trabalho_id: parseInt(workspaceId),
-                deletedAt: null
-            }
-        })
+        // Verificar se CPF/CNPJ já existe no workspace (apenas se CPF/CNPJ foi fornecido)
+        if (cpf_cnpj && cpf_cnpj.trim() !== '') {
+            const existingClient = await prisma.cliente.findFirst({
+                where: {
+                    cpf_cnpj,
+                    area_trabalho_id: parseInt(workspaceId),
+                    deletedAt: null
+                }
+            })
 
-        if (existingClient) {
-            return NextResponse.json(
-                { error: 'Cliente com este CPF/CNPJ já existe' },
-                { status: 400 }
-            )
+            if (existingClient) {
+                return NextResponse.json(
+                    { error: 'Cliente com este CPF/CNPJ já existe' },
+                    { status: 400 }
+                )
+            }
         }
 
         const cliente = await prisma.cliente.create({
             data: {
-                nome,
-                cpf_cnpj,
-                telefone,
-                email,
-                endereco,
+                nome: nome.trim(),
+                cpf_cnpj: cpf_cnpj && cpf_cnpj.trim() !== '' ? cpf_cnpj : null,
+                telefone: telefone && telefone.trim() !== '' ? telefone : null,
+                email: email && email.trim() !== '' ? email : null,
+                endereco: endereco && endereco.trim() !== '' ? endereco : null,
                 bairro: bairro && bairro.trim() !== '' ? bairro : null,
                 cidade: cidade && cidade.trim() !== '' ? cidade : null,
                 estado: estado && estado.trim() !== '' ? estado : null,
@@ -128,14 +130,6 @@ export async function POST(
         return NextResponse.json(cliente, { status: 201 })
     } catch (error) {
         console.error('Failed to create client:', error)
-        
-        // Verificar se é erro de constraint única (CPF/CNPJ duplicado)
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-            return NextResponse.json(
-                { error: 'Cliente com este CPF/CNPJ já existe neste workspace' },
-                { status: 400 }
-            )
-        }
         
         return NextResponse.json(
             { error: 'Erro interno do servidor ao criar cliente' },

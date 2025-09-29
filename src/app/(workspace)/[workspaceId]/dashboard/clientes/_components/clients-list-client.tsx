@@ -20,10 +20,10 @@ import { DateRange } from "react-day-picker"
 interface Client {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone: string
-  email: string
-  endereco: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
   createdAt: string
   updatedAt: string
 }
@@ -58,7 +58,8 @@ export function ClientsListClient({ workspaceId, refreshTrigger, search, dateRan
     }
   }
 
-  const formatCpfCnpj = (cpfCnpj: string) => {
+  const formatCpfCnpj = (cpfCnpj: string | null) => {
+    if (!cpfCnpj) return "-"
     const numbersOnly = cpfCnpj.replace(/\D/g, '')
 
     if (numbersOnly.length === 11) {
@@ -71,12 +72,13 @@ export function ClientsListClient({ workspaceId, refreshTrigger, search, dateRan
     return cpfCnpj
   }
 
-  const getClientType = (cpfCnpj: string) => {
+  const getClientType = (cpfCnpj: string | null) => {
+    if (!cpfCnpj) return '-'
     const numbersOnly = cpfCnpj.replace(/\D/g, '')
     return numbersOnly.length === 11 ? 'PF' : 'PJ'
   }
 
-  const formatPhone = (phone: string) => {
+  const formatPhone = (phone: string | null) => {
     if (!phone) return "-"
     const cleaned = phone.replace(/\D/g, '')
     if (cleaned.length === 11) {
@@ -255,7 +257,7 @@ export function ClientsListClient({ workspaceId, refreshTrigger, search, dateRan
                   <TableCell>
                     <div className="flex items-center">
                       <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                      {client.email}
+                      {client.email || "-"}
                     </div>
                   </TableCell>
                   <TableCell>

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "public"."cliente" ALTER COLUMN "cpf_cnpj" DROP NOT NULL,
+ALTER COLUMN "telefone" DROP NOT NULL,
+ALTER COLUMN "email" DROP NOT NULL,
+ALTER COLUMN "endereco" DROP NOT NULL;

@@ -37,12 +37,20 @@ import { ESTADOS_BRASILEIROS } from "@/lib/constants"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  cpf_cnpj: z.string().min(11, "CPF/CNPJ é obrigatório").refine(validateCpfCnpj, {
+  cpf_cnpj: z.string().optional().or(z.literal('')).refine((value) => {
+    if (!value || value === '') return true
+    return validateCpfCnpj(value)
+  }, {
     message: "CPF/CNPJ inválido"
   }),
-  telefone: z.string().min(1, "Telefone é obrigatório"),
-  email: z.string().email("Email inválido"),
-  endereco: z.string().min(1, "Endereço é obrigatório"),
+  telefone: z.string().optional().or(z.literal('')),
+  email: z.string().optional().or(z.literal('')).refine((value) => {
+    if (!value || value === '') return true
+    return z.string().email().safeParse(value).success
+  }, {
+    message: "Email inválido"
+  }),
+  endereco: z.string().optional().or(z.literal('')),
   bairro: z.string().optional().or(z.literal('')),
   cidade: z.string().optional().or(z.literal('')),
   estado: z.string().optional().or(z.literal('')),
@@ -54,10 +62,10 @@ type ClientFormData = z.infer<typeof clientSchema>
 interface Client {
   id: number
   nome: string
-  cpf_cnpj: string
-  telefone: string
-  email: string
-  endereco: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
   bairro?: string | null
   cidade?: string | null
   estado?: string | null
@@ -80,10 +88,10 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
     resolver: zodResolver(clientSchema),
     defaultValues: {
       nome: client.nome,
-      cpf_cnpj: client.cpf_cnpj,
-      telefone: client.telefone,
-      email: client.email,
-      endereco: client.endereco,
+      cpf_cnpj: client.cpf_cnpj || "",
+      telefone: client.telefone || "",
+      email: client.email || "",
+      endereco: client.endereco || "",
       bairro: client.bairro || "",
       cidade: client.cidade || "",
       estado: client.estado || "",
@@ -200,7 +208,7 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
               name="endereco"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Endereço *</FormLabel>
+                  <FormLabel>Endereço</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Rua, Número, Complemento"
