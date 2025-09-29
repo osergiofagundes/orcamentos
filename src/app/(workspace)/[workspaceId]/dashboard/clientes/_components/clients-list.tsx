@@ -49,7 +49,8 @@ export async function ClientsList({ workspaceId }: ClientsListProps) {
       },
     })
 
-    const formatCpfCnpj = (cpfCnpj: string) => {
+    const formatCpfCnpj = (cpfCnpj: string | null) => {
+      if (!cpfCnpj) return "-"
       const numbersOnly = cpfCnpj.replace(/\D/g, '')
       
       if (numbersOnly.length === 11) {
@@ -62,7 +63,8 @@ export async function ClientsList({ workspaceId }: ClientsListProps) {
       return cpfCnpj
     }
 
-    const getClientType = (cpfCnpj: string) => {
+    const getClientType = (cpfCnpj: string | null) => {
+      if (!cpfCnpj) return '-'
       const numbersOnly = cpfCnpj.replace(/\D/g, '')
       return numbersOnly.length === 11 ? 'PF' : 'PJ'
     }
