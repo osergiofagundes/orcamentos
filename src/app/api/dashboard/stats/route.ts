@@ -198,6 +198,78 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Últimos 10 clientes adicionados
+    const recentClientes = await prisma.cliente.findMany({
+      where: {
+        area_trabalho_id: workspaceId,
+        deletedAt: null
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        cpf_cnpj: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10
+    })
+
+    // Últimos 10 produtos/serviços adicionados
+    const recentProducts = await prisma.produtoServico.findMany({
+      where: {
+        area_trabalho_id: workspaceId,
+        deletedAt: null
+      },
+      select: {
+        id: true,
+        nome: true,
+        tipo: true,
+        valor: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10
+    })
+
+    // Últimos 5 orçamentos adicionados
+    const recentOrcamentos = await prisma.orcamento.findMany({
+      where: {
+        area_trabalho_id: workspaceId,
+        deletedAt: null
+      },
+      select: {
+        id: true,
+        valor_total: true,
+        status: true,
+        createdAt: true,
+        cliente: {
+          select: {
+            nome: true
+          }
+        },
+        usuario: {
+          select: {
+            name: true
+          }
+        },
+        _count: {
+          select: {
+            itensOrcamento: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 5
+    })
+
     const response = {
       stats: {
         totalClientes,
@@ -219,7 +291,31 @@ export async function GET(request: NextRequest) {
           tipo: item.tipo,
           quantidade: item._count.id
         }))
-      }
+      },
+      recentClients: recentClientes.map(client => ({
+        id: client.id,
+        nome: client.nome,
+        email: client.email,
+        telefone: client.telefone,
+        cpf_cnpj: client.cpf_cnpj,
+        data_criacao: client.createdAt
+      })),
+      recentProducts: recentProducts.map(product => ({
+        id: product.id,
+        nome: product.nome,
+        tipo: product.tipo,
+        valor: (product.valor || 0) / 100, // Converter de centavos para reais
+        data_criacao: product.createdAt
+      })),
+      recentOrcamentos: recentOrcamentos.map(orcamento => ({
+        id: orcamento.id,
+        cliente_nome: orcamento.cliente.nome,
+        valor_total: (orcamento.valor_total || 0) / 100, // Converter de centavos para reais
+        status: orcamento.status,
+        data_criacao: orcamento.createdAt,
+        responsavel: orcamento.usuario.name,
+        itens_count: orcamento._count.itensOrcamento
+      }))
     }
 
     return NextResponse.json(response)

@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/sidebar"
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 
-export default function Page() {
+interface PageProps {
+  params: Promise<{ workspaceId: string }>
+}
+
+export default async function Page({ params }: PageProps) {
+  const { workspaceId } = await params
   return (
     <SidebarProvider>
       <WorkspaceAppSidebar />
@@ -43,7 +48,7 @@ export default function Page() {
           </div>
         </header>
         
-        <DashboardContent />
+        <DashboardContent workspaceId={workspaceId} />
       </SidebarInset>
     </SidebarProvider>
   )
