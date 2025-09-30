@@ -117,7 +117,7 @@ export function WorkspaceManagementNavbar({
               </DropdownMenuGroup>
             </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem  className="cursor-pointer">
+            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
               <LogOut />
               Sair
             </DropdownMenuItem>

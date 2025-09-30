@@ -49,6 +49,7 @@ interface ItemOrcamento {
 
 interface OrcamentoData {
   id: number
+  numeroOrcamento: number
   data_criacao: string
   valor_total: number | null
   status: string
@@ -188,7 +189,7 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
     const dataEmissao = new Date()
     
     // Número, data de emissão e data de criação na mesma linha
-    pdf.text(`Orçamento Nº: ${orcamentoData.id}`, margin, y)
+    pdf.text(`Orçamento Nº: ${orcamentoData.numeroOrcamento.toString().padStart(4, '0')}`, margin, y)
     pdf.text(`Emissão: ${formatDate(dataEmissao)} ${dataEmissao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth / 2, y, { align: 'center' })
     pdf.text(`Criação: ${formatDate(orcamentoData.data_criacao)} ${new Date(orcamentoData.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth - margin, y, { align: 'right' })
     
@@ -204,14 +205,23 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
     pdf.setFont(undefined, 'normal')
     pdf.text(`Nome: ${orcamentoData.cliente.nome}`, margin, y)
     y += 6
-    const isCPF = orcamentoData.cliente.cpf_cnpj.replace(/\D/g, '').length === 11
-    const label = isCPF ? 'CPF:' : 'CNPJ:'
-    pdf.text(`${label} ${formatCpfCnpj(orcamentoData.cliente.cpf_cnpj)}`, margin, y)
-    y += 6
-    pdf.text(`Email: ${orcamentoData.cliente.email}`, margin, y)
-    y += 6
-    pdf.text(`Telefone: ${formatPhone(orcamentoData.cliente.telefone)}`, margin, y)
-    y += 6
+    
+    if (orcamentoData.cliente.cpf_cnpj) {
+      const isCPF = orcamentoData.cliente.cpf_cnpj.replace(/\D/g, '').length === 11
+      const label = isCPF ? 'CPF:' : 'CNPJ:'
+      pdf.text(`${label} ${formatCpfCnpj(orcamentoData.cliente.cpf_cnpj)}`, margin, y)
+      y += 6
+    }
+    
+    if (orcamentoData.cliente.email) {
+      pdf.text(`Email: ${orcamentoData.cliente.email}`, margin, y)
+      y += 6
+    }
+    
+    if (orcamentoData.cliente.telefone) {
+      pdf.text(`Telefone: ${formatPhone(orcamentoData.cliente.telefone)}`, margin, y)
+      y += 6
+    }
 
     const clienteEndereco = [
       orcamentoData.cliente.endereco,
@@ -330,11 +340,13 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
 
     y += 8
 
-    pdf.text('Gerado por: Sky Orçamentos', margin, y)
+    pdf.text('Gerado por: www.skyorcamentos.site', margin, y)
     y += 8
 
     // Salvar o PDF
-    const fileName = `Orcamento_${orcamentoData.id}_${orcamentoData.cliente.nome.replace(/\s+/g, '_')}.pdf`
+    const clienteNome = orcamentoData.cliente.nome || 'Cliente'
+    const numeroFormatado = orcamentoData.numeroOrcamento.toString().padStart(4, '0')
+    const fileName = `Orcamento_${numeroFormatado}_${clienteNome.replace(/\s+/g, '_')}.pdf`
     pdf.save(fileName)
 
   } catch (error) {

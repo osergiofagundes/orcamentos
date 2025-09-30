@@ -110,7 +110,9 @@ export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilt
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR })
   }
 
-  const formatCpfCnpj = (cpfCnpj: string) => {
+  const formatCpfCnpj = (cpfCnpj: string | null) => {
+    if (!cpfCnpj) return 'Sem CPF/CNPJ'
+    
     const numbersOnly = cpfCnpj.replace(/\D/g, '')
 
     if (numbersOnly.length === 11) {
@@ -161,7 +163,7 @@ export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilt
       const matchesSearch = (
         orcamento.id.toString().includes(searchTerm) ||
         orcamento.cliente.nome.toLowerCase().includes(searchTerm) ||
-        orcamento.cliente.cpf_cnpj.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, '')) ||
+        (orcamento.cliente.cpf_cnpj && orcamento.cliente.cpf_cnpj.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''))) ||
         orcamento.usuario.name.toLowerCase().includes(searchTerm)
       )
       if (!matchesSearch) return false
@@ -273,7 +275,7 @@ export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilt
                   <TableCell>#{orcamento.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {orcamento.cliente.cpf_cnpj.replace(/\D/g, '').length === 11 ? (
+                      {orcamento.cliente.cpf_cnpj && orcamento.cliente.cpf_cnpj.replace(/\D/g, '').length === 11 ? (
                         <User className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Building className="h-4 w-4 text-muted-foreground" />

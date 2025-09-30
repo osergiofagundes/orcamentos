@@ -135,7 +135,7 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
         <div className="hidden md:contents">
           {statsData.map((stat) => {
             return (
-              <Card key={stat.title} className="border-l-8 border-l-sky-600">
+              <Card key={stat.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
@@ -161,7 +161,7 @@ export function OrcamentosStats({ workspaceId }: OrcamentosStatsProps) {
         <div className="md:hidden space-y-4">
           {cardsToShow.map((stat) => {
             return (
-              <Card key={stat.title} className="border-l-8 border-l-sky-600">
+              <Card key={stat.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
                     {stat.title}

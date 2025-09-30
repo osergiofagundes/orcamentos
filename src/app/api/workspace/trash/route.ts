@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
 
-// GET /api/workspaces - Listar workspaces do usuário
+// GET /api/workspace/trash - Listar workspaces na lixeira
 export async function GET() {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -14,19 +14,21 @@ export async function GET() {
     }
 
     try {
-        const workspaces = await prisma.areaTrabalho.findMany({
+        const trashedWorkspaces = await prisma.areaTrabalho.findMany({
             where: {
                 usuariosAreas: {
                     some: {
                         usuario_id: session.user.id
                     }
                 },
-                inTrash: false // Exclui workspaces na lixeira
+                inTrash: true // Apenas workspaces na lixeira
             },
             select: {
                 id: true,
                 nome: true,
                 cpf_cnpj: true,
+                telefone: true,
+                email: true,
                 endereco: true,
                 bairro: true,
                 cidade: true,
@@ -36,6 +38,9 @@ export async function GET() {
                 createdAt: true,
                 updatedAt: true,
                 deletedAt: true,
+                inTrash: true,
+                trashedAt: true,
+                trashedBy: true,
                 usuariosAreas: {
                     where: {
                         usuario_id: session.user.id
@@ -43,51 +48,24 @@ export async function GET() {
                     select: {
                         nivel_permissao: true
                     }
+                },
+                usuarioQueMoveuParaLixeira: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
                 }
             },
             orderBy: {
-                createdAt: 'desc'
+                trashedAt: 'desc' // Ordenar pelos mais recentemente movidos para lixeira
             }
         })
 
-        return NextResponse.json(workspaces)
+        return NextResponse.json(trashedWorkspaces)
     } catch (error) {
+        console.error('Error fetching trashed workspaces:', error)
         return NextResponse.json(
-            { error: 'Failed to fetch workspaces' },
-            { status: 500 }
-        )
-    }
-}
-
-// POST /api/workspaces - Criar novo workspace
-export async function POST(req: Request) {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
-    const { nome, cpf_cnpj } = await req.json()
-
-    if (!session?.user?.id) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    try {
-        const newWorkspace = await prisma.areaTrabalho.create({
-            data: {
-                nome,
-                cpf_cnpj,
-                usuariosAreas: {
-                    create: {
-                        usuario_id: session.user.id,
-                        nivel_permissao: 3 // Nível de dono
-                    }
-                }
-            }
-        })
-
-        return NextResponse.json(newWorkspace, { status: 201 })
-    } catch (error) {
-        return NextResponse.json(
-            { error: 'Failed to create workspace' },
+            { error: 'Failed to fetch trashed workspaces' },
             { status: 500 }
         )
     }

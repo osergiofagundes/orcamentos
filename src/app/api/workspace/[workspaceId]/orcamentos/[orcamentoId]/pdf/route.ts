@@ -29,6 +29,23 @@ export async function GET(
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 })
     }
 
+    // Buscar todos os orçamentos do workspace ordenados por data de criação para determinar a posição
+    const todosOrcamentos = await prisma.orcamento.findMany({
+      where: {
+        area_trabalho_id: parseInt(workspaceId),
+      },
+      select: {
+        id: true,
+        data_criacao: true,
+      },
+      orderBy: {
+        data_criacao: 'asc'
+      }
+    })
+    
+    // Encontrar a posição do orçamento atual na lista
+    const numeroOrcamento = todosOrcamentos.findIndex(orc => orc.id === parseInt(orcamentoId)) + 1
+
     // Buscar o orçamento com todos os dados necessários para o PDF
     const orcamento = await prisma.orcamento.findFirst({
       where: {
@@ -112,6 +129,7 @@ export async function GET(
 
     const orcamentoData = {
       ...orcamento,
+      numeroOrcamento,
       subtotal,
       totalDesconto,
       valorFinal,

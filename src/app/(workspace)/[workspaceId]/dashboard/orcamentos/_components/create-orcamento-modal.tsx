@@ -295,23 +295,37 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
   }
 
   const calculateItemTotal = (item: any) => {
-    const subtotal = item.quantidade * item.precoUnitario
-    let desconto = 0
-
-    if (item.tipoDesconto === "percentual" && item.descontoPercentual > 0) {
-      desconto = subtotal * (item.descontoPercentual / 100)
-    } else if (item.tipoDesconto === "valor" && item.descontoValor > 0) {
-      desconto = item.descontoValor
-    }
-
-    return Math.max(0, subtotal - desconto)
+    // Retorna apenas o valor bruto (quantidade x preço unitário) sem desconto
+    return item.quantidade * item.precoUnitario
   }
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     const itens = form.watch("itens")
     return itens.reduce((total, item) => {
       return total + calculateItemTotal(item)
     }, 0)
+  }
+
+  const calculateDescontoTotal = () => {
+    const itens = form.watch("itens")
+    return itens.reduce((totalDesconto, item) => {
+      const subtotalItem = item.quantidade * item.precoUnitario
+      let desconto = 0
+      
+      if (item.tipoDesconto === "percentual" && item.descontoPercentual && item.descontoPercentual > 0) {
+        desconto = subtotalItem * (item.descontoPercentual / 100)
+      } else if (item.tipoDesconto === "valor" && item.descontoValor && item.descontoValor > 0) {
+        desconto = item.descontoValor
+      }
+      
+      return totalDesconto + desconto
+    }, 0)
+  }
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal()
+    const descontoTotal = calculateDescontoTotal()
+    return Math.max(0, subtotal - descontoTotal)
   }
 
   const formatCurrency = (value: string) => {
@@ -689,20 +703,68 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 <DialogTitle>Resumo do Orçamento</DialogTitle>
               </div>
 
-              <div className="border rounded-xl p-4 border-b">
+              <div className="border rounded-xl p-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <div className="space-y-1">
-                    <div className="font-bold text-primary">
-                      Total do Orçamento
-                    </div>
-                    <div className="text-muted-foreground">{fields.length} {fields.length === 1 ? 'item' : 'itens'}</div>
+                  <div>
+                    <div className="font-medium">Subtotal ({fields.length} {fields.length === 1 ? 'item' : 'itens'})</div>
+                    <div className="text-muted-foreground text-sm">Soma dos itens sem desconto</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-primary">
-                      R$ {calculateTotal().toFixed(2)}
+                    <div className="text-lg font-semibold">
+                      R$ {calculateSubtotal().toFixed(2)}
                     </div>
                   </div>
                 </div>
+
+                {calculateDescontoTotal() > 0 && (
+                  <>
+                    <div className="border-t pt-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium text-amber-600">Total de Descontos</div>
+                          <div className="text-muted-foreground text-sm">Desconto aplicado aos itens</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-semibold text-amber-600">
+                            -R$ {calculateDescontoTotal().toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-bold text-primary text-lg">
+                            Total Final do Orçamento
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary">
+                            R$ {calculateTotal().toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {calculateDescontoTotal() === 0 && (
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold text-primary text-lg">
+                          Total do Orçamento
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          R$ {calculateTotal().toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

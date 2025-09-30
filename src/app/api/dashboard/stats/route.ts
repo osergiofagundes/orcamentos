@@ -13,10 +13,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    // Buscar o workspace do usuário
+    // Obter workspaceId dos query params
+    const { searchParams } = new URL(request.url)
+    const workspaceIdParam = searchParams.get('workspaceId')
+
+    if (!workspaceIdParam) {
+      return NextResponse.json({ error: 'workspaceId é obrigatório' }, { status: 400 })
+    }
+
+    const workspaceId = parseInt(workspaceIdParam)
+
+    // Verificar se o usuário tem acesso ao workspace
     const userWorkspace = await prisma.usuarioAreaTrabalho.findFirst({
       where: {
-        usuario_id: session.user.id
+        usuario_id: session.user.id,
+        area_trabalho_id: workspaceId
       },
       include: {
         areaTrabalho: true
@@ -24,10 +35,8 @@ export async function GET(request: NextRequest) {
     })
 
     if (!userWorkspace) {
-      return NextResponse.json({ error: 'Workspace não encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Acesso negado ao workspace' }, { status: 403 })
     }
-
-    const workspaceId = userWorkspace.area_trabalho_id
 
     // Estatísticas básicas
     const [

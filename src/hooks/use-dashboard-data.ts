@@ -73,16 +73,18 @@ export interface DashboardData {
   recentOrcamentos: RecentOrcamento[]
 }
 
-export function useDashboardData() {
+export function useDashboardData(workspaceId?: string) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!workspaceId) return
+
     async function fetchDashboardData() {
       try {
         setLoading(true)
-        const response = await fetch('/api/dashboard/stats')
+        const response = await fetch(`/api/dashboard/stats?workspaceId=${workspaceId}`)
         
         if (!response.ok) {
           throw new Error('Erro ao carregar dados do dashboard')
@@ -98,7 +100,7 @@ export function useDashboardData() {
     }
 
     fetchDashboardData()
-  }, [])
+  }, [workspaceId])
 
   return { data, loading, error }
 }

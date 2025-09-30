@@ -124,7 +124,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
         {/* Desktop: mostra todos os cards */}
         <div className="hidden md:contents">
           {statsCards.map((card, index) => (
-            <Card key={index} className="border-l-8 border-l-sky-600">
+            <Card key={index}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {card.title}
@@ -144,7 +144,7 @@ export function ClientsStats({ workspaceId }: ClientsStatsProps) {
         {/* Mobile: mostra cards baseado no estado showAll */}
         <div className="md:hidden space-y-4">
           {cardsToShow.map((card, index) => (
-            <Card key={index} className="border-l-8 border-l-sky-600">
+            <Card key={index}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {card.title}
