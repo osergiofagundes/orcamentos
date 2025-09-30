@@ -17,7 +17,7 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ workspaceId }: DashboardContentProps) {
-  const { data, loading, error } = useDashboardData()
+  const { data, loading, error } = useDashboardData(workspaceId)
   const { data: session } = authClient.useSession()
 
   const getGreeting = () => {
