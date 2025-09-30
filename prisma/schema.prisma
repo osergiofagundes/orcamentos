@@ -26,6 +26,7 @@ model User {
   convitesCriados ConviteWorkspace[] // Convites criados pelo usuário
   solicitacoesEnviadas SolicitacaoEntrada[] // Solicitações enviadas pelo usuário
   solicitacoesRespondidas SolicitacaoEntrada[] @relation("RespondeuSolicitacao") // Solicitações respondidas pelo usuário
+  workspacesMovidosParaLixeira AreaTrabalho[] @relation("WorkspaceMovidoParaLixeira") // Workspaces movidos para lixeira por este usuário
 
   @@unique([email])
   @@map("user")
@@ -123,12 +124,16 @@ model AreaTrabalho {
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
+  inTrash             Boolean        @default(false) // Indica se está na lixeira
+  trashedAt           DateTime?      // Data quando foi movido para lixeira
+  trashedBy           String?        // ID do usuário que moveu para lixeira
   usuariosAreas       UsuarioAreaTrabalho[]
   clientes            Cliente[]
   produtosServicos    ProdutoServico[]
   categorias          Categoria[]
   orcamentos         Orcamento[]
   convites           ConviteWorkspace[] // Convites do workspace
+  usuarioQueMoveuParaLixeira User?   @relation("WorkspaceMovidoParaLixeira", fields: [trashedBy], references: [id])
 
   @@map("area_trabalho")
 }

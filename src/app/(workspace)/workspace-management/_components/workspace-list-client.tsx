@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { WorkspaceCard } from './workspace-card'
 import { CreateWorkspaceModal } from './create-workspace-modal'
 import { JoinWithCodeModal } from './join-with-code-modal'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
+import Link from 'next/link'
 
 interface WorkspaceWithPermission {
   id: number;
@@ -50,6 +53,12 @@ export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceList
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold">Minhas Áreas de Trabalho</h1>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Link href="/workspace-management/trash">
+            <Button variant="outline" size="sm" className="hover:text-red-600 hover:border-red-600 cursor-pointer">
+              <Trash2 className="h-4 w-4 mr-1" />
+              Lixeira
+            </Button>
+          </Link>
           <JoinWithCodeModal onWorkspaceJoined={refreshWorkspaces} />
           <CreateWorkspaceModal onWorkspaceCreated={refreshWorkspaces} />
         </div>
@@ -59,6 +68,12 @@ export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceList
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Você ainda não tem nenhuma área de trabalho</p>
           <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
+            <Link href="/workspace-management/trash">
+              <Button variant="outline" size="sm" className="hover:text-red-600 hover:border-red-600 cursor-pointer">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Lixeira
+              </Button>
+            </Link>
             <JoinWithCodeModal 
               onWorkspaceJoined={refreshWorkspaces}
               buttonText="Entrar com código"

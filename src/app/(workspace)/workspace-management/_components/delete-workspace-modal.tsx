@@ -25,19 +25,20 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleDelete = async () => {
+  const handleMoveToTrash = async () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/workspace/${workspace.id}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/workspace/${workspace.id}/trash`, {
+        method: 'POST',
       })
 
       if (!response.ok) {
-        throw new Error('Falha ao excluir área de trabalho')
+        const error = await response.json()
+        throw new Error(error.error || 'Falha ao mover área de trabalho para lixeira')
       }
 
-      toast.success('Área de trabalho excluída com sucesso.')
+      toast.success('Área de trabalho movida para lixeira.')
 
       // Close modal
       setIsOpen(false)
@@ -47,7 +48,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
         onWorkspaceDeleted()
       }
     } catch (error) {
-      toast.error('Ocorreu um erro ao excluir a área de trabalho.')
+      toast.error(error instanceof Error ? error.message : 'Ocorreu um erro ao mover a área de trabalho para lixeira.')
     } finally {
       setIsLoading(false)
     }
@@ -59,20 +60,20 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="p-2 hover:text-red-600 hover:bg-red-50 hover:border-red-600 cursor-pointer"
-        title="Excluir área de trabalho"
+        className="p-2 hover:text-orange-600 hover:bg-orange-50 hover:border-orange-600 cursor-pointer"
+        title="Mover para lixeira"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
       
       <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
         <DialogHeader>
-          <DialogTitle>Excluir Área de Trabalho</DialogTitle>
+          <DialogTitle>Mover para Lixeira</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir a área de trabalho "{workspace.nome}"?
+            Tem certeza que deseja mover a área de trabalho "{workspace.nome}" para a lixeira?
             <br />
-            <span className="text-red-600 font-medium">
-              Esta ação não pode ser desfeita.
+            <span className="text-muted-foreground">
+              Você poderá restaurá-la posteriormente se necessário.
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -83,18 +84,18 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isLoading}
-            className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
+            className='border hover:text-orange-700 hover:border-orange-700 cursor-pointer'
           >
             Cancelar
           </Button>
           <Button 
             type="button" 
             variant="destructive"
-            onClick={handleDelete}
+            onClick={handleMoveToTrash}
             disabled={isLoading}
-            className='bg-red-600 hover:bg-red-700 cursor-pointer'
+            className='bg-orange-600 hover:bg-orange-700 cursor-pointer'
           >
-            {isLoading ? 'Excluindo...' : 'Excluir'}
+            {isLoading ? 'Movendo...' : 'Mover para Lixeira'}
             <Trash2 className="h-4 w-4" />
           </Button>
         </DialogFooter>

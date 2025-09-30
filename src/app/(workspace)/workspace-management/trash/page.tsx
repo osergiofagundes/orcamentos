@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma'
-import { WorkspaceListClient } from './_components/workspace-list-client'
+import { TrashListClient } from './_components/trash-list-client'
 import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
 import { WorkspaceManagementNavbar } from '@/components/workspace-management-navbar'
 import { Separator } from '@/components/ui/separator'
 import { redirect } from 'next/navigation'
 
-export default async function WorkspaceManagementPage() {
+export default async function WorkspaceTrashPage() {
   const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -22,15 +22,15 @@ export default async function WorkspaceManagementPage() {
     avatar: session.user.image || '/avatars/default.jpg',
   }
 
-  // Busca todos os workspaces do usuário (exceto os que estão na lixeira)
-  const workspaces = await prisma.areaTrabalho.findMany({
+  // Busca todos os workspaces na lixeira do usuário
+  const trashedWorkspaces = await prisma.areaTrabalho.findMany({
     where: {
       usuariosAreas: {
         some: {
           usuario_id: session.user.id
         }
       },
-      inTrash: false // Exclui workspaces na lixeira
+      inTrash: true // Apenas workspaces na lixeira
     },
     select: {
       id: true,
@@ -47,6 +47,9 @@ export default async function WorkspaceManagementPage() {
       createdAt: true,
       updatedAt: true,
       deletedAt: true,
+      inTrash: true,
+      trashedAt: true,
+      trashedBy: true,
       usuariosAreas: {
         where: {
           usuario_id: session.user.id
@@ -54,10 +57,16 @@ export default async function WorkspaceManagementPage() {
         select: {
           nivel_permissao: true
         }
+      },
+      usuarioQueMoveuParaLixeira: {
+        select: {
+          name: true,
+          email: true
+        }
       }
     },
     orderBy: {
-      createdAt: 'desc'
+      trashedAt: 'desc'
     }
   })
 
@@ -68,7 +77,7 @@ export default async function WorkspaceManagementPage() {
       <Separator />
       {/* Conteúdo principal */}
       <main className="flex-1 py-4 sm:py-6 lg:py-8">
-        <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
+        <TrashListClient initialTrashedWorkspaces={trashedWorkspaces} userId={session.user.id} />
       </main>
     </div>
   )
