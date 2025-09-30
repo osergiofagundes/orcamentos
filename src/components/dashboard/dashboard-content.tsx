@@ -9,7 +9,7 @@ import { RecentProductsTable } from "@/components/dashboard/recent-products-tabl
 import { RecentOrcamentosTable } from "@/components/dashboard/recent-orcamentos-table"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Users, Package, FileText, CheckCircle, Clock, DollarSign, BarChart3 } from "lucide-react"
+import { Users, Package, BarChart3, HandCoins } from "lucide-react"
 import { authClient } from "@/lib/auh-client"
 
 interface DashboardContentProps {
@@ -22,8 +22,8 @@ export function DashboardContent({ workspaceId }: DashboardContentProps) {
 
   const getGreeting = () => {
     const hour = new Date().getHours()
-    if (hour < 12) return "Bom dia"
-    if (hour < 18) return "Boa tarde"
+    if (hour >= 6 && hour < 12) return "Bom dia"
+    if (hour >= 12 && hour < 18) return "Boa tarde"
     return "Boa noite"
   }
 
@@ -31,10 +31,10 @@ export function DashboardContent({ workspaceId }: DashboardContentProps) {
     <>
       <div className='space-y-1 px-6 pb-2'>
         <h1 className="text-3xl font-bold tracking-tight">
-          {loading ? 'Boa noite!' : `${getGreeting()}, ${session?.user?.name?.split(' ')[0]}!`}
+          {loading ? '' : `${getGreeting()}, ${session?.user?.name?.split(' ')[0]}!`}
         </h1>
         <p className="hidden text-muted-foreground sm:block">
-          Acompanhe as métricas principais do seu negócio
+          { loading ? '' : `Acompanhe as métricas principais do seu negócio`}
         </p>
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -68,7 +68,7 @@ export function DashboardContent({ workspaceId }: DashboardContentProps) {
                 title="Orçamentos"
                 value={data.stats.totalOrcamentos}
                 description="Total de orçamentos"
-                icon={<FileText className="h-4 w-4 text-muted-foreground" />}
+                icon={<HandCoins className="h-4 w-4 text-muted-foreground" />}
               />
               <StatsCard
                 title="Taxa de Aprovação"

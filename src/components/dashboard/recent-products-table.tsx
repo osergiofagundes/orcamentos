@@ -48,7 +48,15 @@ export function RecentProductsTable({ products, workspaceId }: RecentProductsTab
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base font-medium">Últimos Produtos/Serviços</CardTitle>
-        <Package className="h-4 w-4 text-muted-foreground" />
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => router.push(`/${workspaceId}/dashboard/produtos-e-servicos`)}
+          className="text-muted-foreground cursor-pointer hover:text-sky-600"
+        >
+          <Package className="h-4 w-4"/>
+          Mais detalhes
+        </Button>
       </CardHeader>
       <CardContent>
         {products.length === 0 ? (

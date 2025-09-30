@@ -71,7 +71,16 @@ export function RecentClientsTable({ clients, workspaceId }: RecentClientsTableP
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base font-medium">Últimos Clientes</CardTitle>
-        <Users className="h-4 w-4 text-muted-foreground" />
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => router.push(`/${workspaceId}/dashboard/clientes`)}
+          className="text-muted-foreground cursor-pointer hover:text-sky-600"
+        >
+          <Users className="h-4 w-4" />
+          Mais detalhes
+        </Button>
+        
       </CardHeader>
       <CardContent>
         {clients.length === 0 ? (

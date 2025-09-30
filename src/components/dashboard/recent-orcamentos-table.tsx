@@ -58,7 +58,15 @@ export function RecentOrcamentosTable({ orcamentos, workspaceId }: RecentOrcamen
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base font-medium">Últimos Orçamentos</CardTitle>
-        <HandCoins className="h-4 w-4 text-muted-foreground" />
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => router.push(`/${workspaceId}/dashboard/orcamentos`)}
+          className="text-muted-foreground cursor-pointer hover:text-sky-600"
+        >
+          <HandCoins className="h-4 w-4" />
+          Mais detalhes
+        </Button>
       </CardHeader>
       <CardContent>
         {orcamentos.length === 0 ? (
