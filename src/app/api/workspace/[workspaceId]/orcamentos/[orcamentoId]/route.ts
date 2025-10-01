@@ -296,17 +296,13 @@ export async function DELETE(
       )
     }
 
-    // Excluir orçamento e itens em transação
-    await prisma.$transaction(async (tx) => {
-      // Primeiro, excluir todos os itens do orçamento
-      await tx.itemOrcamento.deleteMany({
-        where: { orcamento_id: parseInt(orcamentoId) },
-      })
-
-      // Depois, excluir o orçamento
-      await tx.orcamento.delete({
-        where: { id: parseInt(orcamentoId) },
-      })
+    // Soft delete do orçamento
+    await prisma.orcamento.update({
+      where: { id: parseInt(orcamentoId) },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: session.user.id
+      }
     })
 
     return NextResponse.json({ 

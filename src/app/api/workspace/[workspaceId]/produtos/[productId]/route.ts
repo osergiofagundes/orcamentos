@@ -185,10 +185,14 @@ export async function DELETE(
       })
     }
 
-    await prisma.produtoServico.delete({
+    await prisma.produtoServico.update({
       where: {
         id: parseInt(productId),
       },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: session.user.id
+      }
     })
 
     const message = force && existingProduct.itensOrcamento.length > 0

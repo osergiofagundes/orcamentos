@@ -167,10 +167,14 @@ export async function DELETE(
       )
     }
 
-    await prisma.categoria.delete({
+    await prisma.categoria.update({
       where: {
         id: parseInt(categoryId),
       },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: session.user.id
+      }
     })
 
     return NextResponse.json({ message: "Categoria excluída com sucesso" })
