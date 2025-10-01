@@ -175,7 +175,7 @@ export function CreateWorkspaceModal({
               onChange={handleChange}
               placeholder="Ex: Meu Negócio"
               required
-              className={errors.nome ? "border-red-500" : ""}
+              className={errors.nome ? "border-red-600" : ""}
             />
             {errors.nome && (
               <p className="text-sm text-red-600">{errors.nome}</p>
@@ -190,7 +190,7 @@ export function CreateWorkspaceModal({
               value={formData.cpf_cnpj}
               onChange={handleChange}
               placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              className={errors.cpf_cnpj ? "border-red-500" : ""}
+              className={errors.cpf_cnpj ? "border-red-600" : ""}
             />
             {errors.cpf_cnpj && (
               <p className="text-sm text-red-600">{errors.cpf_cnpj}</p>
@@ -203,7 +203,7 @@ export function CreateWorkspaceModal({
               variant="outline"
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
-              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
+              className='border hover:text-red-600 hover:border-red-600 cursor-pointer'
             >
               Cancelar
             </Button>

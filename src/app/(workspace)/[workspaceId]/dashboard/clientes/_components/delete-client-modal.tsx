@@ -72,7 +72,7 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
+          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-600 hover:border-red-600 cursor-pointer'>
             Cancelar
           </Button>
           <Button 
@@ -80,7 +80,7 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
             variant="destructive" 
             onClick={handleDelete}
             disabled={isLoading}
-            className='bg-red-500 hover:bg-red-600 cursor-pointer'
+            className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
             {isLoading ? "Excluindo..." : "Excluir"}
             <Trash2 className="h-4 w-4" />

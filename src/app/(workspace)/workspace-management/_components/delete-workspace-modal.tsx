@@ -60,7 +60,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="p-2 hover:text-orange-600 hover:bg-orange-50 hover:border-orange-600 cursor-pointer"
+        className="p-2 hover:text-red-600 hover:bg-red-50 hover:border-red-600 cursor-pointer"
         title="Mover para lixeira"
       >
         <Trash2 className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isLoading}
-            className='border hover:text-orange-700 hover:border-orange-700 cursor-pointer'
+            className='border hover:text-red-600 hover:border-red-600 cursor-pointer'
           >
             Cancelar
           </Button>
@@ -93,7 +93,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             variant="destructive"
             onClick={handleMoveToTrash}
             disabled={isLoading}
-            className='bg-orange-600 hover:bg-orange-700 cursor-pointer'
+            className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
             {isLoading ? 'Movendo...' : 'Mover para Lixeira'}
             <Trash2 className="h-4 w-4" />

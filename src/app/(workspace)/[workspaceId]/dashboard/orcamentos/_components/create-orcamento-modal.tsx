@@ -774,7 +774,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={loading}
-                className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'
+                className='border hover:text-red-600 hover:border-red-600 cursor-pointer sm:mt-4'
               >
                 Cancelar
               </Button>
