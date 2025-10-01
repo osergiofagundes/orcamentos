@@ -6,7 +6,7 @@ import { headers } from 'next/headers'
 // DELETE /api/workspace/[workspaceId]/permanent - Excluir workspace permanentemente
 export async function DELETE(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -16,7 +16,8 @@ export async function DELETE(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const workspaceId = parseInt(params.workspaceId)
+    const { workspaceId: workspaceIdStr } = await params
+    const workspaceId = parseInt(workspaceIdStr)
 
     if (isNaN(workspaceId)) {
         return NextResponse.json(

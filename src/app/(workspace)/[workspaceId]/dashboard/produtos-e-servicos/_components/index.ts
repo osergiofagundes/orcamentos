@@ -7,7 +7,7 @@ export { ProductsTable } from './products-table'
 // Componentes existentes
 export { ProductsTab } from './products-tab'
 // export { CategoriesTab } from './categories-tab' // Comentado temporariamente
-export { ProductsStats } from './products-stats-client'
+export { ProductsServicesStats as ProductsStats } from './products-services-stats'
 export { ProductsGrid } from './products-grid-client'
 // export { CategoriesStats } from './categories-stats' // Comentado temporariamente
 export { CreateProductButton } from './create-product-button'

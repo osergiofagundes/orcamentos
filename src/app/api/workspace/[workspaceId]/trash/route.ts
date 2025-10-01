@@ -6,7 +6,7 @@ import { headers } from 'next/headers'
 // POST /api/workspace/[workspaceId]/trash - Mover workspace para lixeira
 export async function POST(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -16,7 +16,8 @@ export async function POST(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const workspaceId = parseInt(params.workspaceId)
+    const { workspaceId: workspaceIdStr } = await params
+    const workspaceId = parseInt(workspaceIdStr)
 
     if (isNaN(workspaceId)) {
         return NextResponse.json(
@@ -94,7 +95,7 @@ export async function POST(
 // DELETE /api/workspace/[workspaceId]/trash - Restaurar workspace da lixeira
 export async function DELETE(
     req: Request,
-    { params }: { params: { workspaceId: string } }
+    { params }: { params: Promise<{ workspaceId: string }> }
 ) {
     const session = await auth.api.getSession({
         headers: await headers(),
@@ -104,7 +105,8 @@ export async function DELETE(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const workspaceId = parseInt(params.workspaceId)
+    const { workspaceId: workspaceIdStr } = await params
+    const workspaceId = parseInt(workspaceIdStr)
 
     if (isNaN(workspaceId)) {
         return NextResponse.json(

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus } from "@phosphor-icons/react"
-import { ProductsStats } from "./products-stats-client"
+import { ProductsServicesStats as ProductsStats } from "./products-services-stats"
 import { ProductsGrid } from "./products-grid-client"
 import { CreateProductButton } from "./create-product-button"
 
