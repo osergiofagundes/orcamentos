@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
+import {
   User,
   ChevronsUpDown,
   LogOut,
@@ -27,7 +27,7 @@ import Image from "next/image";
 interface UserData {
   name: string
   email: string
-  image: string
+  avatar: string
 }
 
 export default function LandingPage() {
@@ -43,7 +43,7 @@ export default function LandingPage() {
           setUser({
             name: session.data.user.name || "Usuário",
             email: session.data.user.email || "",
-            image: session.data.user.image || "/avatars/default.jpg"
+            avatar: session.data.user.image || "/avatars/default.jpg"
           })
         }
       } catch (error) {
@@ -89,9 +89,12 @@ export default function LandingPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3 py-2">
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={user.image} alt={user.name} />
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback className="rounded-lg">
+                        {user.name?.[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
                     </Avatar>
-                    <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
+                    <div className="grid flex-1 text-left text-sm leading-tight hidden sm:block">
                       <span className="truncate font-medium">{user.name}</span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
@@ -105,7 +108,10 @@ export default function LandingPage() {
                   <DropdownMenuLabel className="p-0 font-normal">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                       <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src={user.image} alt={user.name} />
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className="rounded-lg">
+                          {user.name?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">{user.name}</span>
@@ -149,7 +155,7 @@ export default function LandingPage() {
           </div>
         </div>
       </header>
-      
+
       <main className="flex-1 py-4 sm:py-6 lg:py-8">
         <div className="container mx-auto px-4 sm:px-6">
           <section className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 min-h-[600px]">
@@ -161,7 +167,7 @@ export default function LandingPage() {
                 <span className="text-sky-600 font-bold">Sky Orçamentos</span>
               </h1>
               <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-                Gerencie seus orçamentos de forma simples e eficiente. 
+                Gerencie seus orçamentos de forma simples e eficiente.
                 <br></br>
                 Crie, organize e acompanhe seus projetos com facilidade.
               </p>
@@ -178,7 +184,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            
+
             {/* Imagem do mascote */}
             <div className="flex-shrink-0 lg:flex-1 flex justify-center lg:justify-end">
               <div className="relative">
@@ -195,7 +201,7 @@ export default function LandingPage() {
           </section>
         </div>
       </main>
-      
+
       {/* Footer */}
       <footer className="border-t bg-muted/50">
         <div className="container mx-auto px-4 sm:px-6 py-8">
@@ -209,11 +215,11 @@ export default function LandingPage() {
                 <span className="font-bold text-lg tracking-tight text-primary">Sky Orçamentos</span>
               </div>
               <p className="text-muted-foreground mb-4 max-w-md">
-                A plataforma completa para gerenciar seus orçamentos com eficiência e profissionalismo. 
+                A plataforma completa para gerenciar seus orçamentos com eficiência e profissionalismo.
                 Simplifique seu trabalho e aumente sua produtividade.
               </p>
             </div>
-            
+
             {/* Links úteis */}
             <div>
               <h3 className="font-semibold text-foreground mb-3">Plataforma</h3>
@@ -235,7 +241,7 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-foreground mb-3">Contato</h3>
               <ul className="space-y-2 text-sm">
@@ -247,7 +253,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          
+
           {/* Linha divisória e copyright */}
           <div className="border-t pt-6 mt-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -264,7 +270,7 @@ export default function LandingPage() {
 
       {/* Modal de perfil do usuário */}
       {user && (
-        <UserProfileModal 
+        <UserProfileModal
           open={isProfileModalOpen}
           onOpenChange={setIsProfileModalOpen}
           user={{
