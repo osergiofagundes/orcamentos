@@ -34,7 +34,7 @@ import * as z from "zod"
 import { toast } from "sonner"
 import { formatCpfCnpj, formatPhone, formatCep, validateCpfCnpj } from "@/lib/formatters"
 import { ESTADOS_BRASILEIROS } from "@/lib/constants"
-import { Edit } from "lucide-react"
+import { Edit, Loader2 } from "lucide-react"
 
 const clientSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -306,8 +306,7 @@ export function EditClientModal({ isOpen, onClose, client, workspaceId, onSucces
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
-                {isLoading ? "Salvando..." : "Salvar Alterações"}
-                <Edit className="h-4 w-4" />
+                {isLoading ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>

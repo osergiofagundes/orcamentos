@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Package, User, Calculator, Search, X, FileText, AlertCircle } from "lucide-react"
+import { Plus, Trash2, Package, User, Calculator, Search, X, FileText, AlertCircle, Loader2 } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -768,7 +768,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 disabled={loading || fields.length === 0}
                 className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'
               >
-                {loading ? "Criando..." : "Criar Orçamento"}
+                {loading ? (<>Criando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Criar orçamento <Plus className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>

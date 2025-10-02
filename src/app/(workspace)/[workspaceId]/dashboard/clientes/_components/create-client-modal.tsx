@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -298,8 +298,7 @@ export function CreateClientModal({ workspaceId, onClientCreated }: CreateClient
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
-                {isLoading ? "Criando..." : "Criar Cliente"}
-                <Plus className="h-4 w-4" />
+                {isLoading ? (<>Criando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Criar cliente <Plus className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>

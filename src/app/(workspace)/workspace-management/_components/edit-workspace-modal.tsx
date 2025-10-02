@@ -14,7 +14,7 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
-import { Pencil } from 'lucide-react'
+import { Edit, Loader2, Pencil } from 'lucide-react'
 import { formatCpfCnpj, validateCpfCnpj } from '@/lib/formatters'
 
 interface EditWorkspaceModalProps {
@@ -193,8 +193,7 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-              {isLoading ? 'Atualizando...' : 'Atualizar Área de Trabalho'}
-              <Pencil className="h-4 w-4" />
+              {isLoading ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
             </Button>
           </DialogFooter>
         </form>

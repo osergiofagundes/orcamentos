@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Trash2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 
 interface Client {
   id: number
@@ -78,8 +78,7 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
             disabled={isLoading}
             className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
-            {isLoading ? "Enviando..." : "Enviar para lixeira"}
-            <Trash2 className="h-4 w-4" />
+            {isLoading ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar para lixeira <Trash2 className="h-4 w-4" /></>)}
           </Button>
         </DialogFooter>
       </DialogContent>

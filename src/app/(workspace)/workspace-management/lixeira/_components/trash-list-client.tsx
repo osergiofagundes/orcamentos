@@ -68,14 +68,11 @@ export function TrashListClient({ initialTrashedWorkspaces, userId }: TrashListC
         <h1 className="text-xl sm:text-2xl font-bold">Lixeira</h1>
       </div>
     </div>
-
       {trashedWorkspaces.length === 0 ? (
         <div className="text-center py-12">
-          <Trash2 className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
-          <p className="text-gray-500 mb-2 text-lg">A lixeira está vazia</p>
-          <p className="text-sm text-muted-foreground">
-            Workspaces movidos para a lixeira aparecerão aqui
-          </p>
+          <Trash2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">A lixeira está vazia</h3>
+            <p className="text-muted-foreground">Áreas de trabalho excluídas aparecerão aqui.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

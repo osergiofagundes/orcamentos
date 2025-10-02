@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ESTADOS_BRASILEIROS } from "@/lib/constants"
-import { Save, Copy, Check, User, Users } from "lucide-react"
+import { Save, Copy, Check, User, Users, Loader2, Edit } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface WorkspaceInfo {
@@ -306,8 +306,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
 
                         {canEdit && (
                             <Button type="submit" disabled={isLoading} className="bg-sky-600 hover:bg-sky-700 cursor-pointer text-white hover:text-white">
-                                {isLoading ? "Salvando..." : "Salvar Alterações"}
-                                <Save className="w-4 h-4" />
+                                {isLoading ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
                             </Button>
                         )}
                     </form>

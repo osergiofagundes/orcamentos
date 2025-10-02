@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Edit, Pencil } from "lucide-react"
+import { Edit, Loader2, Pencil } from "lucide-react"
 
 const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -334,8 +334,7 @@ export function EditProductModal({ isOpen, onClose, product, workspaceId }: Edit
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
-                {isLoading ? "Salvando..." : "Salvar Alterações"}
-                <Edit className="h-4 w-4" />
+                {isLoading ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>
