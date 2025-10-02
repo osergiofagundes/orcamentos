@@ -44,15 +44,15 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || "Erro ao excluir cliente")
+        throw new Error(error.message || "Erro ao enviar cliente para lixeira")
       }
 
-      toast.success("Cliente excluído com sucesso!")
+      toast.success("Cliente enviado para lixeira com sucesso!")
       onClose()
       onSuccess?.()
       router.refresh()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao excluir cliente")
+      toast.error(error instanceof Error ? error.message : "Erro ao enviar cliente para lixeira")
     } finally {
       setIsLoading(false)
     }
@@ -62,17 +62,13 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
     <Dialog open={isOpen} onOpenChange={onClose}> 
       <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
         <DialogHeader>
-          <DialogTitle>Excluir Cliente</DialogTitle>
+          <DialogTitle>Confirmar envio para lixeira</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir o cliente <strong>{client.nome}</strong>?
-            <br />
-            <span className="text-red-600 font-medium">
-              Esta ação não pode ser desfeita.
-            </span>
+            Tem certeza que deseja enviar para lixeira o cliente <strong>{client.nome}</strong>?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-500 hover:border-red-500 cursor-pointer'>
+          <Button type="button" variant="outline" onClick={onClose} className='border hover:text-red-600 hover:border-red-600 cursor-pointer'>
             Cancelar
           </Button>
           <Button 
@@ -80,9 +76,9 @@ export function DeleteClientModal({ isOpen, onClose, client, workspaceId, onSucc
             variant="destructive" 
             onClick={handleDelete}
             disabled={isLoading}
-            className='bg-red-500 hover:bg-red-600 cursor-pointer'
+            className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
-            {isLoading ? "Excluindo..." : "Excluir"}
+            {isLoading ? "Enviando..." : "Enviar para lixeira"}
             <Trash2 className="h-4 w-4" />
           </Button>
         </DialogFooter>

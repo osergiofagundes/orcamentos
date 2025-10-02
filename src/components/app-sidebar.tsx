@@ -9,7 +9,9 @@ import {
   UserRound,
   Package,
   Settings,
-  ChartArea
+  ChartArea,
+  Trash,
+  Trash2
 } from "lucide-react"
 
 import { NavProjects } from "@/components/nav-projects"
@@ -61,6 +63,11 @@ const data = {
       name: "Relatórios",
       url: "relatorios",
       icon: ChartArea,
+    },
+    {
+      name: "Lixeira",
+      url: "lixeira",
+      icon: Trash2,
     },
     {
       name: "Configurações",

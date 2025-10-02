@@ -68,7 +68,17 @@ async function main() {
           cliente_id: cliente.id,
           usuario_id: usuario.usuario_id,
           area_trabalho_id: areaTrabalho.id,
-          observacoes: `Orçamento ${status.toLowerCase()} - ${dataOrcamento.toLocaleDateString('pt-BR')}`
+          observacoes: `Orçamento ${status.toLowerCase()} - ${dataOrcamento.toLocaleDateString('pt-BR')}`,
+          // Dados desnormalizados do cliente
+          cliente_nome: cliente.nome,
+          cliente_cpf_cnpj: cliente.cpf_cnpj,
+          cliente_telefone: cliente.telefone,
+          cliente_email: cliente.email,
+          cliente_endereco: cliente.endereco,
+          cliente_bairro: cliente.bairro,
+          cliente_cidade: cliente.cidade,
+          cliente_estado: cliente.estado,
+          cliente_cep: cliente.cep,
         }
       })
 
@@ -86,7 +96,11 @@ async function main() {
             orcamento_id: orcamento.id,
             produto_servico_id: produto.id,
             quantidade,
-            preco_unitario: precoUnitario
+            preco_unitario: precoUnitario,
+            // Dados desnormalizados do produto
+            produto_nome: produto.nome,
+            produto_tipo: produto.tipo,
+            produto_tipo_valor: produto.tipo_valor,
           }
         })
 

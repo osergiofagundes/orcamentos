@@ -328,22 +328,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     return Math.max(0, subtotal - descontoTotal)
   }
 
-  const formatCurrency = (value: string) => {
-    // Remove tudo que não é número
-    const numbers = value.replace(/\D/g, "")
 
-    // Se não houver números, retorna vazio
-    if (!numbers) return ""
-
-    // Converte para formato de moeda
-    const amount = parseFloat(numbers) / 100
-    return amount.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -525,12 +510,12 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                                 <div className="relative">
                                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
                                   <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
                                     className="pl-8 text-right"
                                     {...field}
-                                    onChange={(e) => {
-                                      const formatted = formatCurrency(e.target.value)
-                                      field.onChange(formatted ? parseFloat(formatted.replace(/\D/g, '')) / 100 : 0)
-                                    }}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                   />
                                 </div>
                               </FormControl>
@@ -774,7 +759,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={loading}
-                className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'
+                className='border hover:text-red-600 hover:border-red-600 cursor-pointer sm:mt-4'
               >
                 Cancelar
               </Button>

@@ -2,7 +2,6 @@
 
 import { StatsCard } from "@/components/dashboard/stats-card"
 import { OrcamentosStatusChart } from "@/components/dashboard/orcamentos-status-chart"
-import { OrcamentosMesChart } from "@/components/dashboard/orcamentos-mes-chart"
 import { ProdutosServicosChart } from "@/components/dashboard/produtos-servicos-chart"
 import { RecentClientsTable } from "@/components/dashboard/recent-clients-table"
 import { RecentProductsTable } from "@/components/dashboard/recent-products-table"
@@ -123,18 +122,12 @@ export function DashboardContent({ workspaceId }: DashboardContentProps) {
 
         {/* Gráficos - só aparecem quando há orçamentos cadastrados */}
         {!loading && data && data.stats.totalOrcamentos > 0 && (
-          <>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
-                <OrcamentosStatusChart data={data.charts.orcamentosPorStatus} />
-                <ProdutosServicosChart data={data.charts.produtosVsServicos} />
-              </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
+              <OrcamentosStatusChart data={data.charts.orcamentosPorStatus} />
+              <ProdutosServicosChart data={data.charts.produtosVsServicos} />
             </div>
-
-            <div className="grid gap-4">
-              <OrcamentosMesChart data={data.charts.orcamentosPorMes} />
-            </div>
-          </>
+          </div>
         )}
       </div>
     </>

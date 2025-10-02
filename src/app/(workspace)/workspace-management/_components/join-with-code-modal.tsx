@@ -123,7 +123,7 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={isLoading}
-              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
+              className='border hover:text-red-600 hover:border-red-600 cursor-pointer'
             >
               Cancelar
             </Button>

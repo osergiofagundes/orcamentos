@@ -250,7 +250,7 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               variant="outline"
               onClick={() => setIsPermanentDeleteModalOpen(false)}
               disabled={isLoading}
-              className='border hover:text-red-500 hover:border-red-500 cursor-pointer'
+              className='border hover:text-red-600 hover:border-red-600 cursor-pointer'
             >
               Cancelar
             </Button>
@@ -259,7 +259,7 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               variant="destructive"
               onClick={handlePermanentDelete}
               disabled={isLoading}
-              className='bg-orange-600 hover:bg-orange-700 cursor-pointer'
+              className='bg-red-600 hover:bg-red-700 cursor-pointer'
             >
               {isLoading ? 'Excluindo...' : 'Excluir Permanentemente'}
               <Trash2 className="h-4 w-4 ml-1" />

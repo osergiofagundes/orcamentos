@@ -34,22 +34,35 @@ export async function GET(
         area_trabalho_id: parseInt(workspaceId),
         deletedAt: null,
       },
-      include: {
-        cliente: {
-          select: {
-            nome: true,
-            cpf_cnpj: true,
-          },
-        },
+      select: {
+        id: true,
+        data_criacao: true,
+        valor_total: true,
+        status: true,
+        observacoes: true,
+        // Usar dados desnormalizados do cliente
+        cliente_nome: true,
+        cliente_cpf_cnpj: true,
         usuario: {
           select: {
             name: true,
           },
         },
         itensOrcamento: {
-          include: {
+          select: {
+            id: true,
+            quantidade: true,
+            preco_unitario: true,
+            desconto_percentual: true,
+            desconto_valor: true,
+            // Dados desnormalizados (sempre presentes)
+            produto_nome: true,
+            produto_tipo: true,
+            produto_tipo_valor: true,
+            // Relação opcional (pode ser null se produto foi excluído)
             produtoServico: {
               select: {
+                id: true,
                 nome: true,
               },
             },
@@ -141,7 +154,7 @@ export async function POST(
 
     // Criar orçamento e itens em transação
     const orcamento = await prisma.$transaction(async (tx) => {
-      // Criar o orçamento
+      // Criar o orçamento com dados desnormalizados do cliente
       const novoOrcamento = await tx.orcamento.create({
         data: {
           cliente_id: parseInt(clienteId),
@@ -150,6 +163,16 @@ export async function POST(
           valor_total: valorTotal,
           status: "RASCUNHO",
           observacoes: observacoes || null,
+          // Desnormalizar dados do cliente para preservação
+          cliente_nome: cliente.nome,
+          cliente_cpf_cnpj: cliente.cpf_cnpj,
+          cliente_telefone: cliente.telefone,
+          cliente_email: cliente.email,
+          cliente_endereco: cliente.endereco,
+          cliente_bairro: cliente.bairro,
+          cliente_cidade: cliente.cidade,
+          cliente_estado: cliente.estado,
+          cliente_cep: cliente.cep,
         },
       })
 
@@ -176,6 +199,10 @@ export async function POST(
             preco_unitario: Math.round(item.precoUnitario * 100), // Convert to cents
             desconto_percentual: item.tipoDesconto === "percentual" ? item.descontoPercentual || 0 : 0,
             desconto_valor: item.tipoDesconto === "valor" ? Math.round((item.descontoValor || 0) * 100) : 0, // Convert to cents
+            // Desnormalizar dados do produto para preservação
+            produto_nome: produto.nome,
+            produto_tipo: produto.tipo,
+            produto_tipo_valor: produto.tipo_valor,
           },
         })
       }

@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle } from "lucide-react"
+import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle, Edit } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -82,10 +82,15 @@ interface OrcamentoDetalhado {
     id: number
     quantidade: number
     preco_unitario: number
-    produtoServico: {
+    // Dados desnormalizados (sempre presentes)
+    produto_nome: string
+    produto_tipo: string
+    produto_tipo_valor: string
+    // Relação opcional (pode ser null se produto foi excluído)
+    produtoServico?: {
       id: number
       nome: string
-    }
+    } | null
   }[]
 }
 
@@ -154,7 +159,7 @@ export function EditOrcamentoModal({
         if (orcamentoData.itensOrcamento && Array.isArray(orcamentoData.itensOrcamento)) {
           form.setValue("itens", orcamentoData.itensOrcamento.map((item: any) => ({
             id: item.id,
-            produtoServicoId: item.produtoServico?.id?.toString() || "",
+            produtoServicoId: item.produtoServico?.id?.toString() || "deleted",
             quantidade: item.quantidade || 1,
             precoUnitario: (item.preco_unitario || 0) / 100, // Convert from cents
             descontoPercentual: parseFloat(item.desconto_percentual || 0),
@@ -217,6 +222,11 @@ export function EditOrcamentoModal({
   }
 
   const updatePrecoFromProduto = (index: number, produtoId: string) => {
+    // Não atualizar preço para produtos excluídos
+    if (produtoId === "deleted") {
+      return
+    }
+    
     const produto = produtosServicos.find(p => p.id.toString() === produtoId)
     if (produto && produto.valor) {
       form.setValue(`itens.${index}.precoUnitario`, produto.valor / 100) // Convert from cents
@@ -413,6 +423,15 @@ export function EditOrcamentoModal({
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
+                                    {/* Mostrar produto excluído se for o caso */}
+                                    {field.value === "deleted" && (
+                                      <SelectItem key="deleted" value="deleted" disabled>
+                                        <div className="flex gap-2 items-center text-muted-foreground">
+                                          <span>Produto Excluído</span>
+                                          <span className="text-xs">(não é mais possível selecionar)</span>
+                                        </div>
+                                      </SelectItem>
+                                    )}
                                     {produtosServicos.map((produto) => (
                                       <SelectItem key={produto.id} value={produto.id.toString()}>
                                         <div className="flex gap-2 items-center">
@@ -711,7 +730,7 @@ export function EditOrcamentoModal({
                   variant="outline"
                   onClick={handleClose}
                   disabled={saving}
-                  className='border hover:text-red-500 hover:border-red-500 cursor-pointer sm:mt-4'
+                  className='border hover:text-red-600 hover:border-red-600 cursor-pointer sm:mt-4'
                 >
                   Cancelar
                 </Button>
@@ -721,8 +740,8 @@ export function EditOrcamentoModal({
                     disabled={saving}
                     className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'
                   >
-                    <Save className="h-4 w-4 mr-2" />
                     {saving ? "Salvando..." : "Salvar Alterações"}
+                    <Edit className="h-4 w-4" />
                   </Button>
                 )}
               </DialogFooter>

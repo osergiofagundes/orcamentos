@@ -199,7 +199,8 @@ export async function DELETE(
                 id: parseInt(clienteId)
             },
             data: {
-                deletedAt: new Date()
+                deletedAt: new Date(),
+                deletedBy: session.user.id
             }
         })
 
