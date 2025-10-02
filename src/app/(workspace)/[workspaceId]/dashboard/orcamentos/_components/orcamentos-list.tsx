@@ -23,10 +23,9 @@ interface Orcamento {
   data_criacao: string
   valor_total: number | null
   status: string
-  cliente: {
-    nome: string
-    cpf_cnpj: string
-  }
+  // Dados desnormalizados do cliente
+  cliente_nome: string
+  cliente_cpf_cnpj: string | null
   usuario: {
     name: string
   }
@@ -162,8 +161,8 @@ export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilt
       const searchTerm = search.toLowerCase().trim()
       const matchesSearch = (
         orcamento.id.toString().includes(searchTerm) ||
-        orcamento.cliente.nome.toLowerCase().includes(searchTerm) ||
-        (orcamento.cliente.cpf_cnpj && orcamento.cliente.cpf_cnpj.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''))) ||
+        orcamento.cliente_nome.toLowerCase().includes(searchTerm) ||
+        (orcamento.cliente_cpf_cnpj && orcamento.cliente_cpf_cnpj.replace(/\D/g, '').includes(searchTerm.replace(/\D/g, ''))) ||
         orcamento.usuario.name.toLowerCase().includes(searchTerm)
       )
       if (!matchesSearch) return false
@@ -275,13 +274,13 @@ export function OrcamentosList({ workspaceId, refreshTrigger, search, statusFilt
                   <TableCell>#{orcamento.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {orcamento.cliente.cpf_cnpj && orcamento.cliente.cpf_cnpj.replace(/\D/g, '').length === 11 ? (
+                      {orcamento.cliente_cpf_cnpj && orcamento.cliente_cpf_cnpj.replace(/\D/g, '').length === 11 ? (
                         <User className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Building className="h-4 w-4 text-muted-foreground" />
                       )}
                       <span>
-                        {orcamento.cliente.nome} - {formatCpfCnpj(orcamento.cliente.cpf_cnpj)}
+                        {orcamento.cliente_nome} - {formatCpfCnpj(orcamento.cliente_cpf_cnpj)}
                       </span>
                     </div>
                   </TableCell>

@@ -39,7 +39,10 @@ export async function POST(
 
         switch (type) {
             case 'cliente':
-                // Verificar se há orçamentos relacionados (incluindo os excluídos)
+                // Com a desnormalização dos dados do cliente, agora podemos excluir o cliente
+                // sem afetar os orçamentos, pois os dados estão preservados nos campos desnormalizados
+                
+                // Verificar se há orçamentos relacionados apenas para informar ao usuário
                 const clienteOrcamentosAtivos = await prisma.orcamento.count({
                     where: { 
                         cliente_id: parseInt(id),
@@ -56,40 +59,12 @@ export async function POST(
 
                 const totalOrcamentos = clienteOrcamentosAtivos + clienteOrcamentosExcluidos
 
-                if (totalOrcamentos > 0 && !force) {
-                    return NextResponse.json({ 
-                        error: 'CLIENT_HAS_BUDGETS',
-                        message: `Este cliente possui ${totalOrcamentos} orçamento(s) vinculado(s).`,
-                        details: {
-                            activeBudgets: clienteOrcamentosAtivos,
-                            deletedBudgets: clienteOrcamentosExcluidos,
-                            totalBudgets: totalOrcamentos
-                        }
-                    }, { status: 400 })
+                // Informar sobre os orçamentos, mas não impedir a exclusão
+                if (totalOrcamentos > 0) {
+                    console.log(`Excluindo cliente com ${totalOrcamentos} orçamento(s) vinculado(s). Os dados do cliente nos orçamentos serão preservados através dos campos desnormalizados.`)
                 }
 
-                // Se force = true, deletar todos os orçamentos relacionados primeiro
-                if (force && totalOrcamentos > 0) {
-                    await prisma.$transaction(async (tx) => {
-                        // Buscar todos os orçamentos do cliente
-                        const orcamentosDoCliente = await tx.orcamento.findMany({
-                            where: { cliente_id: parseInt(id) }
-                        })
-
-                        // Deletar itens de orçamento primeiro
-                        for (const orcamento of orcamentosDoCliente) {
-                            await tx.itemOrcamento.deleteMany({
-                                where: { orcamento_id: orcamento.id }
-                            })
-                        }
-
-                        // Depois deletar os orçamentos
-                        await tx.orcamento.deleteMany({
-                            where: { cliente_id: parseInt(id) }
-                        })
-                    })
-                }
-
+                // Excluir apenas o cliente - os orçamentos mantêm os dados através dos campos desnormalizados
                 await prisma.cliente.delete({
                     where: { 
                         id: parseInt(id),
@@ -116,28 +91,8 @@ export async function POST(
                 break
 
             case 'produto':
-                // Verificar se há itens de orçamento relacionados
-                const produtoItens = await prisma.itemOrcamento.count({
-                    where: { produto_servico_id: parseInt(id) }
-                })
-
-                if (produtoItens > 0 && !force) {
-                    return NextResponse.json({ 
-                        error: 'PRODUCT_HAS_BUDGET_ITEMS',
-                        message: `Este produto/serviço está sendo usado em ${produtoItens} item(ns) de orçamento.`,
-                        details: {
-                            budgetItems: produtoItens
-                        }
-                    }, { status: 400 })
-                }
-
-                // Se force = true, deletar todos os itens de orçamento relacionados primeiro
-                if (force && produtoItens > 0) {
-                    await prisma.itemOrcamento.deleteMany({
-                        where: { produto_servico_id: parseInt(id) }
-                    })
-                }
-
+                // Com dados desnormalizados, podemos excluir produtos diretamente
+                // Os orçamentos mantêm os dados do produto através da desnormalização
                 await prisma.produtoServico.delete({
                     where: { 
                         id: parseInt(id),

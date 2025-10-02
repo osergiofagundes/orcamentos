@@ -53,7 +53,7 @@ export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceList
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold">Minhas Áreas de Trabalho</h1>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Link href="/workspace-management/trash">
+          <Link href="/workspace-management/lixeira">
             <Button variant="outline" size="sm" className="hover:text-red-600 hover:border-red-600 cursor-pointer w-full sm:w-auto">
               <Trash2 className="h-4 w-4 mr-1" />
               Lixeira

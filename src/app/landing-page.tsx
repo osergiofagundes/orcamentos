@@ -94,7 +94,7 @@ export default function LandingPage() {
                         {user.name?.[0]?.toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight hidden sm:block">
+                    <div className="flex-1 text-left text-sm leading-tight hidden sm:block">
                       <span className="truncate font-medium">{user.name}</span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
@@ -276,7 +276,7 @@ export default function LandingPage() {
           user={{
             name: user.name,
             email: user.email,
-            avatar: user.image
+            avatar: user.avatar
           }}
         />
       )}

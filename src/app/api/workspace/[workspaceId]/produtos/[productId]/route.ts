@@ -120,8 +120,6 @@ export async function DELETE(
 ) {
   try {
     const { workspaceId, productId } = await context.params
-    const { searchParams } = new URL(request.url)
-    const force = searchParams.get('force') === 'true'
 
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -156,35 +154,13 @@ export async function DELETE(
         id: parseInt(productId),
         area_trabalho_id: parseInt(workspaceId),
       },
-      include: {
-        itensOrcamento: true,
-      },
     })
 
     if (!existingProduct) {
       return NextResponse.json({ message: "Produto não encontrado" }, { status: 404 })
     }
 
-    // Verificar se o produto está sendo usado em algum orçamento
-    if (existingProduct.itensOrcamento.length > 0 && !force) {
-      return NextResponse.json(
-        { 
-          message: `Não é possível excluir este produto/serviço. Ele está sendo usado em ${existingProduct.itensOrcamento.length} orçamento(s).`,
-          details: "Para excluir este produto, primeiro remova-o de todos os orçamentos que o utilizam."
-        },
-        { status: 400 }
-      )
-    }
-
-    // Se force = true, excluir primeiro todos os itens de orçamento relacionados
-    if (force && existingProduct.itensOrcamento.length > 0) {
-      await prisma.itemOrcamento.deleteMany({
-        where: {
-          produto_servico_id: parseInt(productId),
-        },
-      })
-    }
-
+    // Realizar soft delete (mover para lixeira)
     await prisma.produtoServico.update({
       where: {
         id: parseInt(productId),
@@ -195,25 +171,10 @@ export async function DELETE(
       }
     })
 
-    const message = force && existingProduct.itensOrcamento.length > 0
-      ? `Produto excluído com sucesso. ${existingProduct.itensOrcamento.length} item(s) de orçamento foram removidos.`
-      : "Produto excluído com sucesso"
-
-    return NextResponse.json({ message })
+    // Com dados desnormalizados, os orçamentos mantém os dados do produto
+    return NextResponse.json({ message: "Produto movido para a lixeira com sucesso" })
   } catch (error) {
     console.error("Erro ao excluir produto:", error)
-    
-    // Verificar se é um erro de constraint de chave estrangeira
-    if (error instanceof Error && error.message.includes('foreign key constraint')) {
-      return NextResponse.json(
-        { 
-          message: "Não é possível excluir este produto/serviço pois ele está sendo usado em orçamentos.",
-          details: "Para excluir este produto, primeiro remova-o de todos os orçamentos que o utilizam."
-        },
-        { status: 400 }
-      )
-    }
-
     return NextResponse.json(
       { message: "Erro interno do servidor" },
       { status: 500 }

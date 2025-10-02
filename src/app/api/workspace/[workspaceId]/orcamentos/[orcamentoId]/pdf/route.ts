@@ -53,20 +53,6 @@ export async function GET(
         area_trabalho_id: parseInt(workspaceId),
       },
       include: {
-        cliente: {
-          select: {
-            id: true,
-            nome: true,
-            cpf_cnpj: true,
-            email: true,
-            telefone: true,
-            endereco: true,
-            bairro: true,
-            cidade: true,
-            estado: true,
-            cep: true,
-          },
-        },
         usuario: {
           select: {
             name: true,
@@ -89,7 +75,17 @@ export async function GET(
           },
         },
         itensOrcamento: {
-          include: {
+          select: {
+            id: true,
+            quantidade: true,
+            preco_unitario: true,
+            desconto_percentual: true,
+            desconto_valor: true,
+            // Dados desnormalizados (sempre presentes)
+            produto_nome: true,
+            produto_tipo: true,
+            produto_tipo_valor: true,
+            // Relação opcional (pode ser null se produto foi excluído)
             produtoServico: {
               select: {
                 id: true,
@@ -133,6 +129,19 @@ export async function GET(
       subtotal,
       totalDesconto,
       valorFinal,
+      // Montar dados do cliente usando campos desnormalizados
+      cliente: {
+        id: 0, // ID não é necessário para o PDF
+        nome: orcamento.cliente_nome,
+        cpf_cnpj: orcamento.cliente_cpf_cnpj,
+        telefone: orcamento.cliente_telefone,
+        email: orcamento.cliente_email,
+        endereco: orcamento.cliente_endereco,
+        bairro: orcamento.cliente_bairro,
+        cidade: orcamento.cliente_cidade,
+        estado: orcamento.cliente_estado,
+        cep: orcamento.cliente_cep,
+      },
     }
 
     return NextResponse.json(orcamentoData)

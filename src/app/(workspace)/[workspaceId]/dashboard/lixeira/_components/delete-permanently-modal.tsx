@@ -72,7 +72,8 @@ export function DeletePermanentlyModal({
 
       if (!response.ok) {
         // Se for erro de dependência, mostrar modal específico
-        if (['CLIENT_HAS_BUDGETS', 'PRODUCT_HAS_BUDGET_ITEMS', 'CATEGORY_HAS_PRODUCTS'].includes(responseData.error)) {
+        // CLIENT_HAS_BUDGETS e PRODUCT_HAS_BUDGET_ITEMS removidos da lista pois agora é seguro excluir clientes e produtos
+        if (['CATEGORY_HAS_PRODUCTS'].includes(responseData.error)) {
           setDependencyError(responseData)
           setShowDependencyModal(true)
           onOpenChange(false)
@@ -82,7 +83,7 @@ export function DeletePermanentlyModal({
         throw new Error(responseData.message || responseData.error || "Erro ao excluir permanentemente")
       }
 
-      toast.success(`${item.name} foi removido definitivamente.`)
+      toast.success(`${item.name} foi excluido permanentemente.`)
 
       onDeleted?.()
       onOpenChange(false)
@@ -109,6 +110,16 @@ export function DeletePermanentlyModal({
             </DialogTitle>
             <DialogDescription>
               Esta ação é irreversível. O item será removido permanentemente do sistema e não poderá ser recuperado.
+              {item.type === 'cliente' && (
+                <><br /><br />
+                <strong>Nota:</strong> Os orçamentos associados a este cliente serão preservados com todos os dados do cliente intactos.
+                </>
+              )}
+              {item.type === 'produto' && (
+                <><br /><br />
+                <strong>Nota:</strong> Os orçamentos que utilizam este produto/serviço serão preservados com todos os dados do produto intactos.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
 

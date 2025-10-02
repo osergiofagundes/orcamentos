@@ -257,11 +257,8 @@ export async function GET(request: NextRequest) {
         valor_total: true,
         status: true,
         createdAt: true,
-        cliente: {
-          select: {
-            nome: true
-          }
-        },
+        // Usar dados desnormalizados do cliente
+        cliente_nome: true,
         usuario: {
           select: {
             name: true
@@ -318,7 +315,7 @@ export async function GET(request: NextRequest) {
       })),
       recentOrcamentos: recentOrcamentos.map(orcamento => ({
         id: orcamento.id,
-        cliente_nome: orcamento.cliente.nome,
+        cliente_nome: orcamento.cliente_nome,
         valor_total: (orcamento.valor_total || 0) / 100, // Converter de centavos para reais
         status: orcamento.status,
         data_criacao: orcamento.createdAt,

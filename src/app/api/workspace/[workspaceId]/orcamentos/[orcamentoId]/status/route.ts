@@ -73,9 +73,20 @@ export async function PATCH(
           },
         },
         itensOrcamento: {
-          include: {
+          select: {
+            id: true,
+            quantidade: true,
+            preco_unitario: true,
+            desconto_percentual: true,
+            desconto_valor: true,
+            // Dados desnormalizados (sempre presentes)
+            produto_nome: true,
+            produto_tipo: true,
+            produto_tipo_valor: true,
+            // Relação opcional (pode ser null se produto foi excluído)
             produtoServico: {
               select: {
+                id: true,
                 nome: true,
               },
             },

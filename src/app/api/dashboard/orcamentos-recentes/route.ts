@@ -34,7 +34,12 @@ export async function GET(request: NextRequest) {
         area_trabalho_id: workspaceId,
         deletedAt: null
       },
-      include: {
+      select: {
+        id: true,
+        data_criacao: true,
+        valor_total: true,
+        status: true,
+        cliente_nome: true, // Usar dados desnormalizados
         cliente: {
           select: {
             nome: true
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     const orcamentosFormatados = orcamentosRecentes.map(orcamento => ({
       id: orcamento.id,
-      cliente: orcamento.cliente.nome,
+      cliente: orcamento.cliente?.nome || orcamento.cliente_nome, // Usar dados desnormalizados se cliente foi excluído
       valor: orcamento.valor_total ? (orcamento.valor_total / 100) : 0,
       status: orcamento.status,
       data: orcamento.data_criacao.toLocaleDateString('pt-BR'),

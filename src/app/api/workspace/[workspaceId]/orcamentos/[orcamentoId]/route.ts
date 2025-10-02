@@ -35,7 +35,23 @@ export async function GET(
         id: parseInt(orcamentoId),
         area_trabalho_id: parseInt(workspaceId),
       },
-      include: {
+      select: {
+        id: true,
+        data_criacao: true,
+        valor_total: true,
+        status: true,
+        observacoes: true,
+        // Dados desnormalizados do cliente
+        cliente_nome: true,
+        cliente_cpf_cnpj: true,
+        cliente_telefone: true,
+        cliente_email: true,
+        cliente_endereco: true,
+        cliente_bairro: true,
+        cliente_cidade: true,
+        cliente_estado: true,
+        cliente_cep: true,
+        // Incluir dados originais do cliente se ainda existir (para compatibilidade)
         cliente: {
           select: {
             id: true,
@@ -44,6 +60,10 @@ export async function GET(
             email: true,
             telefone: true,
             endereco: true,
+            bairro: true,
+            cidade: true,
+            estado: true,
+            cep: true,
           },
         },
         usuario: {
@@ -53,7 +73,17 @@ export async function GET(
           },
         },
         itensOrcamento: {
-          include: {
+          select: {
+            id: true,
+            quantidade: true,
+            preco_unitario: true,
+            desconto_percentual: true,
+            desconto_valor: true,
+            // Dados desnormalizados (sempre presentes)
+            produto_nome: true,
+            produto_tipo: true,
+            produto_tipo_valor: true,
+            // Relação opcional (pode ser null se produto foi excluído)
             produtoServico: {
               select: {
                 id: true,
@@ -167,13 +197,23 @@ export async function PUT(
 
     // Atualizar orçamento e itens em transação
     const orcamentoAtualizado = await prisma.$transaction(async (tx) => {
-      // Atualizar o orçamento
+      // Atualizar o orçamento com dados atualizados do cliente
       const orcamento = await tx.orcamento.update({
         where: { id: parseInt(orcamentoId) },
         data: {
           cliente_id: parseInt(clienteId),
           valor_total: valorTotal,
           observacoes: observacoes || null,
+          // Atualizar dados desnormalizados do cliente
+          cliente_nome: cliente.nome,
+          cliente_cpf_cnpj: cliente.cpf_cnpj,
+          cliente_telefone: cliente.telefone,
+          cliente_email: cliente.email,
+          cliente_endereco: cliente.endereco,
+          cliente_bairro: cliente.bairro,
+          cliente_cidade: cliente.cidade,
+          cliente_estado: cliente.estado,
+          cliente_cep: cliente.cep,
         },
       })
 
@@ -205,6 +245,10 @@ export async function PUT(
             preco_unitario: Math.round(item.precoUnitario * 100), // Convert to cents
             desconto_percentual: item.tipoDesconto === "percentual" ? item.descontoPercentual || 0 : 0,
             desconto_valor: item.tipoDesconto === "valor" ? Math.round((item.descontoValor || 0) * 100) : 0, // Convert to cents
+            // Desnormalizar dados do produto para preservação
+            produto_nome: produto.nome,
+            produto_tipo: produto.tipo,
+            produto_tipo_valor: produto.tipo_valor,
           },
         })
       }
@@ -225,9 +269,20 @@ export async function PUT(
             },
           },
           itensOrcamento: {
-            include: {
+            select: {
+              id: true,
+              quantidade: true,
+              preco_unitario: true,
+              desconto_percentual: true,
+              desconto_valor: true,
+              // Dados desnormalizados (sempre presentes)
+              produto_nome: true,
+              produto_tipo: true,
+              produto_tipo_valor: true,
+              // Relação opcional (pode ser null se produto foi excluído)
               produtoServico: {
                 select: {
+                  id: true,
                   nome: true,
                 },
               },

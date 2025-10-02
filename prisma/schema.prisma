@@ -185,14 +185,24 @@ model Orcamento {
   valor_total         Int?           // Em centavos (R$ 10,50 = 1050)
   status              StatusOrcamento @default(RASCUNHO)
   observacoes         String?        @db.Text
-  cliente_id          Int
+  cliente_id          Int?           // Tornando opcional para permitir exclusão do cliente
   usuario_id          String         // Alterado para String para relacionar com User.id
   area_trabalho_id    Int
+  // Campos desnormalizados do cliente para preservar dados quando cliente for excluído
+  cliente_nome        String         @db.VarChar(255)
+  cliente_cpf_cnpj    String?        @db.VarChar(255)
+  cliente_telefone    String?        @db.VarChar(255)
+  cliente_email       String?        @db.Text
+  cliente_endereco    String?        @db.Text
+  cliente_bairro      String?        @db.VarChar(255)
+  cliente_cidade      String?        @db.VarChar(255)
+  cliente_estado      String?        @db.VarChar(255)
+  cliente_cep         String?        @db.VarChar(255)
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
   deletedBy           String?        // ID do usuário que excluiu
-  cliente             Cliente        @relation(fields: [cliente_id], references: [id])
+  cliente             Cliente?       @relation(fields: [cliente_id], references: [id])
   usuario             User           @relation(fields: [usuario_id], references: [id])
   areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
   itensOrcamento     ItemOrcamento[]
@@ -204,15 +214,19 @@ model Orcamento {
 model ItemOrcamento {
   id                  Int            @id @default(autoincrement())
   orcamento_id        Int
-  produto_servico_id  Int
+  produto_servico_id  Int?           // Tornando opcional para permitir exclusão do produto
   quantidade          Int
   preco_unitario      Int            // Em centavos (R$ 10,50 = 1050)
   desconto_percentual Decimal?       @default(0) @db.Decimal(5,2) // Desconto em percentual (0.00 a 100.00)
   desconto_valor      Int?           @default(0) // Desconto em valor fixo em centavos
+  // Campos desnormalizados do produto/serviço para preservar dados quando produto for excluído
+  produto_nome        String         @db.VarChar(255)
+  produto_tipo        TipoProdutoServico?
+  produto_tipo_valor  TipoValor?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   orcamento           Orcamento      @relation(fields: [orcamento_id], references: [id])
-  produtoServico      ProdutoServico @relation(fields: [produto_servico_id], references: [id])
+  produtoServico      ProdutoServico? @relation(fields: [produto_servico_id], references: [id])
 
   @@map("item_orcamento")
 }

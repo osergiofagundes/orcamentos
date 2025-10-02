@@ -20,10 +20,9 @@ interface Orcamento {
   data_criacao: string
   valor_total: number | null
   status: string
-  cliente: {
-    nome: string
-    cpf_cnpj: string
-  }
+  // Dados desnormalizados do cliente
+  cliente_nome: string
+  cliente_cpf_cnpj: string | null
   usuario: {
     name: string
   }
@@ -91,10 +90,9 @@ export function OrcamentoActions({ orcamento, workspaceId, onUpdate }: Orcamento
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => setDeleteOpen(true)}
-                className="text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
+                Enviar para lixeira
               </DropdownMenuItem>
             </>
           )}
@@ -116,7 +114,7 @@ export function OrcamentoActions({ orcamento, workspaceId, onUpdate }: Orcamento
           <DeleteOrcamentoModal
             orcamentoId={orcamento.id}
             orcamentoNumero={orcamento.id.toString()}
-            clienteNome={orcamento.cliente.nome}
+            clienteNome={orcamento.cliente_nome}
             valorTotal={orcamento.valor_total}
             workspaceId={workspaceId}
             isOpen={deleteOpen}

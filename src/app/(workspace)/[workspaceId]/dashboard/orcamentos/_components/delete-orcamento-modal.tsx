@@ -52,16 +52,16 @@ export function DeleteOrcamentoModal({
       })
 
       if (response.ok) {
-        toast.success("Orçamento excluído com sucesso!")
+        toast.success("Orçamento enviado para lixeira com sucesso!")
         onClose()
         onOrcamentoDeleted()
       } else {
         const error = await response.json()
-        toast.error(error.message || "Erro ao excluir orçamento")
+        toast.error(error.message || "Erro ao enviar orçamento para lixeira")
       }
     } catch (error) {
-      console.error("Erro ao excluir orçamento:", error)
-      toast.error("Erro ao excluir orçamento")
+      console.error("Erro ao enviar orçamento para lixeira:", error)
+      toast.error("Erro ao enviar orçamento para lixeira")
     } finally {
       setDeleting(false)
     }
@@ -72,15 +72,10 @@ export function DeleteOrcamentoModal({
       <DialogContent className="sm:max-w-lg border-l-8 border-l-red-800">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogTitle>Confirmar envio para lixeira</DialogTitle>
           </div>
           <DialogDescription>
-            Tem certeza que deseja excluir o orçamento <strong>#{orcamentoNumero}</strong>?
-            <br />
-            <span className="text-red-600 font-medium">
-              Esta ação não pode ser desfeita.
-            </span>
+            Tem certeza que deseja enviar para lixeira o orçamento <strong>#{orcamentoNumero}</strong>?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -94,7 +89,7 @@ export function DeleteOrcamentoModal({
             disabled={deleting}
             className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
-            {deleting ? "Excluindo..." : "Excluir"}
+            {deleting ? "Enviando..." : "Enviar para lixeira"}
             <Trash2 className="h-4 w-4" />
           </Button>
         </DialogFooter>

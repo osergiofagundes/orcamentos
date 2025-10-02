@@ -74,8 +74,14 @@ export async function GET(
                     area_trabalho_id: parseInt(workspaceId),
                     deletedAt: { not: null },
                 },
-                include: {
-                    cliente: true,
+                select: {
+                    id: true,
+                    deletedAt: true,
+                    deletedBy: true,
+                    cliente_nome: true, // Dados desnormalizados
+                    cliente: {
+                        select: { nome: true }
+                    },
                     usuarioQueExcluiu: {
                         select: { name: true }
                     }
@@ -84,7 +90,7 @@ export async function GET(
             })
 
             orcamentos.forEach(orcamento => {
-                const name = `Orçamento #${orcamento.id} - ${orcamento.cliente.nome}`
+                const name = `Orçamento #${orcamento.id} - ${orcamento.cliente?.nome || orcamento.cliente_nome}`
                 if (!search || name.toLowerCase().includes(search.toLowerCase())) {
                     items.push({
                         id: orcamento.id.toString(),
