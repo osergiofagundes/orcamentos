@@ -144,8 +144,17 @@ export function DeletePermanentlyModal({
               disabled={loading}
               className='bg-red-600 hover:bg-red-700 cursor-pointer'
             >
-              Excluir Permanentemente
-              <Trash2 className="h-4 w-4" />
+              {loading ? (
+              <>
+                Excluindo
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </>
+              ) : (
+              <>
+                Excluir Permanentemente
+                <Trash2 className="h-4 w-4" />
+              </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

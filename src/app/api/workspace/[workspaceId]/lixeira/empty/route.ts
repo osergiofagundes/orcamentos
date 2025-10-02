@@ -59,32 +59,16 @@ export async function POST(
             })
             deletedCount += deletedOrcamentos.count
 
-            // 4. Deletar produtos/serviços excluídos (verificando dependências)
-            const produtosExcluidos = await tx.produtoServico.findMany({
+            // 4. Deletar produtos/serviços excluídos
+            // Com dados desnormalizados, podemos excluir produtos diretamente
+            // Os orçamentos mantêm os dados do produto através da desnormalização
+            const deletedProdutos = await tx.produtoServico.deleteMany({
                 where: {
                     area_trabalho_id: parseInt(workspaceId),
                     deletedAt: { not: null }
                 }
             })
-
-            for (const produto of produtosExcluidos) {
-                // Verificar se ainda há itens de orçamento ativos que referenciam este produto
-                const itensAtivos = await tx.itemOrcamento.count({
-                    where: {
-                        produto_servico_id: produto.id,
-                        orcamento: {
-                            deletedAt: null
-                        }
-                    }
-                })
-
-                if (itensAtivos === 0) {
-                    await tx.produtoServico.delete({
-                        where: { id: produto.id }
-                    })
-                    deletedCount++
-                }
-            }
+            deletedCount += deletedProdutos.count
 
             // 5. Deletar categorias excluídas (verificando dependências)
             const categoriasExcluidas = await tx.categoria.findMany({
@@ -111,30 +95,16 @@ export async function POST(
                 }
             }
 
-            // 6. Deletar clientes excluídos (verificando dependências)
-            const clientesExcluidos = await tx.cliente.findMany({
+            // 6. Deletar clientes excluídos
+            // Com a desnormalização dos dados do cliente, agora podemos excluir o cliente
+            // sem afetar os orçamentos, pois os dados estão preservados nos campos desnormalizados
+            const deletedClientes = await tx.cliente.deleteMany({
                 where: {
                     area_trabalho_id: parseInt(workspaceId),
                     deletedAt: { not: null }
                 }
             })
-
-            for (const cliente of clientesExcluidos) {
-                // Verificar se ainda há orçamentos ativos que referenciam este cliente
-                const orcamentosAtivos = await tx.orcamento.count({
-                    where: {
-                        cliente_id: cliente.id,
-                        deletedAt: null
-                    }
-                })
-
-                if (orcamentosAtivos === 0) {
-                    await tx.cliente.delete({
-                        where: { id: cliente.id }
-                    })
-                    deletedCount++
-                }
-            }
+            deletedCount += deletedClientes.count
         })
 
 

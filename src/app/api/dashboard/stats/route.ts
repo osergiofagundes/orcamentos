@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Buscar nomes dos produtos
-    const produtoIds = topProdutos.map(item => item.produto_servico_id)
+    const produtoIds = topProdutos.map(item => item.produto_servico_id).filter((id): id is number => id !== null)
     const produtos = await prisma.produtoServico.findMany({
       where: {
         id: { in: produtoIds }

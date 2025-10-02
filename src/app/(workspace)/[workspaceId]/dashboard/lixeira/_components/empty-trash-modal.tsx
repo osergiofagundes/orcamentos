@@ -84,14 +84,24 @@ export function EmptyTrashModal({
           >
             Cancelar
           </Button>
-          <Button
+            <Button
             variant="destructive"
             onClick={handleEmptyTrash}
+            disabled={loading}
             className='bg-red-600 hover:bg-red-700 cursor-pointer'
-          >
-            Esvaziar Lixeira
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            >
+            {loading ? (
+              <>
+                Esvaziando
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </>
+            ) : (
+              <>
+                Esvaziar Lixeira
+                <Trash2 className="h-4 w-4" />
+              </>
+            )}
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
