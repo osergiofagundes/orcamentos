@@ -27,18 +27,18 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle, Edit } from "lucide-react"
+import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle, Edit, Loader2 } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
 
 const editOrcamentoSchema = z.object({
-  clienteId: z.string().min(1, "Selecione um cliente"),
+  clienteId: z.string().min(1, "Selecione um cliente"), // "deleted" é um valor válido
   observacoes: z.string().optional(),
   itens: z.array(z.object({
     id: z.number().optional(),
-    produtoServicoId: z.string().min(1, "Selecione um produto/serviço"),
+    produtoServicoId: z.string().min(1, "Selecione um produto/serviço"), // "deleted" é um valor válido
     quantidade: z.number().min(1, "Quantidade deve ser maior que 0"),
     precoUnitario: z.number().min(0, "Preço deve ser maior ou igual a 0"),
     descontoPercentual: z.number().min(0).max(100).optional(),
@@ -70,11 +70,22 @@ interface OrcamentoDetalhado {
   valor_total: number | null
   status: string
   observacoes?: string
+  // Dados desnormalizados do cliente (sempre presentes)
+  cliente_nome: string
+  cliente_cpf_cnpj: string | null
+  cliente_telefone: string | null
+  cliente_email: string | null
+  cliente_endereco: string | null
+  cliente_bairro: string | null
+  cliente_cidade: string | null
+  cliente_estado: string | null
+  cliente_cep: string | null
+  // Relação opcional (pode ser null se cliente foi excluído)
   cliente: {
     id: number
     nome: string
     cpf_cnpj: string | null
-  }
+  } | null
   usuario: {
     name: string
   }
@@ -82,6 +93,8 @@ interface OrcamentoDetalhado {
     id: number
     quantidade: number
     preco_unitario: number
+    desconto_percentual: number
+    desconto_valor: number
     // Dados desnormalizados (sempre presentes)
     produto_nome: string
     produto_tipo: string
@@ -150,8 +163,11 @@ export function EditOrcamentoModal({
         setOrcamento(orcamentoData)
         
         // Verificar se os dados existem antes de popular o formulário
+        // Se o cliente ainda existe, usar ele, senão usar "deleted"
         if (orcamentoData && orcamentoData.cliente && orcamentoData.cliente.id) {
           form.setValue("clienteId", orcamentoData.cliente.id.toString())
+        } else {
+          form.setValue("clienteId", "deleted")
         }
         
         form.setValue("observacoes", orcamentoData.observacoes || "")
@@ -305,20 +321,12 @@ export function EditOrcamentoModal({
               Orçamentos com status "{orcamento?.status}" não podem ser modificados.
             </p>
           </div>
-        ) : dataLoaded && (clientes.length === 0 || produtosServicos.length === 0) ? (
+        ) : dataLoaded && !orcamento ? (
           <div className="text-center py-12">
-            <AlertCircle className="h-16 w-16 text-sky-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Dados necessários não encontrados</h3>
-            <div className="space-y-2 text-muted-foreground">
-              {clientes.length === 0 && (
-                <p>• Você precisa cadastrar pelo menos um cliente antes de editar o orçamento.</p>
-              )}
-              {produtosServicos.length === 0 && (
-                <p>• Você precisa cadastrar pelo menos um produto/serviço antes de editar o orçamento.</p>
-              )}
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Cadastre os dados necessários e tente novamente.
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Orçamento não encontrado</h3>
+            <p className="text-muted-foreground">
+              Não foi possível carregar os dados do orçamento.
             </p>
           </div>
         ) : (
@@ -338,16 +346,31 @@ export function EditOrcamentoModal({
                       <FormLabel>Cliente *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione um cliente" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {clientes.map((cliente) => (
-                            <SelectItem key={cliente.id} value={cliente.id.toString()}>
-                              {cliente.nome} - {cliente.cpf_cnpj || 'Sem CPF/CNPJ'}
+                          {/* Mostrar cliente excluído se for o caso */}
+                          {field.value === "deleted" && orcamento && (
+                            <SelectItem key="deleted" value="deleted" disabled>
+                              <div className="flex gap-2 items-center text-muted-foreground">
+                                <span>{orcamento.cliente_nome}</span>
+                                <span className="text-xs text-red-600">(Cliente Excluído)</span>
+                              </div>
                             </SelectItem>
-                          ))}
+                          )}
+                          {clientes.length === 0 ? (
+                            <SelectItem key="no-clients" value="no-clients" disabled>
+                              <span className="text-muted-foreground">Nenhum cliente cadastrado</span>
+                            </SelectItem>
+                          ) : (
+                            clientes.map((cliente) => (
+                              <SelectItem key={cliente.id} value={cliente.id.toString()}>
+                                {cliente.nome} - {cliente.cpf_cnpj || 'Sem CPF/CNPJ'}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -386,10 +409,27 @@ export function EditOrcamentoModal({
                   {fields.map((field, index) => (
                     <div key={field.id} className="relative bg-muted/30 border border-border rounded-xl p-6 transition-all hover:shadow-sm">
                       <div className="absolute top-4 right-4 flex items-center space-x-2">
-                        <span className="bg-background px-2 py-1 rounded-full font-semibold">
+                        {form.watch(`itens.${index}.produtoServicoId`) === "deleted" && (
+                          <p className="bg-background px-2 py-1 rounded-full font-semibold text-red-600">
+                            Este produto/serviço foi excluído.
+                          </p>
+                        )}
+                        <span className="bg-background px-2 py-1 rounded-full font-semibold flex items-center gap-2">
                           Item {index + 1}
                         </span>
-                        {fields.length > 1 && (
+                        {form.watch(`itens.${index}.produtoServicoId`) === "deleted" && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => remove(index)}
+                              className="h-8 w-8 p-0 border cursor-pointer bg-red-600 text-white hover:text-white hover:bg-red-700"
+                              title="Remover item excluído do orçamento"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        {fields.length > 1 && form.watch(`itens.${index}.produtoServicoId`) !== "deleted" && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -416,31 +456,38 @@ export function EditOrcamentoModal({
                                     updatePrecoFromProduto(index, value)
                                   }} 
                                   value={field.value}
+                                  disabled={field.value === "deleted"}
                                 >
                                   <FormControl>
-                                    <SelectTrigger className="h-11 w-full">
+                                    <SelectTrigger className={`h-11 w-full ${field.value === "deleted" ? "opacity-60" : ""}`}>
                                       <SelectValue placeholder="Selecione um produto/serviço" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
                                     {/* Mostrar produto excluído se for o caso */}
-                                    {field.value === "deleted" && (
+                                    {field.value === "deleted" && orcamento && (
                                       <SelectItem key="deleted" value="deleted" disabled>
                                         <div className="flex gap-2 items-center text-muted-foreground">
-                                          <span>Produto Excluído</span>
-                                          <span className="text-xs">(não é mais possível selecionar)</span>
+                                          <span>{orcamento.itensOrcamento[index]?.produto_nome || "Produto Excluído"}</span>
+                                          <span className="text-xs">(produto excluído)</span>
                                         </div>
                                       </SelectItem>
                                     )}
-                                    {produtosServicos.map((produto) => (
-                                      <SelectItem key={produto.id} value={produto.id.toString()}>
-                                        <div className="flex gap-2 items-center">
-                                          <span>{produto.nome}</span>
-                                          <span>-</span>
-                                          <span className="text-muted-foreground">{produto.categoria?.nome || 'Sem categoria'}</span>
-                                        </div>
+                                    {produtosServicos.length === 0 ? (
+                                      <SelectItem key="no-products" value="no-products" disabled>
+                                        <span className="text-muted-foreground">Nenhum produto/serviço cadastrado</span>
                                       </SelectItem>
-                                    ))}
+                                    ) : (
+                                      produtosServicos.map((produto) => (
+                                        <SelectItem key={produto.id} value={produto.id.toString()}>
+                                          <div className="flex gap-2 items-center">
+                                            <span>{produto.nome}</span>
+                                            <span>-</span>
+                                            <span className="text-muted-foreground">{produto.categoria?.nome || 'Sem categoria'}</span>
+                                          </div>
+                                        </SelectItem>
+                                      ))
+                                    )}
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -461,6 +508,7 @@ export function EditOrcamentoModal({
                                     type="number"
                                     min="1"
                                     className="text-right"
+                                    disabled={form.watch(`itens.${index}.produtoServicoId`) === "deleted"}
                                     {...field}
                                     onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                                   />
@@ -486,6 +534,7 @@ export function EditOrcamentoModal({
                                       step="0.01"
                                       min="0"
                                       className="pl-8 text-right"
+                                      disabled={form.watch(`itens.${index}.produtoServicoId`) === "deleted"}
                                       {...field}
                                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                     />
@@ -518,7 +567,11 @@ export function EditOrcamentoModal({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-sm font-medium">Tipo de Desconto</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select 
+                                  onValueChange={field.onChange} 
+                                  value={field.value}
+                                  disabled={form.watch(`itens.${index}.produtoServicoId`) === "deleted"}
+                                >
                                   <FormControl>
                                     <SelectTrigger className="w-full">
                                       <SelectValue placeholder="Sem desconto" />
@@ -553,6 +606,7 @@ export function EditOrcamentoModal({
                                         max="100"
                                         placeholder="0.00"
                                         className="pl-8 text-right"
+                                        disabled={form.watch(`itens.${index}.produtoServicoId`) === "deleted"}
                                         {...field}
                                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                       />
@@ -580,6 +634,7 @@ export function EditOrcamentoModal({
                                         min="0"
                                         placeholder="0.00"
                                         className="pl-8 text-right"
+                                        disabled={form.watch(`itens.${index}.produtoServicoId`) === "deleted"}
                                         {...field}
                                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                       />
@@ -740,8 +795,7 @@ export function EditOrcamentoModal({
                     disabled={saving}
                     className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'
                   >
-                    {saving ? "Salvando..." : "Salvar Alterações"}
-                    <Edit className="h-4 w-4" />
+                    {saving ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
                   </Button>
                 )}
               </DialogFooter>

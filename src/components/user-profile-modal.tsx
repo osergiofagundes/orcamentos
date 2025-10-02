@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { User, Lock, Camera, Pen, Save, Send } from "lucide-react"
+import { User, Lock, Camera, Pen, Save, Send, Loader2, Edit } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -250,8 +250,7 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
               </div>
               
               <Button type="submit" disabled={isLoadingProfile} className='w-full bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-                {isLoadingProfile ? "Salvando..." : "Salvar Alterações"}
-                <Save className="h-4 w-4" />
+                {isLoadingProfile ? (<>Salvando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Salvar Alterações <Edit className="h-4 w-4" /></>)}
               </Button>
             </form>
           </TabsContent>
@@ -285,8 +284,7 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
                   }
                 }}
               >
-                {isLoadingPassword ? 'Enviando...' : 'Enviar email de redefinição'}
-                <Send className="h-4 w-4" />
+                {isLoadingPassword ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar email de redefinição <Send className="h-4 w-4" /></>)}
               </Button>
             </div>
           </TabsContent>

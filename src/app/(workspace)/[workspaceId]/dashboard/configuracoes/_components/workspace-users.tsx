@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { UserPlus, MoreHorizontal, Trash2, Edit, Copy, Check, Users, Clock, KeyRound } from "lucide-react"
+import { UserPlus, MoreHorizontal, Trash2, Edit, Copy, Check, Users, Clock, KeyRound, Loader2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 
@@ -280,8 +280,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                                     Cancelar
                                                 </Button>
                                                 <Button type="submit" disabled={isGeneratingCode} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-                                                    {isGeneratingCode ? "Gerando..." : "Gerar Código"}
-                                                    <KeyRound className="h-4 w-4" />
+                                                    {isGeneratingCode ? (<>Gerando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Gerar Código <KeyRound className="h-4 w-4" /></>)} 
                                                 </Button>
                                             </div>
                                         </form>

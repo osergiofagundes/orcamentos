@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { KeyRound, MailPlus } from 'lucide-react'
+import { KeyRound, Loader2, MailPlus } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface JoinWithCodeModalProps {
@@ -128,8 +128,7 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-              {isLoading ? 'Enviando...' : 'Solicitar Entrada'}
-              <MailPlus className="h-4 w-4" />
+              {isLoading ? (<>Solicitando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Solicitar Entrada <MailPlus className="h-4 w-4" /></>)}
             </Button>
           </div>
         </form>

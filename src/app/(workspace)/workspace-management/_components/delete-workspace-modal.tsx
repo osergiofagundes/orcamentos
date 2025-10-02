@@ -11,7 +11,7 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
-import { Trash2 } from 'lucide-react'
+import { Loader2, Trash2 } from 'lucide-react'
 
 interface DeleteWorkspaceModalProps {
   workspace: {
@@ -95,8 +95,7 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
             disabled={isLoading}
             className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
-            {isLoading ? 'Movendo...' : 'Mover para Lixeira'}
-            <Trash2 className="h-4 w-4" />
+            {isLoading ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar para lixeira <Trash2 className="h-4 w-4" /></>)}
           </Button>
         </DialogFooter>
       </DialogContent>

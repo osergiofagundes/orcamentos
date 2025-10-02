@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Trash2, AlertTriangle } from "lucide-react"
+import { Trash2, AlertTriangle, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface DeleteOrcamentoModalProps {
@@ -89,8 +89,7 @@ export function DeleteOrcamentoModal({
             disabled={deleting}
             className='bg-red-600 hover:bg-red-700 cursor-pointer'
           >
-            {deleting ? "Enviando..." : "Enviar para lixeira"}
-            <Trash2 className="h-4 w-4" />
+            {deleting ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar para lixeira <Trash2 className="h-4 w-4" /></>)}
           </Button>
         </DialogFooter>
       </DialogContent>

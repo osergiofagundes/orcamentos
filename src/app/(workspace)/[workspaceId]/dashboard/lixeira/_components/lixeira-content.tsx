@@ -101,24 +101,25 @@ export function LixeiraContent({
   }
 
   if (items.length === 0) {
+    const hasFiltersApplied = search || (filterType && filterType !== 'all')
+    
     return (
-      <Card className="p-6">
-        <div className="text-center py-12">
-          <Trash2 className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
-          <p className="text-gray-500 mb-2 text-lg">
-        {search || filterType !== "all" 
-          ? "Nenhum item encontrado" 
-          : "A lixeira está vazia"
-        }
-          </p>
-          <p className="text-sm text-muted-foreground">
-        {search || filterType !== "all"
-          ? "Tente ajustar os filtros ou termos de pesquisa"
-          : "Itens excluídos aparecerão aqui"
-        }
-          </p>
-        </div>
-      </Card>
+      <>
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Trash2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              {hasFiltersApplied ? 'Nenhum item encontrado' : 'A lixeira está vazia'}
+            </h3>
+            <p className="text-muted-foreground">
+              {hasFiltersApplied 
+                ? 'Nenhum item corresponde aos filtros aplicados.'
+                : 'Itens excluídos aparecerão aqui.'
+              }
+            </p>
+          </CardContent>
+        </Card>
+      </>
     )
   }
 

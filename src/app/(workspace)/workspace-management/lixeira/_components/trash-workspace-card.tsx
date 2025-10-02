@@ -13,7 +13,7 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
-import { RotateCcw, Trash2, User } from 'lucide-react'
+import { Loader2, RotateCcw, Trash2, User } from 'lucide-react'
 
 // Função para formatar data de forma consistente entre servidor e cliente
 const formatDate = (date: Date | null) => {
@@ -223,8 +223,7 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               disabled={isLoading}
               className='bg-sky-600 hover:bg-sky-700 cursor-pointer'
             >
-              {isLoading ? 'Restaurando...' : 'Restaurar'}
-              <RotateCcw className="h-4 w-4 ml-1" />
+              {isLoading ? (<>Restaurando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Restaurar <RotateCcw className="h-4 w-4" /></>)}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -261,8 +260,7 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               disabled={isLoading}
               className='bg-red-600 hover:bg-red-700 cursor-pointer'
             >
-              {isLoading ? 'Excluindo...' : 'Excluir Permanentemente'}
-              <Trash2 className="h-4 w-4 ml-1" />
+              {isLoading ? (<>Excluindo... <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Excluir Permanentemente <Trash2 className="h-4 w-4 ml-1" /></>)}
             </Button>
           </DialogFooter>
         </DialogContent>

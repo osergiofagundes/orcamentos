@@ -16,7 +16,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { toast } from "sonner"
-import { Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { formatCpfCnpj, validateCpfCnpj } from '@/lib/formatters'
 
 interface CreateWorkspaceModalProps {
@@ -208,8 +208,7 @@ export function CreateWorkspaceModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-              {isLoading ? 'Criando...' : 'Criar Área de Trabalho'}
-              <Plus className="h-4 w-4" />
+              {isLoading ? (<>Criando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Criar área de trabalho <Plus className="h-4 w-4" /></>)}
             </Button>
           </DialogFooter>
         </form>

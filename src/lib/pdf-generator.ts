@@ -39,12 +39,17 @@ interface ProdutoServico {
 interface ItemOrcamento {
   id: number
   orcamento_id: number
-  produto_servico_id: number
+  produto_servico_id: number | null
   quantidade: number
   preco_unitario: number
   desconto_percentual: any
   desconto_valor: number | null
-  produtoServico: ProdutoServico
+  // Dados desnormalizados (sempre presentes)
+  produto_nome: string
+  produto_tipo: string
+  produto_tipo_valor: string
+  // Relação opcional (pode ser null se produto foi excluído)
+  produtoServico: ProdutoServico | null
 }
 
 interface OrcamentoData {
@@ -278,15 +283,15 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
 
       x = margin
       
-      // Nome do produto/serviço (quebrado se necessário)
-      const nomeLines = pdf.splitTextToSize(item.produtoServico.nome, colWidths[0] - 5)
+      // Nome do produto/serviço (quebrado se necessário) - usar dados desnormalizados
+      const nomeLines = pdf.splitTextToSize(item.produto_nome, colWidths[0] - 5)
       pdf.text(nomeLines, x, y)
       
       x += colWidths[0]
       pdf.text(item.quantidade.toString(), x, y)
       
       x += colWidths[1]
-      pdf.text(getTipoValorLabel(item.produtoServico.tipo_valor), x, y)
+      pdf.text(getTipoValorLabel(item.produto_tipo_valor), x, y)
       
       x += colWidths[2]
       pdf.text(formatCurrency(item.preco_unitario), x, y)

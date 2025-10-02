@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Plus } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 
 const productSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -306,8 +306,7 @@ export function CreateProductModal({ isOpen, onClose, workspaceId }: CreateProdu
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
-                {isLoading ? "Criando..." : "Criar Produto/Serviço"}
-                <Plus className="h-4 w-4" />
+                {isLoading ? (<>Criando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Criar produto/serviço <Plus className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>

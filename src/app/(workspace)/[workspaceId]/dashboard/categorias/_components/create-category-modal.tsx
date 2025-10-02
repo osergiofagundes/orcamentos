@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 const categorySchema = z.object({
@@ -113,8 +113,7 @@ export function CreateCategoryModal({ workspaceId, onCategoryCreated }: CreateCa
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading} className='bg-sky-600 hover:bg-sky-700 cursor-pointer my-4 sm:my-0 sm:mt-4'>
-                {isLoading ? "Criando..." : "Criar Categoria"}
-                <Plus className="h-4 w-4" />
+                {isLoading ? (<>Criando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Criar categoria <Plus className="h-4 w-4" /></>)}
               </Button>
             </DialogFooter>
           </form>

@@ -164,20 +164,23 @@ export async function PUT(
     const body = await request.json()
     const { clienteId, observacoes, itens } = body
 
-    // Validar se o cliente existe no workspace
-    const cliente = await prisma.cliente.findFirst({
-      where: {
-        id: parseInt(clienteId),
-        area_trabalho_id: parseInt(workspaceId),
-        deletedAt: null,
-      },
-    })
+    // Validar se o cliente existe no workspace (apenas se não for "deleted")
+    let cliente = null
+    if (clienteId !== "deleted") {
+      cliente = await prisma.cliente.findFirst({
+        where: {
+          id: parseInt(clienteId),
+          area_trabalho_id: parseInt(workspaceId),
+          deletedAt: null,
+        },
+      })
 
-    if (!cliente) {
-      return NextResponse.json(
-        { error: "Cliente não encontrado" },
-        { status: 400 }
-      )
+      if (!cliente) {
+        return NextResponse.json(
+          { error: "Cliente não encontrado" },
+          { status: 400 }
+        )
+      }
     }
 
     // Calcular valor total
@@ -197,33 +200,75 @@ export async function PUT(
 
     // Atualizar orçamento e itens em transação
     const orcamentoAtualizado = await prisma.$transaction(async (tx) => {
-      // Atualizar o orçamento com dados atualizados do cliente
+      // Preparar dados de atualização
+      const updateData: any = {
+        valor_total: valorTotal,
+        observacoes: observacoes || null,
+      }
+
+      // Se o cliente não foi excluído, atualizar os dados
+      if (cliente) {
+        updateData.cliente_id = parseInt(clienteId)
+        updateData.cliente_nome = cliente.nome
+        updateData.cliente_cpf_cnpj = cliente.cpf_cnpj
+        updateData.cliente_telefone = cliente.telefone
+        updateData.cliente_email = cliente.email
+        updateData.cliente_endereco = cliente.endereco
+        updateData.cliente_bairro = cliente.bairro
+        updateData.cliente_cidade = cliente.cidade
+        updateData.cliente_estado = cliente.estado
+        updateData.cliente_cep = cliente.cep
+      }
+      // Se o cliente foi excluído, manter os dados de snapshot existentes
+
+      // Atualizar o orçamento
       const orcamento = await tx.orcamento.update({
         where: { id: parseInt(orcamentoId) },
-        data: {
-          cliente_id: parseInt(clienteId),
-          valor_total: valorTotal,
-          observacoes: observacoes || null,
-          // Atualizar dados desnormalizados do cliente
-          cliente_nome: cliente.nome,
-          cliente_cpf_cnpj: cliente.cpf_cnpj,
-          cliente_telefone: cliente.telefone,
-          cliente_email: cliente.email,
-          cliente_endereco: cliente.endereco,
-          cliente_bairro: cliente.bairro,
-          cliente_cidade: cliente.cidade,
-          cliente_estado: cliente.estado,
-          cliente_cep: cliente.cep,
-        },
+        data: updateData,
       })
 
-      // Remover todos os itens existentes
-      await tx.itemOrcamento.deleteMany({
+      // Remover apenas itens de produtos que ainda existem (permitindo edição)
+      // Manter itens de produtos excluídos como estão
+      const itensExistentes = await tx.itemOrcamento.findMany({
         where: { orcamento_id: parseInt(orcamentoId) },
       })
 
-      // Criar os novos itens
+      // Separar itens que podem ser editados (produto ainda existe) dos que devem ser preservados
+      const itensParaPreservar = []
+      const itensParaDeletar = []
+
+      for (const itemExistente of itensExistentes) {
+        const produtoAindaExiste = itemExistente.produto_servico_id && await tx.produtoServico.findFirst({
+          where: {
+            id: itemExistente.produto_servico_id,
+            deletedAt: null,
+          },
+        })
+
+        if (produtoAindaExiste) {
+          itensParaDeletar.push(itemExistente.id)
+        } else {
+          itensParaPreservar.push(itemExistente)
+        }
+      }
+
+      // Deletar apenas itens de produtos que ainda existem
+      if (itensParaDeletar.length > 0) {
+        await tx.itemOrcamento.deleteMany({
+          where: { 
+            id: { in: itensParaDeletar },
+            orcamento_id: parseInt(orcamentoId) 
+          },
+        })
+      }
+
+      // Criar os novos itens - apenas aceitar produtos que ainda existem
       for (const item of itens) {
+        // Pular itens de produtos excluídos - eles não devem ser editáveis
+        if (item.produtoServicoId === "deleted") {
+          continue
+        }
+
         // Verificar se o produto/serviço existe no workspace
         const produto = await tx.produtoServico.findFirst({
           where: {
