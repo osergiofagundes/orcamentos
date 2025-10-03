@@ -10,7 +10,8 @@ export const auth = betterAuth({
     baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: false
+        requireEmailVerification: true,
+        sendEmailVerificationOnSignUp: true,
     },
     socialProviders: {
         google: { 
