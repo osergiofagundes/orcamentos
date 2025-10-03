@@ -23,12 +23,14 @@ interface CreateWorkspaceModalProps {
   onWorkspaceCreated?: () => void
   buttonText?: string
   buttonVariant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
+  checkEmailVerification?: (actionCallback: () => void | Promise<void>) => void
 }
 
 export function CreateWorkspaceModal({ 
   onWorkspaceCreated, 
   buttonText = "Nova Área de Trabalho",
-  buttonVariant = "default"
+  buttonVariant = "default",
+  checkEmailVerification
 }: CreateWorkspaceModalProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -149,10 +151,22 @@ export function CreateWorkspaceModal({
     }
   }
 
+  const handleOpenModal = () => {
+    if (checkEmailVerification) {
+      checkEmailVerification(() => setIsOpen(true))
+    } else {
+      setIsOpen(true)
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant} className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
+        <Button 
+          variant={buttonVariant} 
+          className='bg-sky-600 hover:bg-sky-700 cursor-pointer'
+          onClick={handleOpenModal}
+        >
           {buttonText}
           <Plus className="h-4 w-4" />
         </Button>
