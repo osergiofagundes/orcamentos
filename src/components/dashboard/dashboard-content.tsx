@@ -7,8 +7,9 @@ import { RecentClientsTable } from "@/components/dashboard/recent-clients-table"
 import { RecentProductsTable } from "@/components/dashboard/recent-products-table"
 import { RecentOrcamentosTable } from "@/components/dashboard/recent-orcamentos-table"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
+import { useDashboardInfo } from "@/hooks/use-dashboard-info"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Users, Package, BarChart3, HandCoins } from "lucide-react"
+import { Users, Package, BarChart3, HandCoins, Clock, Divide } from "lucide-react"
 import { authClient } from "@/lib/auh-client"
 
 interface DashboardContentProps {
@@ -18,6 +19,7 @@ interface DashboardContentProps {
 export function DashboardContent({ workspaceId }: DashboardContentProps) {
   const { data, loading, error } = useDashboardData(workspaceId)
   const { data: session } = authClient.useSession()
+  const dashboardInfo = useDashboardInfo()
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -28,12 +30,19 @@ export function DashboardContent({ workspaceId }: DashboardContentProps) {
 
   return (
     <>
-      <div className='space-y-1 px-6 pb-2'>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {loading ? '' : `${getGreeting()}, ${session?.user?.name?.split(' ')[0]}!`}
-        </h1>
-        <p className="hidden text-muted-foreground sm:block">
+      <div className='space-y-1 px-6 pb-2 mb-4'>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            {loading ? '' : `${getGreeting()}, ${session?.user?.name?.split(' ')[0]}!`}
+          </h1>
+          <div className="hidden lg:block">
+            {loading ? '' : <p className="text-3xl font-bold tracking-tight">{dashboardInfo.currentTime}</p>}
+          </div>
+          
+        </div>
+        <p className="hidden text-muted-foreground sm:block lg:flex flex-col lg:flex-row lg:items-center lg:justify-between">
           { loading ? '' : `Acompanhe as métricas principais do seu negócio`}
+          {loading ? '' : <span className="text-sm font-normal">Horário de Brasília</span>}
         </p>
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
