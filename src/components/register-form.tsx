@@ -90,6 +90,12 @@ export function RegisterForm({
       }
 
       console.log("Usuário cadastrado com sucesso:", data)
+      
+      // Mostrar mensagem de sucesso informando sobre o email de verificação
+      toast.success("Conta criada com sucesso!", {
+        description: "Verifique seu email para ativar sua conta e acessar o sistema."
+      })
+      
       router.replace("/workspace-management")
     } catch (error: any) {
       console.error("Erro ao cadastrar:", error)

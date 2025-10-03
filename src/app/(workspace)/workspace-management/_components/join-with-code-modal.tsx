@@ -19,9 +19,10 @@ import { toast } from 'sonner'
 interface JoinWithCodeModalProps {
   onWorkspaceJoined: () => void
   buttonText?: string
+  checkEmailVerification?: (actionCallback: () => void | Promise<void>) => void
 }
 
-export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com Código" }: JoinWithCodeModalProps) {
+export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com Código", checkEmailVerification }: JoinWithCodeModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [inviteCode, setInviteCode] = useState('')
@@ -77,10 +78,22 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
     }
   }
 
+  const handleOpenModal = () => {
+    if (checkEmailVerification) {
+      checkEmailVerification(() => setIsOpen(true))
+    } else {
+      setIsOpen(true)
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className='cursor-pointer hover:text-sky-600 hover:border-sky-600'>
+        <Button 
+          variant="outline" 
+          className='cursor-pointer hover:text-sky-600 hover:border-sky-600'
+          onClick={handleOpenModal}
+        >
           {buttonText}
           <KeyRound className="h-4 w-4" />
         </Button>

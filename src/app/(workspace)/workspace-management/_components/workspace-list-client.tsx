@@ -7,6 +7,8 @@ import { JoinWithCodeModal } from './join-with-code-modal'
 import { Button } from '@/components/ui/button'
 import { Frown, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { EmailVerificationModal } from '@/components/email-verification-modal'
+import { useEmailVerification } from '@/hooks/use-email-verification'
 
 interface WorkspaceWithPermission {
   id: number;
@@ -31,10 +33,18 @@ interface WorkspaceWithPermission {
 interface WorkspaceListClientProps {
   initialWorkspaces: WorkspaceWithPermission[];
   userId: string;
+  userEmail: string;
+  isEmailVerified: boolean;
 }
 
-export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceListClientProps) {
+export function WorkspaceListClient({ initialWorkspaces, userId, userEmail, isEmailVerified }: WorkspaceListClientProps) {
   const [workspaces, setWorkspaces] = useState<WorkspaceWithPermission[]>(initialWorkspaces)
+  
+  // Hook para verificação de email
+  const { isModalOpen, closeModal, checkEmailVerificationBeforeAction } = useEmailVerification({
+    userEmail,
+    isEmailVerified
+  })
 
   const refreshWorkspaces = async () => {
     try {
@@ -53,14 +63,25 @@ export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceList
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
         <h1 className="text-xl sm:text-2xl font-bold">Minhas Áreas de Trabalho</h1>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Link href="/workspace-management/lixeira">
-            <Button variant="outline" size="sm" className="hover:text-red-600 hover:border-red-600 cursor-pointer w-full sm:w-auto">
-              <Trash2 className="h-4 w-4 mr-1" />
-              Lixeira
-            </Button>
-          </Link>
-          <JoinWithCodeModal onWorkspaceJoined={refreshWorkspaces} />
-          <CreateWorkspaceModal onWorkspaceCreated={refreshWorkspaces} />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:text-red-600 hover:border-red-600 cursor-pointer w-full sm:w-auto"
+            onClick={() => checkEmailVerificationBeforeAction(() => {
+              window.location.href = "/workspace-management/lixeira"
+            })}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Lixeira
+          </Button>
+          <JoinWithCodeModal 
+            onWorkspaceJoined={refreshWorkspaces} 
+            checkEmailVerification={checkEmailVerificationBeforeAction}
+          />
+          <CreateWorkspaceModal 
+            onWorkspaceCreated={refreshWorkspaces}
+            checkEmailVerification={checkEmailVerificationBeforeAction}
+          />
         </div>
       </div>
 
@@ -76,10 +97,18 @@ export function WorkspaceListClient({ initialWorkspaces, userId }: WorkspaceList
               workspace={workspace}
               userPermissionLevel={workspace.usuariosAreas[0]?.nivel_permissao || 1}
               onWorkspaceUpdated={refreshWorkspaces}
+              checkEmailVerification={checkEmailVerificationBeforeAction}
             />
           ))}
         </div>
       )}
+      
+      {/* Modal de verificação de email */}
+      <EmailVerificationModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        userEmail={userEmail}
+      />
     </div>
   )
 }

@@ -21,6 +21,7 @@ export default async function WorkspaceManagementPage() {
     name: session.user.name || 'Usuário',
     email: session.user.email || '',
     avatar: session.user.image || '/avatars/default.jpg',
+    emailVerified: session.user.emailVerified || false,
   }
 
   // Verificar se usuário fez login com Google
@@ -72,7 +73,12 @@ export default async function WorkspaceManagementPage() {
       <Separator />
       {/* Conteúdo principal */}
       <main className="flex-1 py-4 sm:py-6 lg:py-8">
-        <WorkspaceListClient initialWorkspaces={workspaces} userId={session.user.id} />
+        <WorkspaceListClient 
+          initialWorkspaces={workspaces} 
+          userId={session.user.id}
+          userEmail={user.email}
+          isEmailVerified={user.emailVerified}
+        />
       </main>
     </div>
   )

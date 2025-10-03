@@ -41,9 +41,10 @@ interface WorkspaceCardProps {
   }
   userPermissionLevel: number
   onWorkspaceUpdated?: () => void
+  checkEmailVerification?: (actionCallback: () => void | Promise<void>) => void
 }
 
-export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdated }: WorkspaceCardProps) {
+export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdated, checkEmailVerification }: WorkspaceCardProps) {
   const getPermissionLabel = (level: number) => {
     switch(level) {
       case 3: return 'Admin'
