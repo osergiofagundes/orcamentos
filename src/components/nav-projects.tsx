@@ -56,7 +56,7 @@ export function NavProjects({
   }
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup>
       <SidebarGroupLabel>Páginas</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => {

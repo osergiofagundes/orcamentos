@@ -25,6 +25,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 // This is sample data.
 const data = {
@@ -113,6 +114,13 @@ export function AppSidebar({
             Sky Orçamentos
           </span>
         </div>
+      )}
+      {!open && (
+        <SidebarHeader>
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src="../images/logo.png" alt="Sky orcamentos logo" />
+          </Avatar>
+        </SidebarHeader>
       )}
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={workspaces} />
