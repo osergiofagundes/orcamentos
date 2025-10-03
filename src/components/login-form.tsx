@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,6 +20,8 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { authClient } from "@/lib/auh-client"
 import { ForgotPasswordModal } from "@/app/(auth)/signin/_components/forgot-password-modal"
+import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
+import { useToast } from "@/hooks/use-toast"
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -36,7 +38,10 @@ export function LoginForm({
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const router = useRouter()
+  const recaptchaRef = useRef<ReCaptchaRef>(null)
+  const { toast } = useToast()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -47,25 +52,44 @@ export function LoginForm({
   })
 
   async function onSubmit(formData: LoginFormValues) {
+    // Verificar reCAPTCHA
+    if (!recaptchaToken) {
+      toast.error("Por favor, complete a verificação reCAPTCHA.")
+      return
+    }
+
     setIsLoading(true)
     
-    await authClient.signIn.email({
-      email: formData.email,
-      password: formData.password,
-      callbackURL: "/workspace-management",
-    }, {
-      onRequest: (ctx) => {
-        // Mantém loading ativo
-      },
-      onSuccess: (ctx) => {
-        console.log("Login bem-sucedido:", ctx)
-        router.replace("/workspace-management")
-      },
-      onError: (ctx) => {
-        console.error("Erro ao fazer login:", ctx)
-        setIsLoading(false)
-      },
-    })
+    try {
+      const response = await fetch('/api/auth/signin-with-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          recaptchaToken: recaptchaToken,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao fazer login')
+      }
+
+      console.log("Login bem-sucedido:", data)
+      router.replace("/workspace-management")
+    } catch (error) {
+      console.error("Erro ao fazer login:", error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao fazer login')
+      // Reset reCAPTCHA em caso de erro
+      recaptchaRef.current?.reset()
+      setRecaptchaToken(null)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function signInWithGoogle() {
@@ -169,7 +193,6 @@ export function LoginForm({
                     </FormItem>
                   )}
                 />
-
                 <Button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 cursor-pointer" disabled={isLoading}>
                   {isLoading ? (
                     <>
@@ -180,6 +203,14 @@ export function LoginForm({
                     "Login"
                   )}
                 </Button>
+                <div className="flex justify-center">
+                  <ReCaptcha
+                    ref={recaptchaRef}
+                    onVerify={(token) => setRecaptchaToken(token)}
+                    onExpired={() => setRecaptchaToken(null)}
+                    onError={() => setRecaptchaToken(null)}
+                  />
+                </div>
               </div>
               <div className="text-center text-sm">
                 Não possui uma conta?{" "}

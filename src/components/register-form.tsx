@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -20,6 +20,7 @@ import { Eye, EyeOff, Loader2, CarTaxiFrontIcon } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { authClient } from "@/lib/auh-client"
 import { useToast } from "@/hooks/use-toast"
+import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
 
 const signupSchema = z
   .object({
@@ -44,8 +45,10 @@ export function RegisterForm({
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
+  const recaptchaRef = useRef<ReCaptchaRef>(null)
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -58,56 +61,61 @@ export function RegisterForm({
   })
 
   async function onSubmit(formData: SignupFormValues) {
+    // Verificar reCAPTCHA
+    if (!recaptchaToken) {
+      toast.error("Por favor, complete a verificação reCAPTCHA.")
+      return
+    }
+
     setIsLoading(true)
 
-    const { data, error } = await authClient.signUp.email({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      callbackURL: "/workspace-management",
-    }, {
-      onRequest: (ctx) => {
+    try {
+      const response = await fetch('/api/auth/signup-with-recaptcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          recaptchaToken: recaptchaToken,
+        }),
+      })
 
-      },
-      onSuccess: (ctx) => {
-        console.log("Usuário cadastrado com sucesso:", CarTaxiFrontIcon)
-        setIsLoading(false)
-        router.replace("/workspace-management")
-      },
-      onError: (ctx) => {
-        console.error("Erro ao cadastrar:", ctx)
-        setIsLoading(false)
+      const data = await response.json()
 
-        // Verifica se o erro é relacionado a usuário já existente (email duplicado)
-        const errorCode = ctx.error.code || ""
-        const errorMessage = ctx.error.message || ""
-
-        const isEmailDuplicate =
-          errorCode === "USER_ALREADY_EXISTS" ||
-          errorMessage.toLowerCase().includes("user already exists") ||
-          errorMessage.toLowerCase().includes("email") &&
-          (errorMessage.toLowerCase().includes("already") ||
-            errorMessage.toLowerCase().includes("exists") ||
-            errorMessage.toLowerCase().includes("duplicate") ||
-            errorMessage.toLowerCase().includes("já existe") ||
-            errorMessage.toLowerCase().includes("em uso") ||
-            errorMessage.toLowerCase().includes("unique constraint")) ||
-          errorMessage.toLowerCase().includes("user_email_key") // Erro específico do Prisma
-
-        if (isEmailDuplicate) {
-          form.setError("email", {
-            type: "manual",
-            message: "Este email já está em uso. Tente usar outro email."
-          })
-        } else {
-          // Para outros tipos de erro, mostra um toast
-          toast.error("Erro ao cadastrar", {
-            description: "Ocorreu um erro inesperado. Tente novamente."
-          })
-        }
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar conta')
       }
-    })
 
+      console.log("Usuário cadastrado com sucesso:", data)
+      router.replace("/workspace-management")
+    } catch (error: any) {
+      console.error("Erro ao cadastrar:", error)
+      
+      // Reset reCAPTCHA em caso de erro
+      recaptchaRef.current?.reset()
+      setRecaptchaToken(null)
+
+      const errorMessage = error.message || ""
+
+      // Verifica se o erro é relacionado a usuário já existente (email duplicado)
+      if (errorMessage.toLowerCase().includes("já está em uso") || 
+          errorMessage.toLowerCase().includes("email") && errorMessage.toLowerCase().includes("uso")) {
+        form.setError("email", {
+          type: "manual",
+          message: "Este email já está em uso. Tente usar outro email."
+        })
+      } else {
+        // Para outros tipos de erro, mostra um toast
+        toast.error("Erro ao cadastrar", {
+          description: errorMessage || "Ocorreu um erro inesperado. Tente novamente."
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function signInWithGoogle() {
@@ -253,7 +261,6 @@ export function RegisterForm({
                     </FormItem>
                   )}
                 />
-
                 <Button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 cursor-pointer" disabled={isLoading}>
                   {isLoading ? (
                     <>
@@ -264,6 +271,14 @@ export function RegisterForm({
                     "Criar conta"
                   )}
                 </Button>
+                <div className="flex justify-center">
+                  <ReCaptcha
+                    ref={recaptchaRef}
+                    onVerify={(token) => setRecaptchaToken(token)}
+                    onExpired={() => setRecaptchaToken(null)}
+                    onError={() => setRecaptchaToken(null)}
+                  />
+                </div>
               </div>
               <div className="text-center text-sm">
                 Já possui uma conta?{" "}
