@@ -7,11 +7,13 @@ export async function validateRecaptcha(token: string): Promise<boolean> {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY
 
   if (!secretKey) {
-    console.error('RECAPTCHA_SECRET_KEY não encontrada nas variáveis de ambiente')
+    console.error('❌ RECAPTCHA_SECRET_KEY não encontrada nas variáveis de ambiente')
     return false
   }
 
   try {
+    console.log('🔍 Enviando token para validação no Google reCAPTCHA...')
+    
     const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
       method: 'POST',
       headers: {
@@ -25,9 +27,17 @@ export async function validateRecaptcha(token: string): Promise<boolean> {
 
     const data = await response.json()
     
-    return data.success === true
+    console.log('📊 Resposta do Google reCAPTCHA:', data)
+    
+    if (data.success === true) {
+      console.log('✅ reCAPTCHA validado com sucesso')
+      return true
+    } else {
+      console.log('❌ reCAPTCHA falhou na validação:', data['error-codes'])
+      return false
+    }
   } catch (error) {
-    console.error('Erro ao validar reCAPTCHA:', error)
+    console.error('❌ Erro ao validar reCAPTCHA:', error)
     return false
   }
 }
