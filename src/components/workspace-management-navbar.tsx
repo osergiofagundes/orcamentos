@@ -30,12 +30,14 @@ import Link from "next/link"
 
 export function WorkspaceManagementNavbar({
   user,
+  canChangePassword = true,
 }: {
   user: {
     name: string
     email: string
     avatar: string
   }
+  canChangePassword?: boolean
 }) {
   const router = useRouter()
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -76,7 +78,7 @@ export function WorkspaceManagementNavbar({
                   {user.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight hidden sm:block">
+              <div className="flex-1 text-left text-sm leading-tight hidden sm:block">
                 <span className="truncate font-medium">{user.name}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -130,6 +132,7 @@ export function WorkspaceManagementNavbar({
         open={isProfileModalOpen}
         onOpenChange={setIsProfileModalOpen}
         user={user}
+        canChangePassword={canChangePassword}
       />
     </nav>
   )

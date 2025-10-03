@@ -30,7 +30,7 @@ export function WorkspaceSwitcher({
 }: {
   workspaces: Workspace[]
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile, open } = useSidebar()
   const router = useRouter()
   const params = useParams()
   const currentWorkspaceId = params.workspaceId as string
@@ -45,6 +45,47 @@ export function WorkspaceSwitcher({
     return null
   }
 
+  // Quando a sidebar estiver fechada, mostrar apenas a logo/iniciais
+  if (!open) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            size="lg"
+            className="justify-center cursor-pointer"
+            onClick={() => handleWorkspaceChange(activeWorkspace.id)}
+          >
+            <div className="bg-sky-600 text-white flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+              {activeWorkspace.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={activeWorkspace.logo_url}
+                  alt={`Logo ${activeWorkspace.nome}`}
+                  className="object-cover w-full h-full"
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    const parent = e.currentTarget.parentElement
+                    if (parent) {
+                      e.currentTarget.style.display = 'none'
+                      const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
+                      if (fallback) {
+                        fallback.style.display = 'block'
+                      }
+                    }
+                  }}
+                />
+              ) : null}
+              <span 
+                className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+              >
+                {activeWorkspace.nome.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -52,7 +93,7 @@ export function WorkspaceSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <div className="bg-sky-600 text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
                 {activeWorkspace.logo_url ? (
@@ -97,7 +138,7 @@ export function WorkspaceSwitcher({
               <DropdownMenuItem
                 key={workspace.id}
                 onClick={() => handleWorkspaceChange(workspace.id)}
-                className="gap-2 p-2"
+                className="gap-2 p-2 cursor-pointer"
               >
                 <div className="bg-sky-600 flex size-6 items-center justify-center rounded-sm border overflow-hidden">
                   {workspace.logo_url ? (
@@ -129,7 +170,7 @@ export function WorkspaceSwitcher({
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              className="gap-2 p-2"
+              className="gap-2 p-2 cursor-pointer"
               onClick={() => router.push('/workspace-management')}
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">

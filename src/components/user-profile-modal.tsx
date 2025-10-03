@@ -30,9 +30,10 @@ interface UserProfileModalProps {
     email: string
     avatar: string
   }
+  canChangePassword?: boolean // Se false, não mostra a aba de senha (usuário logou com Google)
 }
 
-export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalProps) {
+export function UserProfileModal({ open, onOpenChange, user, canChangePassword = true }: UserProfileModalProps) {
   const { toast } = useToast()
   const [profileData, setProfileData] = useState({
     name: user.name,
@@ -194,18 +195,20 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
         </DialogHeader>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${canChangePassword ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">
               <User className="h-4 w-4" />
               Perfil
             </TabsTrigger>
-            <TabsTrigger value="password" className="flex items-center gap-2 data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">
-              <Lock className="h-4 w-4" />
-              Senha
-            </TabsTrigger>
+            {canChangePassword && (
+              <TabsTrigger value="password" className="flex items-center gap-2 data-[state=active]:bg-sky-600 data-[state=active]:text-white cursor-pointer">
+                <Lock className="h-4 w-4" />
+                Senha
+              </TabsTrigger>
+            )}
           </TabsList>
           
-          <TabsContent value="profile">
+          <TabsContent value="profile" className="mt-4">
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
@@ -255,39 +258,41 @@ export function UserProfileModal({ open, onOpenChange, user }: UserProfileModalP
             </form>
           </TabsContent>
           
-          <TabsContent value="password">
-            <div className="space-y-4 flex flex-col items-center justify-center">
-              <p className="text-center text-gray-700">
-                Para alterar sua senha, enviaremos um link de redefinição para seu email cadastrado.
-              </p>
-              <Button
-                type="button"
-                disabled={isLoadingPassword}
-                className="w-full bg-sky-600 hover:bg-sky-700 cursor-pointer"
-                onClick={async () => {
-                  setIsLoadingPassword(true)
-                  try {
-                    const response = await fetch('/api/auth/forgot-password', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: profileData.email }),
-                    })
-                    const data = await response.json()
-                    if (!response.ok || !data.success) {
-                      throw new Error(data.message || 'Erro ao enviar email de redefinição')
+          {canChangePassword && (
+            <TabsContent value="password">
+              <div className="space-y-4 flex flex-col items-center justify-center">
+                <p className="text-center text-gray-700">
+                  Para alterar sua senha, enviaremos um link de redefinição para seu email cadastrado.
+                </p>
+                <Button
+                  type="button"
+                  disabled={isLoadingPassword}
+                  className="w-full bg-sky-600 hover:bg-sky-700 cursor-pointer"
+                  onClick={async () => {
+                    setIsLoadingPassword(true)
+                    try {
+                      const response = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: profileData.email }),
+                      })
+                      const data = await response.json()
+                      if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Erro ao enviar email de redefinição')
+                      }
+                      toast.success('Enviamos um email para redefinir sua senha!')
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : 'Erro ao enviar email de redefinição')
+                    } finally {
+                      setIsLoadingPassword(false)
                     }
-                    toast.success('Enviamos um email para redefinir sua senha!')
-                  } catch (error) {
-                    toast.error(error instanceof Error ? error.message : 'Erro ao enviar email de redefinição')
-                  } finally {
-                    setIsLoadingPassword(false)
-                  }
-                }}
-              >
-                {isLoadingPassword ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar email de redefinição <Send className="h-4 w-4" /></>)}
-              </Button>
-            </div>
-          </TabsContent>
+                  }}
+                >
+                  {isLoadingPassword ? (<>Enviando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Enviar email de redefinição <Send className="h-4 w-4" /></>)}
+                </Button>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
 

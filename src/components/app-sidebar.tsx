@@ -25,6 +25,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 
 // This is sample data.
 const data = {
@@ -92,10 +93,12 @@ type User = {
 export function AppSidebar({ 
   workspaces = [],
   user,
+  canChangePassword = true,
   ...props 
 }: React.ComponentProps<typeof Sidebar> & {
   workspaces?: Workspace[]
   user?: User
+  canChangePassword?: boolean
 }) {
   const userData = user || data.user;
   const { open } = useSidebar();
@@ -114,6 +117,13 @@ export function AppSidebar({
           </span>
         </div>
       )}
+      {!open && (
+        <SidebarHeader>
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src="../images/logo.png" alt="Sky orcamentos logo" />
+          </Avatar>
+        </SidebarHeader>
+      )}
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={workspaces} />
       </SidebarHeader>
@@ -121,7 +131,7 @@ export function AppSidebar({
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} />
+        <NavUser user={userData} canChangePassword={canChangePassword} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
