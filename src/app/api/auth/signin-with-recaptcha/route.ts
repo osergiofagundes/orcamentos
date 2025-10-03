@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     console.log('reCAPTCHA validation successful, attempting login...')
     
     // Buscar usuário no banco de dados
+    console.log('Searching for user with email:', email)
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -36,38 +37,46 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
+      console.log('User not found for email:', email)
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
         { status: 401 }
       )
     }
 
-    // Verificar se o usuário tem uma conta de email/senha (Better Auth usa 'credential' como providerId)
-    const emailAccount = user.accounts.find(account => account.providerId === 'credential' || account.providerId === 'email')
+    console.log('User found:', { id: user.id, email: user.email, emailVerified: user.emailVerified })
+    console.log('User accounts:', user.accounts.map(acc => ({ providerId: acc.providerId, hasPassword: !!acc.password })))
+
+    // Verificar se o usuário tem uma conta com senha (independente do provider)
+    const emailAccount = user.accounts.find(account => account.password)
     
     if (!emailAccount || !emailAccount.password) {
+      console.log('No email account found or no password set')
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
         { status: 401 }
       )
     }
 
+    console.log('Email account found, verifying password...')
     // Verificar a senha
     const isValidPassword = await bcrypt.compare(password, emailAccount.password)
     
     if (!isValidPassword) {
+      console.log('Password verification failed')
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
         { status: 401 }
       )
     }
 
-    // Verificar se o email está verificado
+    console.log('Password verified successfully')
+
+    // Permitir login mesmo com email não verificado, mas informar o usuário
     if (!user.emailVerified) {
-      return NextResponse.json(
-        { error: 'Email não verificado. Verifique seu email antes de fazer login.' },
-        { status: 403 }
-      )
+      console.log('User email not verified, but allowing login')
+      // Opcional: você pode escolher se quer bloquear ou permitir
+      // Para agora, vamos permitir o login e apenas avisar
     }
 
     // Se chegou até aqui, o login é válido
@@ -88,10 +97,20 @@ export async function POST(request: Request) {
 
     if (authResponse.ok) {
       const result = await authResponse.json()
-      return NextResponse.json({ success: true, data: result })
+      return NextResponse.json({ 
+        success: true, 
+        data: result,
+        emailVerified: user.emailVerified,
+        message: !user.emailVerified ? 'Login realizado com sucesso. Recomendamos verificar seu email.' : undefined
+      })
     } else {
       // Se o Better Auth falhar, pelo menos já validamos as credenciais
-      return NextResponse.json({ success: true, user: { id: user.id, email: user.email, name: user.name } })
+      return NextResponse.json({ 
+        success: true, 
+        user: { id: user.id, email: user.email, name: user.name },
+        emailVerified: user.emailVerified,
+        message: !user.emailVerified ? 'Login realizado com sucesso. Recomendamos verificar seu email.' : undefined
+      })
     }
   } catch (error) {
     console.error('Erro no login com reCAPTCHA:', error)
