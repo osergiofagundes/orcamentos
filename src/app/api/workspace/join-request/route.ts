@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { headers } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
+import { checkEmailVerification } from '@/lib/email-verification-middleware'
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,6 +15,12 @@ export async function POST(request: NextRequest) {
                 { error: "Não autorizado" },
                 { status: 401 }
             )
+        }
+
+        // Verificar se o email está verificado
+        const emailVerificationError = await checkEmailVerification(session.user.id)
+        if (emailVerificationError) {
+            return emailVerificationError
         }
 
         const { codigo, mensagem } = await request.json()

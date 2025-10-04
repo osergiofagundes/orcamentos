@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 import { WorkspaceManagementNavbar } from '@/components/workspace-management-navbar'
 import { Separator } from '@/components/ui/separator'
 import { redirect } from 'next/navigation'
-import { isGoogleUser } from '@/lib/auth-utils'
+import { isGoogleUser, needsEmailVerification } from '@/lib/auth-utils'
 
 export default async function WorkspaceTrashPage() {
   const session = await auth.api.getSession({
@@ -25,6 +25,9 @@ export default async function WorkspaceTrashPage() {
 
   // Verificar se usuário fez login com Google
   const canChangePassword = !(await isGoogleUser(session.user.id))
+  
+  // Verificar se o usuário precisa verificar o email
+  const needsVerification = await needsEmailVerification(session.user.id)
 
   // Busca todos os workspaces na lixeira do usuário
   const trashedWorkspaces = await prisma.areaTrabalho.findMany({
@@ -81,7 +84,12 @@ export default async function WorkspaceTrashPage() {
       <Separator />
       {/* Conteúdo principal */}
       <main className="flex-1 py-4 sm:py-6 lg:py-8">
-        <TrashListClient initialTrashedWorkspaces={trashedWorkspaces} userId={session.user.id} />
+        <TrashListClient 
+          initialTrashedWorkspaces={trashedWorkspaces} 
+          userId={session.user.id} 
+          needsEmailVerification={needsVerification}
+          userEmail={session.user.email || ''}
+        />
       </main>
     </div>
   )
