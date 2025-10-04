@@ -57,6 +57,36 @@ export function WorkspaceListClient({
     }
   }
 
+  // Se precisa verificar email, mostra apenas a mensagem
+  if (needsEmailVerification) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <div className="bg-sky-50 border border-sky-200 rounded-lg p-8 max-w-md">
+              <p className="text-lg text-sky-800 font-medium">
+                Verifique o seu email para utilizar o sistema
+              </p>
+              <p className="text-sm text-sky-700 mt-2">
+                Um email de verificação foi enviado para: {userEmail}
+              </p>
+              <p className="text-sm text-sky-700 mt-2">
+                Verifique a sua caixa de entrada (e a pasta de spam).
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Modal de verificação de email */}
+        <EmailVerificationModal 
+          isOpen={showEmailVerificationModal}
+          onClose={() => setShowEmailVerificationModal(false)}
+          userEmail={userEmail}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 sm:px-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
@@ -67,11 +97,6 @@ export function WorkspaceListClient({
               variant="outline" 
               size="sm" 
               className="hover:text-red-600 hover:border-red-600 cursor-pointer w-full sm:w-auto"
-              disabled={needsEmailVerification}
-              onClick={needsEmailVerification ? (e) => {
-                e.preventDefault()
-                setShowEmailVerificationModal(true)
-              } : undefined}
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Lixeira
@@ -79,13 +104,9 @@ export function WorkspaceListClient({
           </Link>
           <JoinWithCodeModal 
             onWorkspaceJoined={refreshWorkspaces} 
-            disabled={needsEmailVerification}
-            onDisabledClick={() => setShowEmailVerificationModal(true)}
           />
           <CreateWorkspaceModal 
             onWorkspaceCreated={refreshWorkspaces}
-            disabled={needsEmailVerification}
-            onDisabledClick={() => setShowEmailVerificationModal(true)}
           />
         </div>
       </div>
@@ -102,8 +123,6 @@ export function WorkspaceListClient({
               workspace={workspace}
               userPermissionLevel={workspace.usuariosAreas[0]?.nivel_permissao || 1}
               onWorkspaceUpdated={refreshWorkspaces}
-              disabled={needsEmailVerification}
-              onDisabledClick={() => setShowEmailVerificationModal(true)}
             />
           ))}
         </div>
