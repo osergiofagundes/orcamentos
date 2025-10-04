@@ -41,9 +41,17 @@ interface WorkspaceCardProps {
   }
   userPermissionLevel: number
   onWorkspaceUpdated?: () => void
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
-export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdated }: WorkspaceCardProps) {
+export function WorkspaceCard({ 
+  workspace, 
+  userPermissionLevel, 
+  onWorkspaceUpdated,
+  disabled = false,
+  onDisabledClick 
+}: WorkspaceCardProps) {
   const getPermissionLabel = (level: number) => {
     switch(level) {
       case 3: return 'Admin'
@@ -90,19 +98,35 @@ export function WorkspaceCard({ workspace, userPermissionLevel, onWorkspaceUpdat
           <EditWorkspaceModal 
           workspace={workspace} 
           onWorkspaceUpdated={onWorkspaceUpdated}
+          disabled={disabled}
+          onDisabledClick={onDisabledClick}
           />
           <DeleteWorkspaceModal 
           workspace={workspace} 
           onWorkspaceDeleted={onWorkspaceUpdated}
+          disabled={disabled}
+          onDisabledClick={onDisabledClick}
           />
         </>
         )}
-        <Link href={`/${workspace.id}/dashboard`}>
-        <Button size="sm" className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
-          Acessar
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-        </Link>
+        {disabled ? (
+          <Button 
+            size="sm" 
+            className='bg-sky-600 hover:bg-sky-700 cursor-pointer'
+            disabled={disabled}
+            onClick={onDisabledClick}
+          >
+            Acessar
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Link href={`/${workspace.id}/dashboard`}>
+          <Button size="sm" className='bg-sky-600 hover:bg-sky-700 cursor-pointer'>
+            Acessar
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          </Link>
+        )}
       </div>
       </div>
     </div>

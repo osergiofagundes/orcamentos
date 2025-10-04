@@ -19,9 +19,16 @@ interface DeleteWorkspaceModalProps {
     nome: string
   }
   onWorkspaceDeleted?: () => void
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
-export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWorkspaceModalProps) {
+export function DeleteWorkspaceModal({ 
+  workspace, 
+  onWorkspaceDeleted,
+  disabled = false,
+  onDisabledClick 
+}: DeleteWorkspaceModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -52,6 +59,21 @@ export function DeleteWorkspaceModal({ workspace, onWorkspaceDeleted }: DeleteWo
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (disabled) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        onClick={onDisabledClick}
+        className="p-2 hover:text-red-600 hover:bg-red-50 hover:border-red-600 cursor-pointer"
+        title="Mover para lixeira"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    )
   }
 
   return (

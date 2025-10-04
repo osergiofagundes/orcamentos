@@ -19,9 +19,16 @@ import { toast } from 'sonner'
 interface JoinWithCodeModalProps {
   onWorkspaceJoined: () => void
   buttonText?: string
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
-export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com Código" }: JoinWithCodeModalProps) {
+export function JoinWithCodeModal({ 
+  onWorkspaceJoined, 
+  buttonText = "Entrar com Código",
+  disabled = false,
+  onDisabledClick
+}: JoinWithCodeModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [inviteCode, setInviteCode] = useState('')
@@ -75,6 +82,20 @@ export function JoinWithCodeModal({ onWorkspaceJoined, buttonText = "Entrar com 
         setMessage('')
       }
     }
+  }
+
+  if (disabled) {
+    return (
+      <Button 
+        variant="outline" 
+        className='cursor-pointer hover:text-sky-600 hover:border-sky-600'
+        disabled={disabled}
+        onClick={onDisabledClick}
+      >
+        {buttonText}
+        <KeyRound className="h-4 w-4" />
+      </Button>
+    )
   }
 
   return (
