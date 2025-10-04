@@ -1,0 +1,1 @@
+export { VerifyEmailContent } from './verify-email-content'

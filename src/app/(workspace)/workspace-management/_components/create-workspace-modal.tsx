@@ -23,12 +23,16 @@ interface CreateWorkspaceModalProps {
   onWorkspaceCreated?: () => void
   buttonText?: string
   buttonVariant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
 export function CreateWorkspaceModal({ 
   onWorkspaceCreated, 
   buttonText = "Nova Área de Trabalho",
-  buttonVariant = "default"
+  buttonVariant = "default",
+  disabled = false,
+  onDisabledClick
 }: CreateWorkspaceModalProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -147,6 +151,20 @@ export function CreateWorkspaceModal({
         cpf_cnpj: ''
       })
     }
+  }
+
+  if (disabled) {
+    return (
+      <Button 
+        variant={buttonVariant} 
+        className='bg-sky-600 hover:bg-sky-700 cursor-pointer'
+        disabled={disabled}
+        onClick={onDisabledClick}
+      >
+        {buttonText}
+        <Plus className="h-4 w-4" />
+      </Button>
+    )
   }
 
   return (

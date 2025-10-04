@@ -24,9 +24,16 @@ interface EditWorkspaceModalProps {
     cpf_cnpj: string | null
   }
   onWorkspaceUpdated?: () => void
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
-export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorkspaceModalProps) {
+export function EditWorkspaceModal({ 
+  workspace, 
+  onWorkspaceUpdated,
+  disabled = false,
+  onDisabledClick 
+}: EditWorkspaceModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -128,6 +135,21 @@ export function EditWorkspaceModal({ workspace, onWorkspaceUpdated }: EditWorksp
         cpf_cnpj: ''
       })
     }
+  }
+
+  if (disabled) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        onClick={onDisabledClick}
+        className="p-2 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-600 cursor-pointer"
+        title="Editar área de trabalho"
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    )
   }
 
   return (
