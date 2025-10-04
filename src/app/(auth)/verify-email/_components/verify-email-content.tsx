@@ -23,15 +23,12 @@ export function VerifyEmailContent() {
 
     const verifyEmail = async () => {
       try {
-        const response = await fetch('/api/auth/verify-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token }),
+        // Primeiro, tentar a API do Better Auth
+        const betterAuthResponse = await fetch(`/api/auth/verify-email?token=${token}`, {
+          method: 'GET',
         })
 
-        if (response.ok) {
+        if (betterAuthResponse.ok) {
           setStatus('success')
           setMessage('Email verificado com sucesso!')
           
@@ -39,11 +36,42 @@ export function VerifyEmailContent() {
           setTimeout(() => {
             router.push('/workspace-management')
           }, 3000)
-        } else {
-          const data = await response.json()
-          setStatus('error')
-          setMessage(data.error || 'Erro ao verificar email')
+          return
         }
+
+        // Se Better Auth falhar, tentar nosso endpoint customizado
+        const customResponse = await fetch('/api/verify-email-custom', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token }),
+        })
+
+        if (customResponse.ok) {
+          setStatus('success')
+          setMessage('Email verificado com sucesso!')
+          
+          // Redirecionar após 3 segundos
+          setTimeout(() => {
+            router.push('/workspace-management')
+          }, 3000)
+          return
+        }
+
+        // Se ambos falharem
+        let errorMessage = 'Erro ao verificar email'
+        try {
+          const errorData = await betterAuthResponse.text()
+          if (errorData.includes('expired') || errorData.includes('invalid')) {
+            errorMessage = 'Token de verificação inválido ou expirado'
+          }
+        } catch {
+          // Usar mensagem padrão
+        }
+        
+        setStatus('error')
+        setMessage(errorMessage)
       } catch (error) {
         setStatus('error')
         setMessage('Erro de conexão. Tente novamente.')

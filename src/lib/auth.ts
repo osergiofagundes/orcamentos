@@ -21,16 +21,20 @@ export const auth = betterAuth({
         sendVerificationEmail: async ({ user, url, token }) => {
             try {
                 console.log(`📧 Enviando email de verificação para: ${user.email}`);
-                console.log(`🔗 URL de verificação: ${url}`);
+                console.log(`🔗 URL original do Better Auth: ${url}`);
                 
                 if (!process.env.RESEND_API_KEY) {
                     console.error('❌ RESEND_API_KEY não configurada!');
                     throw new Error('RESEND_API_KEY não configurada');
                 }
 
+                // Criar URL personalizada para nossa página de verificação
+                const customVerificationUrl = `${process.env.NEXT_PUBLIC_URL}/verify-email?token=${token}`;
+                console.log(`🔗 URL personalizada: ${customVerificationUrl}`);
+
                 const emailHtml = await render(EmailVerificationEmail({
                     userEmail: user.email,
-                    verificationUrl: url,
+                    verificationUrl: customVerificationUrl,
                 }));
 
                 await resend.emails.send({
