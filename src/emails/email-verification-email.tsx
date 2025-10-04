@@ -108,6 +108,7 @@ const text = {
   fontSize: '16px',
   lineHeight: '26px',
   margin: '30px 0',
+  textAlign: 'center' as const,
 }
 
 const buttonContainer = {
@@ -133,6 +134,8 @@ const link = {
   fontSize: '14px',
   textDecoration: 'underline',
   wordBreak: 'break-all' as const,
+  textAlign: 'center' as const,
+  display: 'block' as const,
 }
 
 const footerText = {

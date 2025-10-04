@@ -13,7 +13,7 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true,
+        requireEmailVerification: false, // Permitir login mesmo sem verificação
     },
     emailVerification: {
         sendOnSignUp: true,

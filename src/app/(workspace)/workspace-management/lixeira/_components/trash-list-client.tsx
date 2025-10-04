@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { TrashWorkspaceCard } from './trash-workspace-card'
+import { EmailVerificationModal } from '@/components/email-verification-modal'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
@@ -36,10 +37,18 @@ interface TrashedWorkspaceWithPermission {
 interface TrashListClientProps {
   initialTrashedWorkspaces: TrashedWorkspaceWithPermission[];
   userId: string;
+  needsEmailVerification?: boolean;
+  userEmail?: string;
 }
 
-export function TrashListClient({ initialTrashedWorkspaces, userId }: TrashListClientProps) {
+export function TrashListClient({ 
+  initialTrashedWorkspaces, 
+  userId,
+  needsEmailVerification = false,
+  userEmail = ''
+}: TrashListClientProps) {
   const [trashedWorkspaces, setTrashedWorkspaces] = useState<TrashedWorkspaceWithPermission[]>(initialTrashedWorkspaces)
+  const [showEmailVerificationModal, setShowEmailVerificationModal] = useState(needsEmailVerification)
 
   const refreshTrashedWorkspaces = async () => {
     try {
@@ -82,10 +91,19 @@ export function TrashListClient({ initialTrashedWorkspaces, userId }: TrashListC
                 workspace={workspace}
                 userPermissionLevel={workspace.usuariosAreas[0]?.nivel_permissao || 1}
                 onWorkspaceAction={refreshTrashedWorkspaces}
+                disabled={needsEmailVerification}
+                onDisabledClick={() => setShowEmailVerificationModal(true)}
                 />
             ))}
         </div>
       )}
+      
+      {/* Modal de verificação de email */}
+      <EmailVerificationModal 
+        isOpen={showEmailVerificationModal}
+        onClose={() => setShowEmailVerificationModal(false)}
+        userEmail={userEmail}
+      />
     </div>
   )
 }

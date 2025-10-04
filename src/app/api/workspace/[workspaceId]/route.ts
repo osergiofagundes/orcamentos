@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from "@/lib/auth";
 import { headers } from 'next/headers'
+import { checkEmailVerification } from '@/lib/email-verification-middleware'
 
 // GET /api/workspaces/[workspaceId] - Detalhes do workspace
 export async function GET(
@@ -62,6 +63,12 @@ export async function PUT(
 
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Verificar se o email está verificado
+    const emailVerificationError = await checkEmailVerification(session.user.id)
+    if (emailVerificationError) {
+        return emailVerificationError
     }
 
     const { workspaceId } = await params

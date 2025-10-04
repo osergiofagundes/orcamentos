@@ -60,9 +60,17 @@ interface TrashWorkspaceCardProps {
   }
   userPermissionLevel: number
   onWorkspaceAction?: () => void
+  disabled?: boolean
+  onDisabledClick?: () => void
 }
 
-export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspaceAction }: TrashWorkspaceCardProps) {
+export function TrashWorkspaceCard({ 
+  workspace, 
+  userPermissionLevel, 
+  onWorkspaceAction,
+  disabled = false,
+  onDisabledClick 
+}: TrashWorkspaceCardProps) {
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false)
   const [isPermanentDeleteModalOpen, setIsPermanentDeleteModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -173,7 +181,8 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsRestoreModalOpen(true)}
+                onClick={disabled ? onDisabledClick : () => setIsRestoreModalOpen(true)}
+                disabled={disabled}
                 className="flex-1 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-600 cursor-pointer"
               >
                 <RotateCcw className="h-4 w-4 mr-1" />
@@ -182,7 +191,8 @@ export function TrashWorkspaceCard({ workspace, userPermissionLevel, onWorkspace
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsPermanentDeleteModalOpen(true)}
+                onClick={disabled ? onDisabledClick : () => setIsPermanentDeleteModalOpen(true)}
+                disabled={disabled}
                 className="flex-1 hover:text-red-600 hover:bg-red-50 hover:border-red-600 cursor-pointer"
               >
                 <Trash2 className="h-4 w-4 mr-1" />
