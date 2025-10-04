@@ -15,11 +15,18 @@ export async function sendVerificationEmail(userEmail: string, userId: string) {
       throw new Error('RESEND_API_KEY não configurada')
     }
 
-    // Gerar token único
-    const token = crypto.randomBytes(32).toString('hex')
+    // Gerar um JWT simples compatível com Better Auth
+    const tokenPayload = {
+      email: userEmail,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 horas
+    }
+    
+    // Para simplicidade, vamos usar base64 encoding
+    const token = Buffer.from(JSON.stringify(tokenPayload)).toString('base64')
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 horas
 
-    // Salvar token no banco
+    // Salvar token no banco para controle
     await prisma.verification.create({
       data: {
         id: crypto.randomUUID(),

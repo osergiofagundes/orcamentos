@@ -84,6 +84,8 @@ const logoContainer = {
 
 const logo = {
   borderRadius: '12px',
+  margin: '0 auto',
+  display: 'block',
 }
 
 const h1 = {
