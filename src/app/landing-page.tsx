@@ -261,7 +261,7 @@ export default function LandingPage() {
                 © {new Date().getFullYear()} Sky Orçamentos. Todos os direitos reservados.
               </p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Versão 1.0</span>
+                <span>Versão 1.1</span>
               </div>
             </div>
           </div>
