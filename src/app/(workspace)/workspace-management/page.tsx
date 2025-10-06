@@ -24,7 +24,8 @@ export default async function WorkspaceManagementPage() {
   }
 
   // Verificar se usuário fez login com Google
-  const canChangePassword = !(await isGoogleUser(session.user.id))
+  const isGoogle = await isGoogleUser(session.user.id)
+  const canChangePassword = !isGoogle
   
   // Verificar se o usuário precisa verificar o email
   const needsVerification = await needsEmailVerification(session.user.id)
@@ -71,7 +72,7 @@ export default async function WorkspaceManagementPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Navbar */}
-      <WorkspaceManagementNavbar user={user} canChangePassword={canChangePassword} />
+      <WorkspaceManagementNavbar user={user} canChangePassword={canChangePassword} isGoogleUser={isGoogle} />
       <Separator />
       {/* Conteúdo principal */}
       <main className="flex-1 py-4 sm:py-6 lg:py-8">

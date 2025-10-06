@@ -89,11 +89,13 @@ export function AppSidebar({
   workspaces = [],
   user,
   canChangePassword = true,
+  isGoogleUser = false,
   ...props 
 }: React.ComponentProps<typeof Sidebar> & {
   workspaces?: Workspace[]
   user?: User
   canChangePassword?: boolean
+  isGoogleUser?: boolean
 }) {
   const userData = user || data.user;
   const { open } = useSidebar();
@@ -127,7 +129,7 @@ export function AppSidebar({
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} canChangePassword={canChangePassword} />
+        <NavUser user={userData} canChangePassword={canChangePassword} isGoogleUser={isGoogleUser} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

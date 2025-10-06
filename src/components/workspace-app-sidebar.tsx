@@ -26,6 +26,7 @@ export async function WorkspaceAppSidebar() {
     avatar: "/avatars/default.jpg",
   };
   let canChangePassword = true;
+  let isGoogle = false;
 
   // Try to get session with database error handling
   const sessionResult = await withDatabaseErrorHandling(
@@ -115,15 +116,16 @@ export async function WorkspaceAppSidebar() {
 
     // Verificar se o usuário fez login com Google
     if (session?.user?.id) {
-      const isGoogle = await withDatabaseErrorHandling(
+      const isGoogleResult = await withDatabaseErrorHandling(
         async () => {
           return await isGoogleUser(session!.user.id);
         },
         false
       );
-      canChangePassword = !isGoogle.data; // Se é usuário do Google, não pode alterar senha
+      isGoogle = isGoogleResult.data; // Se é usuário do Google
+      canChangePassword = !isGoogle; // Se é usuário do Google, não pode alterar senha
     }
   }
 
-  return <AppSidebar workspaces={workspaces} user={user} canChangePassword={canChangePassword} />;
+  return <AppSidebar workspaces={workspaces} user={user} canChangePassword={canChangePassword} isGoogleUser={isGoogle} />;
 }
