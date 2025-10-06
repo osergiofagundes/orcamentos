@@ -80,6 +80,9 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
     const [inviteCode, setInviteCode] = useState("")
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
     const [copiedCode, setCopiedCode] = useState(false)
+    const [removingUserId, setRemovingUserId] = useState<string | null>(null)
+    const [approvingRequestId, setApprovingRequestId] = useState<number | null>(null)
+    const [rejectingRequestId, setRejectingRequestId] = useState<number | null>(null)
 
     const fetchUsers = async () => {
         try {
@@ -150,6 +153,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
     }
 
     const handleApproveRequest = async (requestId: number) => {
+        setApprovingRequestId(requestId)
         try {
             const response = await fetch(`/api/workspace/${workspaceId}/invite-requests/${requestId}/approve`, {
                 method: 'POST',
@@ -165,10 +169,13 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
             toast.success("Solicitação aprovada com sucesso!")
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Erro ao aprovar solicitação")
+        } finally {
+            setApprovingRequestId(null)
         }
     }
 
     const handleRejectRequest = async (requestId: number) => {
+        setRejectingRequestId(requestId)
         try {
             const response = await fetch(`/api/workspace/${workspaceId}/invite-requests/${requestId}/reject`, {
                 method: 'POST',
@@ -183,6 +190,8 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
             toast.success("Solicitação rejeitada com sucesso!")
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Erro ao rejeitar solicitação")
+        } finally {
+            setRejectingRequestId(null)
         }
     }
 
@@ -214,6 +223,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
     }
 
     const handleRemoveUser = async (userId: string) => {
+        setRemovingUserId(userId)
         try {
             const response = await fetch(`/api/workspace/${workspaceId}/users/${userId}`, {
                 method: 'DELETE',
@@ -228,6 +238,8 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
             toast.success("Usuário removido com sucesso!")
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Erro ao remover usuário")
+        } finally {
+            setRemovingUserId(null)
         }
     }
 
@@ -408,12 +420,13 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                                                 </AlertDialogDescription>
                                                             </AlertDialogHeader>
                                                             <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                <AlertDialogCancel className='border hover:text-red-600 hover:border-red-600 cursor-pointer'>Cancelar</AlertDialogCancel>
                                                                 <AlertDialogAction
                                                                     onClick={() => handleRemoveUser(user.usuario_id)}
-                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                    disabled={removingUserId === user.usuario_id}
+                                                                    className='bg-red-600 hover:bg-red-700 cursor-pointer'
                                                                 >
-                                                                    Remover
+                                                                    {removingUserId === user.usuario_id ? (<>Removendo <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Remover <Trash2 className="h-4 w-4" /></>)}
                                                                 </AlertDialogAction>
                                                             </AlertDialogFooter>
                                                         </AlertDialogContent>
@@ -432,28 +445,25 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
             {canManageUsers && pendingRequests.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Clock className="h-5 w-5" />
-                            Solicitações Pendentes
-                        </CardTitle>
-                        <CardDescription>
+                        <CardTitle>Solicitações Pendentes</CardTitle>
+                        <CardDescription className="hidden sm:block">
                             Usuários que solicitaram entrada no workspace
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             {pendingRequests.map((request) => (
-                                <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar>
+                                <div key={request.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <Avatar className="flex-shrink-0">
                                             <AvatarImage src={request.usuario.image} alt={request.usuario.name} />
                                             <AvatarFallback>
                                                 {request.usuario.name.charAt(0).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div>
-                                            <div className="font-medium">{request.usuario.name}</div>
-                                            <div className="text-sm text-muted-foreground">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">{request.usuario.name}</div>
+                                            <div className="text-sm text-muted-foreground truncate">
                                                 {request.usuario.email}
                                             </div>
                                             {request.mensagem && (
@@ -466,20 +476,23 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
                                         <Button
                                             size="sm"
                                             variant="outline"
                                             onClick={() => handleRejectRequest(request.id)}
-                                            className="text-red-600 hover:text-red-700"
+                                            disabled={rejectingRequestId === request.id}
+                                            className='border hover:text-red-600 hover:border-red-600 cursor-pointer flex-1 sm:flex-none'
                                         >
-                                            Rejeitar
+                                            {rejectingRequestId === request.id ? (<>Rejeitando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Rejeitar</>)}
                                         </Button>
                                         <Button
                                             size="sm"
                                             onClick={() => handleApproveRequest(request.id)}
+                                            disabled={approvingRequestId === request.id}
+                                            className='bg-sky-600 hover:bg-sky-700 cursor-pointer flex-1 sm:flex-none'
                                         >
-                                            Aprovar
+                                            {approvingRequestId === request.id ? (<>Aprovando <Loader2 className="h-4 w-4 animate-spin" /></>) : (<>Aprovar</>)}
                                         </Button>
                                     </div>
                                 </div>

@@ -52,47 +52,26 @@ export function EmailVerificationModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent  className="sm:max-w-lg border-l-8">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-blue-600" />
               <DialogTitle>Verificação de Email</DialogTitle>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
           <DialogDescription className="text-left">
             Para garantir a segurança da sua conta, você precisa verificar seu email antes de continuar.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="py-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p className="text-sm text-blue-800">
-              📧 Um email de verificação foi enviado para:
+
+        <div>
+          <div className="bg-sky-50 border border-sky-200 rounded-lg p-4">
+            <p className="text-sm text-sky-800">
+              Um email de verificação foi enviado para:
             </p>
-            <p className="font-medium text-blue-900 mt-1">
+            <p className="font-medium text-sm text-sky-900 mt-1">
               {userEmail}
-            </p>
-          </div>
-          
-          <div className="space-y-3 text-sm text-gray-600">
-            <p>
-              • Verifique sua caixa de entrada e clique no link de verificação
-            </p>
-            <p>
-              • Não esquece de verificar na pasta de spam/lixo eletrônico
-            </p>
-            <p>
-              • Após verificar, você poderá acessar todas as funcionalidades
             </p>
           </div>
         </div>
@@ -102,13 +81,13 @@ export function EmailVerificationModal({
             variant="outline" 
             onClick={handleResendEmail}
             disabled={isResending}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto border hover:text-sky-600 hover:border-sky-600 cursor-pointer"
           >
             {isResending ? "Reenviando..." : "Reenviar Email"}
           </Button>
           <Button 
             onClick={onClose}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 cursor-pointer"
           >
             Fechar
           </Button>

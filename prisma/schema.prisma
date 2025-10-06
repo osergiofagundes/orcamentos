@@ -172,7 +172,7 @@ model Cliente {
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
   deletedBy           String?        // ID do usuário que excluiu
-  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
   orcamentos         Orcamento[]
   usuarioQueExcluiu   User?          @relation("ClienteExcluido", fields: [deletedBy], references: [id])
 
@@ -204,7 +204,7 @@ model Orcamento {
   deletedBy           String?        // ID do usuário que excluiu
   cliente             Cliente?       @relation(fields: [cliente_id], references: [id])
   usuario             User           @relation(fields: [usuario_id], references: [id])
-  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
   itensOrcamento     ItemOrcamento[]
   usuarioQueExcluiu   User?          @relation("OrcamentoExcluido", fields: [deletedBy], references: [id])
 
@@ -225,7 +225,7 @@ model ItemOrcamento {
   produto_tipo_valor  TipoValor?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
-  orcamento           Orcamento      @relation(fields: [orcamento_id], references: [id])
+  orcamento           Orcamento      @relation(fields: [orcamento_id], references: [id], onDelete: Cascade)
   produtoServico      ProdutoServico? @relation(fields: [produto_servico_id], references: [id])
 
   @@map("item_orcamento")
@@ -244,7 +244,7 @@ model ProdutoServico {
   deletedAt           DateTime?
   deletedBy           String?        // ID do usuário que excluiu
   categoria           Categoria?     @relation(fields: [categoria_id], references: [id])
-  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
   itensOrcamento     ItemOrcamento[]
   usuarioQueExcluiu   User?          @relation("ProdutoServicoExcluido", fields: [deletedBy], references: [id])
 
@@ -259,7 +259,7 @@ model Categoria {
   updatedAt           DateTime       @updatedAt
   deletedAt           DateTime?
   deletedBy           String?        // ID do usuário que excluiu
-  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id])
+  areaTrabalho        AreaTrabalho   @relation(fields: [area_trabalho_id], references: [id], onDelete: Cascade)
   produtosServicos    ProdutoServico[]
   usuarioQueExcluiu   User?          @relation("CategoriaExcluida", fields: [deletedBy], references: [id])
 

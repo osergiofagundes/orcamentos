@@ -29,6 +29,11 @@ export default async function WorkspaceTrashPage() {
   // Verificar se o usuário precisa verificar o email
   const needsVerification = await needsEmailVerification(session.user.id)
 
+  // Se precisar verificar email, redirecionar para workspace-management
+  if (needsVerification) {
+    redirect('/workspace-management')
+  }
+
   // Busca todos os workspaces na lixeira do usuário
   const trashedWorkspaces = await prisma.areaTrabalho.findMany({
     where: {
