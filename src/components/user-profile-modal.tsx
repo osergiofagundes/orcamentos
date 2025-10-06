@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { User, Lock, Camera, Pen, Save, Send, Loader2, Edit } from "lucide-react"
+import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogContent,
@@ -31,10 +32,12 @@ interface UserProfileModalProps {
     avatar: string
   }
   canChangePassword?: boolean // Se false, não mostra a aba de senha (usuário logou com Google)
+  isGoogleUser?: boolean // Se true, usuário logou com Google e não pode trocar email
 }
 
-export function UserProfileModal({ open, onOpenChange, user, canChangePassword = true }: UserProfileModalProps) {
+export function UserProfileModal({ open, onOpenChange, user, canChangePassword = true, isGoogleUser = false }: UserProfileModalProps) {
   const { toast } = useToast()
+  const router = useRouter()
   const [profileData, setProfileData] = useState({
     name: user.name,
     email: user.email,
@@ -96,11 +99,18 @@ export function UserProfileModal({ open, onOpenChange, user, canChangePassword =
 
       const updatedUser = await response.json()
       
-      // Atualizar os dados do usuário no componente pai se necessário
-      // Você pode adicionar um callback aqui para atualizar o estado do usuário
-      
       toast.success('Perfil atualizado com sucesso!')
-      onOpenChange(false)
+      
+      // Se o email foi alterado, redirecionar para workspace-management
+      if (updatedUser.emailChanged) {
+        toast.success('Um email de verificação foi enviado para o novo endereço')
+        onOpenChange(false)
+        router.push('/workspace-management')
+        router.refresh() // Atualiza a página para mostrar o modal de verificação
+      } else {
+        onOpenChange(false)
+        router.refresh() // Atualiza a página para refletir as mudanças
+      }
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error)
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar perfil')
@@ -249,7 +259,14 @@ export function UserProfileModal({ open, onOpenChange, user, canChangePassword =
                   value={profileData.email}
                   onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="seu@email.com"
+                  disabled={isGoogleUser}
+                  className={isGoogleUser ? "bg-gray-100 cursor-not-allowed" : ""}
                 />
+                {isGoogleUser && (
+                  <p className="text-xs text-gray-500">
+                    O email não pode ser alterado pois você fez login com Google
+                  </p>
+                )}
               </div>
               
               <Button type="submit" disabled={isLoadingProfile} className='w-full bg-sky-600 hover:bg-sky-700 cursor-pointer'>

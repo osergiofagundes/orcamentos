@@ -36,6 +36,7 @@ import { UserProfileModal } from "./user-profile-modal"
 export function NavUser({
   user,
   canChangePassword = true,
+  isGoogleUser = false,
 }: {
   user: {
     name: string
@@ -43,6 +44,7 @@ export function NavUser({
     avatar: string
   }
   canChangePassword?: boolean
+  isGoogleUser?: boolean
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -132,6 +134,7 @@ export function NavUser({
         onOpenChange={setIsProfileModalOpen}
         user={user}
         canChangePassword={canChangePassword}
+        isGoogleUser={isGoogleUser}
       />
     </SidebarMenu>
   )

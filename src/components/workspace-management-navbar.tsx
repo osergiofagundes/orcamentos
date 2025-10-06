@@ -31,6 +31,7 @@ import Link from "next/link"
 export function WorkspaceManagementNavbar({
   user,
   canChangePassword = true,
+  isGoogleUser = false,
 }: {
   user: {
     name: string
@@ -38,6 +39,7 @@ export function WorkspaceManagementNavbar({
     avatar: string
   }
   canChangePassword?: boolean
+  isGoogleUser?: boolean
 }) {
   const router = useRouter()
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -133,6 +135,7 @@ export function WorkspaceManagementNavbar({
         onOpenChange={setIsProfileModalOpen}
         user={user}
         canChangePassword={canChangePassword}
+        isGoogleUser={isGoogleUser}
       />
     </nav>
   )
