@@ -100,25 +100,26 @@ export function AppSidebar({
   
   return (
     <Sidebar collapsible="icon" {...props}>
-      {open && (
-        <div className="flex items-center gap-2 px-4 py-2 border-b bg-sky-600 justify-center rounded-lg m-2">
-          <img 
-            src="/images/logo.png" 
-            alt="Sky Orçamentos Logo" 
-            className="h-8 w-8 rounded"
-          />
-          <span className="font-semibold text-lg text-white">
-            Sky Orçamentos
-          </span>
-        </div>
-      )}
-      {!open && (
-        <SidebarHeader>
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src="../images/logo.png" alt="Sky orcamentos logo" />
-          </Avatar>
-        </SidebarHeader>
-      )}
+      <SidebarHeader>
+        {open ? (
+          <div className="flex items-center gap-2 px-2 py-2 border-b bg-sky-600 justify-center rounded-lg">
+            <img 
+              src="/images/logo.png" 
+              alt="Sky Orçamentos Logo" 
+              className="h-8 w-8 rounded"
+            />
+            <span className="font-semibold text-lg text-white">
+              Sky Orçamentos
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-2">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage src="/images/logo.png" alt="Sky orcamentos logo" />
+            </Avatar>
+          </div>
+        )}
+      </SidebarHeader>
       <SidebarHeader>
         <WorkspaceSwitcher workspaces={workspaces} />
       </SidebarHeader>
