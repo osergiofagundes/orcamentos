@@ -110,14 +110,14 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
             })
 
             if (!response.ok) {
-                throw new Error('Failed to update workspace')
+                throw new Error('Falha ao atualizar a Área de trabalho')
             }
 
             const updatedWorkspace = await response.json()
 
-            toast.success("Workspace atualizado com sucesso!")
+            toast.success("Área de trabalho atualizado com sucesso!")
         } catch (error) {
-            toast.error("Não foi possível atualizar o workspace. Tente novamente.")
+            toast.error("Não foi possível atualizar a Área de trabalho. Tente novamente.")
         } finally {
             setIsLoading(false)
         }
@@ -142,7 +142,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
         try {
             await navigator.clipboard.writeText(workspace.id.toString())
             setCopied(true)
-            toast.success("ID do workspace copiado!")
+            toast.success("ID da Área de trabalho copiado!")
             setTimeout(() => setCopied(false), 2000)
         } catch (error) {
             toast.error("Erro ao copiar ID")
@@ -152,15 +152,15 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Informações do Workspace</CardTitle>
+                <CardTitle>Informações da Área de trabalho</CardTitle>
                 <CardDescription>
-                    Gerencie as informações básicas do seu workspace
+                    Gerencie as informações básicas da sua Área de trabalho
                 </CardDescription>
             </CardHeader>
 
             <CardContent>
                 <div className="mb-6">
-                    <Label htmlFor="nome" className="mb-2">Logo do Workspace</Label>
+                    <Label htmlFor="nome" className="mb-2">Logo da Área de trabalho</Label>
                     <LogoUpload
                         workspaceId={workspace.id}
                         currentLogoUrl={workspace.logo_url}
@@ -171,12 +171,12 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: WorkspaceSettingsF
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="nome">Nome do Workspace*</Label>
+                                <Label htmlFor="nome">Nome da Área de trabalho*</Label>
                                 <Input
                                     id="nome"
                                     value={formData.nome}
                                     onChange={(e) => handleInputChange("nome", e.target.value)}
-                                    placeholder="Nome do workspace"
+                                    placeholder="Nome da Área de trabalho"
                                     required
                                     disabled={!canEdit}
                                     className={errors.nome ? "border-red-500" : ""}

@@ -30,7 +30,12 @@ interface UserData {
   avatar: string
 }
 
-export default function LandingPage() {
+interface LandingPageProps {
+  canChangePassword?: boolean
+  isGoogleUser?: boolean
+}
+
+export default function LandingPage({ canChangePassword = true, isGoogleUser = false }: LandingPageProps) {
   const [user, setUser] = useState<UserData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
@@ -278,6 +283,8 @@ export default function LandingPage() {
             email: user.email,
             avatar: user.avatar
           }}
+          canChangePassword={canChangePassword}
+          isGoogleUser={isGoogleUser}
         />
       )}
     </div>

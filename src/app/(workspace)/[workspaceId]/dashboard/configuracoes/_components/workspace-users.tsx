@@ -66,7 +66,7 @@ const getPermissionDescription = (level: number) => {
         case 2:
             return "Pode gerenciar produtos, categorias e clientes"
         case 3:
-            return "Controle total do workspace"
+            return "Controle total da Área de trabalho"
         default:
             return "Nível de permissão desconhecido"
     }
@@ -247,7 +247,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Usuários do Workspace</CardTitle>
+                    <CardTitle>Usuários da Área de trabalho</CardTitle>
                     <CardDescription>Carregando usuários...</CardDescription>
                 </CardHeader>
             </Card>
@@ -260,9 +260,9 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle>Usuários do Workspace</CardTitle>
+                            <CardTitle>Usuários da Área de trabalho</CardTitle>
                             <CardDescription className="hidden sm:block">
-                                Gerencie quem tem acesso ao workspace e seus níveis de permissão
+                                Gerencie quem tem acesso a Área de trabalho e seus níveis de permissão
                             </CardDescription>
                         </div>
                         {canManageUsers && (
@@ -277,7 +277,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                     <DialogHeader>
                                         <DialogTitle>Convidar Participantes</DialogTitle>
                                         <DialogDescription>
-                                            Gere um código de convite para que outros usuários possam solicitar entrada no workspace.
+                                            Gere um código de convite para que outros usuários possam solicitar entrada na Área de trabalho.
                                         </DialogDescription>
                                     </DialogHeader>
                                     {!inviteCode ? (
@@ -415,7 +415,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                                                             <AlertDialogHeader>
                                                                 <AlertDialogTitle>Remover usuário</AlertDialogTitle>
                                                                 <AlertDialogDescription>
-                                                                    Tem certeza que deseja remover {user.usuario.name} do workspace?
+                                                                    Tem certeza que deseja remover {user.usuario.name} da Área de trabalho?
                                                                     Esta ação não pode ser desfeita.
                                                                 </AlertDialogDescription>
                                                             </AlertDialogHeader>
@@ -447,7 +447,7 @@ export function WorkspaceUsers({ workspaceId, currentUserId, canManageUsers }: W
                     <CardHeader>
                         <CardTitle>Solicitações Pendentes</CardTitle>
                         <CardDescription className="hidden sm:block">
-                            Usuários que solicitaram entrada no workspace
+                            Usuários que solicitaram entrada na Área de trabalho
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

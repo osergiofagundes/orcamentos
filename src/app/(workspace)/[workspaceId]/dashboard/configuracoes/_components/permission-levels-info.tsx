@@ -42,13 +42,13 @@ export function PermissionLevelsInfo() {
             name: "Usuário Nível 3",
             color: "bg-green-100 text-green-800",
             icon: Settings,
-            description: "Controle total do workspace",
+            description: "Controle total da Área de trabalho",
             permissions: [
                 "Todas as permissões dos níveis anteriores",
-                "Gerenciar configurações do workspace",
+                "Gerenciar configurações da Área de trabalho",
                 "Adicionar/remover usuários",
                 "Alterar permissões de usuários",
-                "Excluir workspace"
+                "Excluir Área de trabalho"
             ]
         }
     ]
@@ -61,7 +61,7 @@ export function PermissionLevelsInfo() {
                     Níveis de Permissão
                 </CardTitle>
                 <CardDescription>
-                    Entenda os diferentes níveis de acesso no workspace
+                    Entenda os diferentes níveis de acesso da Área de trabalho
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
