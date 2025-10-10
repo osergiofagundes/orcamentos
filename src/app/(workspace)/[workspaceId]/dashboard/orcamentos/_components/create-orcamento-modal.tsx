@@ -28,15 +28,19 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Package, User, Calculator, Search, X, FileText, AlertCircle, Loader2 } from "lucide-react"
+import { Plus, Trash2, Package, User, Calculator, Search, X, FileText, AlertCircle, Loader2, ClipboardPen, AlertTriangle } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const createOrcamentoSchema = z.object({
   clienteId: z.string().min(1, "Selecione um cliente"),
   observacoes: z.string().optional(),
+  descontoGeralPercentual: z.number().min(0).max(100).optional(),
+  descontoGeralValor: z.number().min(0).optional(),
+  tipoDescontoGeral: z.enum(["percentual", "valor", "nenhum"]).optional(),
   itens: z.array(z.object({
     produtoServicoId: z.string().min(1, "Selecione um produto/serviço"),
     quantidade: z.number().min(1, "Quantidade deve ser maior que 0"),
@@ -64,6 +68,20 @@ interface ProdutoServico {
   categoria: {
     nome: string
   }
+}
+
+interface Workspace {
+  id: number
+  nome: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
+  bairro: string | null
+  cidade: string | null
+  estado: string | null
+  cep: string | null
+  logo_url: string | null
 }
 
 interface CreateOrcamentoModalProps {
@@ -205,6 +223,7 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
   const [loading, setLoading] = useState(false)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [produtosServicos, setProdutosServicos] = useState<ProdutoServico[]>([])
+  const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [dataLoaded, setDataLoaded] = useState(false)
 
   const form = useForm<CreateOrcamentoForm>({
@@ -212,6 +231,9 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     defaultValues: {
       clienteId: "",
       observacoes: "",
+      descontoGeralPercentual: 0,
+      descontoGeralValor: 0,
+      tipoDescontoGeral: "nenhum",
       itens: [{
         produtoServicoId: "",
         quantidade: 1,
@@ -236,9 +258,10 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
 
   const loadData = async () => {
     try {
-      const [clientesRes, produtosRes] = await Promise.all([
+      const [clientesRes, produtosRes, workspaceRes] = await Promise.all([
         fetch(`/api/workspace/${workspaceId}/clientes`),
         fetch(`/api/workspace/${workspaceId}/produtos`),
+        fetch(`/api/workspace/${workspaceId}`),
       ])
 
       if (clientesRes.ok) {
@@ -249,6 +272,11 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
       if (produtosRes.ok) {
         const produtosData = await produtosRes.json()
         setProdutosServicos(produtosData)
+      }
+
+      if (workspaceRes.ok) {
+        const workspaceData = await workspaceRes.json()
+        setWorkspace(workspaceData)
       }
       
       setDataLoaded(true)
@@ -322,13 +350,50 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
     }, 0)
   }
 
-  const calculateTotal = () => {
+  const calculateDescontoGeral = () => {
+    // Calcular subtotal após descontos dos itens
     const subtotal = calculateSubtotal()
-    const descontoTotal = calculateDescontoTotal()
-    return Math.max(0, subtotal - descontoTotal)
+    const descontoItens = calculateDescontoTotal()
+    const subtotalComDescontos = subtotal - descontoItens
+    
+    const tipoDescontoGeral = form.watch("tipoDescontoGeral")
+    const descontoGeralPercentual = form.watch("descontoGeralPercentual") || 0
+    const descontoGeralValor = form.watch("descontoGeralValor") || 0
+
+    if (tipoDescontoGeral === "percentual" && descontoGeralPercentual > 0) {
+      return subtotalComDescontos * (descontoGeralPercentual / 100)
+    } else if (tipoDescontoGeral === "valor" && descontoGeralValor > 0) {
+      return descontoGeralValor
+    }
+    
+    return 0
   }
 
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal()
+    const descontoItens = calculateDescontoTotal()
+    const descontoGeral = calculateDescontoGeral()
+    return Math.max(0, subtotal - descontoItens - descontoGeral)
+  }
 
+  // Verificar se informações importantes do workspace estão faltando
+  const getMissingWorkspaceInfo = () => {
+    if (!workspace) return []
+    
+    const missingFields: string[] = []
+    
+    if (!workspace.logo_url) missingFields.push("Logotipo")
+    if (!workspace.cpf_cnpj) missingFields.push("CPF/CNPJ")
+    if (!workspace.telefone) missingFields.push("Telefone")
+    if (!workspace.email) missingFields.push("E-mail")
+    if (!workspace.endereco || !workspace.cidade || !workspace.estado) missingFields.push("Endereço completo")
+    
+    return missingFields
+  }
+
+  const hasMissingInfo = () => {
+    return getMissingWorkspaceInfo().length > 0
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -370,6 +435,27 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Aviso de informações faltantes do workspace */}
+              {hasMissingInfo() && (
+                <Alert variant="default" className="border-sky-500 bg-sky-50/50">
+                  <AlertTitle className="font-semibold">
+                    Informações da Área de Trabalho Incompletas
+                  </AlertTitle>
+                  <AlertDescription>
+                    <p className="my-4">
+                      Sua Área de Trabalho está com algumas informações importantes faltando: <strong>{getMissingWorkspaceInfo().join(", ")}</strong>.
+                    </p>
+                    <p className="text-sm">
+                      <strong>Dica:</strong> Orçamentos com informações completas (logotipo, cpf/cnpj, telefone, e-mail e endereço)
+                      transmitem mais profissionalismo e têm maiores chances de serem aprovados pelos clientes.
+                    </p>
+                    <p className="text-sm mt-4">
+                      Complete essas informações nas <a href={`/${workspaceId}/dashboard/configuracoes`} className="font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer">Configurações do Workspace</a> para melhorar a apresentação dos seus orçamentos.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Seção de Informações Básicas */}
               <div className="space-y-6">
                 <div className="flex items-center space-x-2 pb-2 border-b">
@@ -681,10 +767,132 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
               />
             </div>
 
+            {/* Seção de Desconto Geral */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 pb-2 border-b">
+                <Calculator className="h-5 w-5" />
+                <DialogTitle>Desconto Geral no Orçamento</DialogTitle>
+              </div>
+
+              <div className="bg-muted/30 border rounded-xl p-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Aplique um desconto adicional sobre o subtotal do orçamento.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="tipoDescontoGeral"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Tipo de Desconto</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="w-full bg-white">
+                              <SelectValue placeholder="Sem desconto" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="nenhum">Sem Desconto</SelectItem>
+                            <SelectItem value="percentual">Percentual (%)</SelectItem>
+                            <SelectItem value="valor">Valor Fixo (R$)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {form.watch("tipoDescontoGeral") === "percentual" && (
+                    <FormField
+                      control={form.control}
+                      name="descontoGeralPercentual"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Desconto (%)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">%</span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                placeholder="0.00"
+                                className="pl-8 text-right bg-white"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {form.watch("tipoDescontoGeral") === "valor" && (
+                    <FormField
+                      control={form.control}
+                      name="descontoGeralValor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Desconto (R$)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                className="pl-8 text-right bg-white"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {form.watch("tipoDescontoGeral") !== "nenhum" && (
+                    <>
+                      {form.watch("tipoDescontoGeral") === "percentual" && (
+                        <div>
+                          <div className="flex flex-col h-full">
+                            <label className="text-sm font-medium mb-2">Valor do Desconto Geral</label>
+                            <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 bg-white">
+                              <span className="font-bold">
+                                -R$ {((calculateSubtotal() - calculateDescontoTotal()) * (form.watch("descontoGeralPercentual") || 0) / 100).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {form.watch("tipoDescontoGeral") === "valor" && (
+                        <div>
+                          <div className="flex flex-col h-full">
+                            <label className="text-sm font-medium mb-2">Valor do Desconto Geral</label>
+                            <div className="px-3 py-1 border rounded-md flex items-center justify-center border-amber-600 bg-white">
+                              <span className="font-bold">
+                                -R$ {(form.watch("descontoGeralValor") || 0).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Seção de Resumo do Orçamento */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2 pb-2 border-b">
-                <Calculator className="h-5 w-5 text-primary" />
+                <ClipboardPen className="h-5 w-5 text-primary" />
                 <DialogTitle>Resumo do Orçamento</DialogTitle>
               </div>
 
@@ -706,8 +914,8 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                     <div className="border-t pt-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="font-medium text-amber-600">Total de Descontos</div>
-                          <div className="text-muted-foreground text-sm">Desconto aplicado aos itens</div>
+                          <div className="font-medium text-amber-600">Descontos nos Itens</div>
+                          <div className="text-muted-foreground text-sm">Desconto aplicado aos itens individuais</div>
                         </div>
                         <div className="text-right">
                           <div className="text-lg font-semibold text-amber-600">
@@ -717,16 +925,15 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                       </div>
                     </div>
 
-                    <div className="border-t pt-3">
+                    <div className="border-t pt-3 bg-muted/30">
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="font-bold text-primary text-lg">
-                            Total Final do Orçamento
-                          </div>
+                          <div className="font-medium">Subtotal com Descontos</div>
+                          <div className="text-muted-foreground text-sm">Após descontos dos itens</div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-primary">
-                            R$ {calculateTotal().toFixed(2)}
+                          <div className="text-lg font-semibold">
+                            R$ {(calculateSubtotal() - calculateDescontoTotal()).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -734,7 +941,40 @@ export function CreateOrcamentoModal({ workspaceId, onOrcamentoCreated }: Create
                   </>
                 )}
 
-                {calculateDescontoTotal() === 0 && (
+                {calculateDescontoGeral() > 0 && (
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium text-amber-600">Desconto Geral</div>
+                        <div className="text-muted-foreground text-sm">Aplicado sobre o subtotal com descontos</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-amber-600">
+                          -R$ {calculateDescontoGeral().toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {(calculateDescontoTotal() > 0 || calculateDescontoGeral() > 0) && (
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-bold text-primary text-lg">
+                          Total Final do Orçamento
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          R$ {calculateTotal().toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {calculateDescontoTotal() === 0 && calculateDescontoGeral() === 0 && (
                   <div className="border-t pt-3">
                     <div className="flex justify-between items-center">
                       <div>
