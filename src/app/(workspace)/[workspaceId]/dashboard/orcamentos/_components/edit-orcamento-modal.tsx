@@ -27,11 +27,12 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, Save, Package, User, Calculator, FileText, AlertCircle, Edit, Loader2, ClipboardPen } from "lucide-react"
+import { Plus, Trash2, Package, User, Calculator, FileText, AlertCircle, Loader2, Edit, ClipboardPen, AlertTriangle } from "lucide-react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const editOrcamentoSchema = z.object({
   clienteId: z.string().min(1, "Selecione um cliente"), // "deleted" é um valor válido
@@ -65,6 +66,20 @@ interface ProdutoServico {
   categoria: {
     nome: string
   }
+}
+
+interface Workspace {
+  id: number
+  nome: string
+  cpf_cnpj: string | null
+  telefone: string | null
+  email: string | null
+  endereco: string | null
+  bairro: string | null
+  cidade: string | null
+  estado: string | null
+  cep: string | null
+  logo_url: string | null
 }
 
 interface OrcamentoDetalhado {
@@ -128,6 +143,7 @@ export function EditOrcamentoModal({
   const [orcamento, setOrcamento] = useState<OrcamentoDetalhado | null>(null)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [produtosServicos, setProdutosServicos] = useState<ProdutoServico[]>([])
+  const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
@@ -158,10 +174,11 @@ export function EditOrcamentoModal({
   const loadData = async () => {
     setLoading(true)
     try {
-      const [orcamentoRes, clientesRes, produtosRes] = await Promise.all([
+      const [orcamentoRes, clientesRes, produtosRes, workspaceRes] = await Promise.all([
         fetch(`/api/workspace/${workspaceId}/orcamentos/${orcamentoId}`),
         fetch(`/api/workspace/${workspaceId}/clientes`),
         fetch(`/api/workspace/${workspaceId}/produtos`),
+        fetch(`/api/workspace/${workspaceId}`),
       ])
 
       if (orcamentoRes.ok) {
@@ -202,6 +219,11 @@ export function EditOrcamentoModal({
       if (produtosRes.ok) {
         const produtosData = await produtosRes.json()
         setProdutosServicos(produtosData)
+      }
+
+      if (workspaceRes.ok) {
+        const workspaceData = await workspaceRes.json()
+        setWorkspace(workspaceData)
       }
       
       setDataLoaded(true)
@@ -317,6 +339,25 @@ export function EditOrcamentoModal({
     }
   }
 
+  // Verificar se informações importantes do workspace estão faltando
+  const getMissingWorkspaceInfo = () => {
+    if (!workspace) return []
+    
+    const missingFields: string[] = []
+    
+    if (!workspace.logo_url) missingFields.push("Logotipo")
+    if (!workspace.cpf_cnpj) missingFields.push("CPF/CNPJ")
+    if (!workspace.telefone) missingFields.push("Telefone")
+    if (!workspace.email) missingFields.push("E-mail")
+    if (!workspace.endereco || !workspace.cidade || !workspace.estado) missingFields.push("Endereço completo")
+    
+    return missingFields
+  }
+
+  const hasMissingInfo = () => {
+    return getMissingWorkspaceInfo().length > 0
+  }
+
   // Verificar se o orçamento pode ser editado
   const canEdit = orcamento && (orcamento.status === "RASCUNHO" || orcamento.status === "ENVIADO")
 
@@ -358,6 +399,27 @@ export function EditOrcamentoModal({
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Aviso de informações faltantes do workspace */}
+              {hasMissingInfo() && (
+                <Alert variant="default" className="border-sky-500 bg-sky-50/50">
+                  <AlertTitle className="font-semibold">
+                    Informações da Área de Trabalho Incompletas
+                  </AlertTitle>
+                  <AlertDescription>
+                    <p className="my-4">
+                      Sua Área de Trabalho está com algumas informações importantes faltando: <strong>{getMissingWorkspaceInfo().join(", ")}</strong>.
+                    </p>
+                    <p className="text-sm">
+                      <strong>Dica:</strong> Orçamentos com informações completas (logotipo, cpf/cnpj, telefone, e-mail e endereço)
+                      transmitem mais profissionalismo e têm maiores chances de serem aprovados pelos clientes.
+                    </p>
+                    <p className="text-sm mt-4">
+                      Complete essas informações nas <a href={`/${workspaceId}/dashboard/configuracoes`} className="font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer">Configurações do Workspace</a> para melhorar a apresentação dos seus orçamentos.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Seção de Informações Básicas */}
               <div className="space-y-6">
                 <div className="flex items-center space-x-2 pb-2 border-b">
