@@ -236,7 +236,9 @@ export async function generateOrcamentoPDF(orcamentoData: OrcamentoData) {
       orcamentoData.cliente.cep ? formatCep(orcamentoData.cliente.cep) : null
     ].filter(Boolean).join(', ')
 
-    y = addWrappedText(`Endereço: ${clienteEndereco}`, margin, y, pageWidth - margin * 2)
+    if (clienteEndereco) {
+      y = addWrappedText(`Endereço: ${clienteEndereco}`, margin, y, pageWidth - margin * 2)
+    }
     y += 10
 
     // 6. ITENS DO ORÇAMENTO
