@@ -61,6 +61,11 @@ const data = {
       icon: HandCoins,
     },
     {
+      name: "Relatórios",
+      url: "relatorios",
+      icon: ChartArea,
+    },
+    {
       name: "Lixeira",
       url: "lixeira",
       icon: Trash2,
