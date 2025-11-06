@@ -44,7 +44,7 @@ export default function NotFound() {
             className="w-full sm:w-auto min-w-[200px] border hover:text-red-600 hover:border-red-600 cursor-pointer"
             onClick={() => window.history.back()}
           >
-            <ArrowLeft className="w-5 h-5" / >
+            <ArrowLeft className="w-5 h-5" />
             Página Anterior
           </Button>
         </div>
