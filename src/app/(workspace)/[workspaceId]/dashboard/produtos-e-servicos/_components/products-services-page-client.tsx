@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CalendarIcon, Lock, X, Tag, Ruler, Package } from "lucide-react"
+import { CalendarIcon, Lock, X, Tag, Ruler, Package, Download, Upload, NotepadTextDashed } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -180,6 +180,23 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
             </Popover>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Exportar CSV
+          <Download className="h-4 w-4" />
+        </Button>
+
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Importar CSV
+          <Upload className="h-4 w-4" />
+        </Button>
+
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Baixar Template
+          <NotepadTextDashed className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="space-y-6">

@@ -16,7 +16,8 @@ import {
   Clock, 
   Users, 
   Package,
-  TrendingUp 
+  TrendingUp,
+  Download 
 } from "lucide-react"
 import {
   Table,
@@ -26,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 
 interface ResumoOrcamentos {
   total: number
@@ -178,13 +180,21 @@ export function RelatoriosContent({ workspaceId }: RelatoriosContentProps) {
           {/* 2. ORÇAMENTOS POR CLIENTE */}
           <Card>
             <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <CardTitle>Orçamentos por Cliente</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5" />
+                    <CardTitle>Orçamentos por Cliente</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Top 10 clientes com mais orçamentos criados
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600">
+                  Exportar CSV
+                  <Download className="h-4 w-4" />
+                </Button>
               </div>
-              <CardDescription>
-                Top 10 clientes com mais orçamentos criados
-              </CardDescription>
             </CardHeader>
             <CardContent>
               {data.orcamentosPorCliente.length === 0 ? (
@@ -225,13 +235,21 @@ export function RelatoriosContent({ workspaceId }: RelatoriosContentProps) {
           {/* 3. PRODUTOS/SERVIÇOS MAIS ORÇADOS */}
           <Card>
             <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Package className="h-5 w-5" />
-                <CardTitle>Produtos/Serviços Mais Orçados</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5" />
+                    <CardTitle>Produtos/Serviços Mais Orçados</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Top 10 itens mais frequentes nos orçamentos
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600">
+                  Exportar CSV
+                  <Download className="h-4 w-4" />
+                </Button>
               </div>
-              <CardDescription>
-                Top 10 itens mais frequentes nos orçamentos
-              </CardDescription>
             </CardHeader>
             <CardContent>
               {data.produtosMaisOrcados.length === 0 ? (
