@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { ChevronDownIcon, CalendarIcon, X } from "lucide-react"
+import { ChevronDownIcon, CalendarIcon, X, Download, Upload, NotepadTextDashed } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -150,6 +150,23 @@ export function OrcamentosPageClient({ workspaceId }: OrcamentosPageClientProps)
             </Popover>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Exportar CSV
+          <Download className="h-4 w-4" />
+        </Button>
+
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Importar CSV
+          <Upload className="h-4 w-4" />
+        </Button>
+
+        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
+          Baixar Template
+          <NotepadTextDashed className="h-4 w-4" />
+        </Button>
       </div>
 
 
