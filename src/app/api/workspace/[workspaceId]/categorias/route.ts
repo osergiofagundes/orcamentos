@@ -38,6 +38,7 @@ export async function GET(
     const categorias = await prisma.categoria.findMany({
       where: {
         area_trabalho_id: parseInt(workspaceId),
+        deletedAt: null,
       },
       include: {
         _count: {

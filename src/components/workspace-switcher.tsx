@@ -34,6 +34,11 @@ export function WorkspaceSwitcher({
   const router = useRouter()
   const params = useParams()
   const currentWorkspaceId = params.workspaceId as string
+  const [mounted, setMounted] = React.useState(false)
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const activeWorkspace = workspaces.find(w => w.id.toString() === currentWorkspaceId) || workspaces[0]
 
@@ -45,89 +50,50 @@ export function WorkspaceSwitcher({
     return null
   }
 
-  // Quando a sidebar estiver fechada, mostrar apenas a logo/iniciais
-  if (!open) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            className="justify-center cursor-pointer"
-            onClick={() => handleWorkspaceChange(activeWorkspace.id)}
-          >
-            <div className="bg-sky-600 text-white flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
-              {activeWorkspace.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={activeWorkspace.logo_url}
-                  alt={`Logo ${activeWorkspace.nome}`}
-                  className="object-cover w-full h-full"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                    const parent = e.currentTarget.parentElement
-                    if (parent) {
-                      e.currentTarget.style.display = 'none'
-                      const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
-                      if (fallback) {
-                        fallback.style.display = 'block'
-                      }
-                    }
-                  }}
-                />
-              ) : null}
-              <span 
-                className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
-              >
-                {activeWorkspace.nome.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    )
-  }
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
-            >
-              <div className="bg-sky-600 text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
-                {activeWorkspace.logo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={activeWorkspace.logo_url}
-                    alt={`Logo ${activeWorkspace.nome}`}
-                    className="object-cover w-full h-full"
-                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                      const parent = e.currentTarget.parentElement
-                      if (parent) {
-                        e.currentTarget.style.display = 'none'
-                        const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
-                        if (fallback) {
-                          fallback.style.display = 'block'
-                        }
-                      }
-                    }}
-                  />
-                ) : null}
-                <span 
-                  className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+        {open ? (
+          mounted ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
                 >
-                  {activeWorkspace.nome.substring(0, 2).toUpperCase()}
-                </span>
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {activeWorkspace.nome}
-                </span>
-              </div>
-              <ChevronsUpDown className="ml-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
+                  <div className="bg-sky-600 text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                    {activeWorkspace.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={activeWorkspace.logo_url}
+                        alt={`Logo ${activeWorkspace.nome}`}
+                        className="object-cover w-full h-full"
+                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                          const parent = e.currentTarget.parentElement
+                          if (parent) {
+                            e.currentTarget.style.display = 'none'
+                            const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
+                            if (fallback) {
+                              fallback.style.display = 'block'
+                            }
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <span 
+                      className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+                    >
+                      {activeWorkspace.nome.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {activeWorkspace.nome}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             align="start"
@@ -182,6 +148,77 @@ export function WorkspaceSwitcher({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+          ) : (
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+            >
+              <div className="bg-sky-600 text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                {activeWorkspace.logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={activeWorkspace.logo_url}
+                    alt={`Logo ${activeWorkspace.nome}`}
+                    className="object-cover w-full h-full"
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                      const parent = e.currentTarget.parentElement
+                      if (parent) {
+                        e.currentTarget.style.display = 'none'
+                        const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
+                        if (fallback) {
+                          fallback.style.display = 'block'
+                        }
+                      }
+                    }}
+                  />
+                ) : null}
+                <span 
+                  className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+                >
+                  {activeWorkspace.nome.substring(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">
+                  {activeWorkspace.nome}
+                </span>
+              </div>
+              <ChevronsUpDown className="ml-auto" />
+            </SidebarMenuButton>
+          )
+        ) : (
+          <SidebarMenuButton
+            size="lg"
+            className="justify-center cursor-pointer"
+            onClick={() => handleWorkspaceChange(activeWorkspace.id)}
+          >
+            <div className="bg-sky-600 text-white flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+              {activeWorkspace.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={activeWorkspace.logo_url}
+                  alt={`Logo ${activeWorkspace.nome}`}
+                  className="object-cover w-full h-full"
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    const parent = e.currentTarget.parentElement
+                    if (parent) {
+                      e.currentTarget.style.display = 'none'
+                      const fallback = parent.querySelector('.workspace-fallback') as HTMLElement
+                      if (fallback) {
+                        fallback.style.display = 'block'
+                      }
+                    }
+                  }}
+                />
+              ) : null}
+              <span 
+                className={`text-xs font-semibold workspace-fallback ${activeWorkspace.logo_url ? 'hidden' : ''}`}
+              >
+                {activeWorkspace.nome.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+          </SidebarMenuButton>
+        )}
       </SidebarMenuItem>
     </SidebarMenu>
   )

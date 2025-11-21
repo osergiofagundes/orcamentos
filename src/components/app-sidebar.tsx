@@ -104,6 +104,11 @@ export function AppSidebar({
 }) {
   const userData = user || data.user;
   const { open } = useSidebar();
+  const [mounted, setMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   
   return (
     <Sidebar collapsible="icon" {...props}>

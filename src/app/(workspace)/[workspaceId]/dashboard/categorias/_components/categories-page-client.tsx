@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { CreateCategoryModal } from "./create-category-modal"
 import { CategoriesContent } from "./categories-content"
 import { CategoriesStats } from "./categories-stats"
+import { ImportCategoriasCSVModal } from "./import-categorias-csv-modal"
 import { SearchInput } from "@/components/search-input"
 import { useUserPermissions } from "@/hooks/use-user-permissions"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -14,13 +15,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon, Download, Lock, NotepadTextDashed, Upload, X } from "lucide-react"
+import { CalendarIcon, Download, Lock, NotepadTextDashed, Upload, X, Loader2 } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { convertCategoriasToCSV, downloadCSV, generateCategoriasCSVTemplate } from "@/lib/csv-utils"
+import { toast } from "sonner"
 
 interface CategoriesPageClientProps {
   workspaceId: string
+}
+
+interface Category {
+  id: number
+  nome: string
 }
 
 export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps) {
@@ -29,9 +37,55 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
   const { canManageCategories, userLevel, isLoading } = useUserPermissions(workspaceId)
   const [open, setOpen] = React.useState(false)
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const handleCategoryCreated = () => {
     setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleImportSuccess = () => {
+    setRefreshTrigger(prev => prev + 1)
+    setImportModalOpen(false)
+  }
+
+  const handleExportCSV = async () => {
+    setExporting(true)
+    try {
+      const response = await fetch(`/api/workspace/${workspaceId}/categorias`)
+      if (!response.ok) {
+        throw new Error('Erro ao buscar categorias')
+      }
+
+      const categories: Category[] = await response.json()
+
+      if (categories.length === 0) {
+        toast.info('Não há categorias para exportar')
+        return
+      }
+
+      // Converte para formato CSV
+      const csvData = categories.map(category => ({
+        nome: category.nome,
+      }))
+
+      const csvContent = convertCategoriasToCSV(csvData)
+      const filename = `categorias_${new Date().toISOString().split('T')[0]}.csv`
+      
+      downloadCSV(csvContent, filename)
+      toast.success('Categorias exportadas com sucesso!')
+    } catch (error) {
+      console.error('Erro ao exportar CSV:', error)
+      toast.error('Erro ao exportar categorias')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleDownloadTemplate = () => {
+    const template = generateCategoriasCSVTemplate()
+    downloadCSV(template, 'template_categorias.csv')
+    toast.success('Template baixado com sucesso!')
   }
 
   return (
@@ -121,22 +175,56 @@ export function CategoriesPageClient({ workspaceId }: CategoriesPageClientProps)
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Exportar CSV
-          <Download className="h-4 w-4" />
-        </Button>
+      {canManageCategories && (
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={handleExportCSV}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Exportar CSV
+              </>
+            )}
+          </Button>
 
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Importar CSV
-          <Upload className="h-4 w-4" />
-        </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={() => setImportModalOpen(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importar CSV
+          </Button>
 
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Baixar Template
-          <NotepadTextDashed className="h-4 w-4" />
-        </Button>
-      </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={handleDownloadTemplate}
+          >
+            <NotepadTextDashed className="h-4 w-4 mr-2" />
+            Baixar Template
+          </Button>
+        </div>
+      )}
+
+      <ImportCategoriasCSVModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        workspaceId={workspaceId}
+        onImportSuccess={handleImportSuccess}
+      />
 
       <CategoriesContent 
         workspaceId={workspaceId} 

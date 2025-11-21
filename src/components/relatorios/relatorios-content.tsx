@@ -28,6 +28,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { 
+  convertOrcamentosPorClienteToCSV, 
+  convertProdutosMaisOrcadosToCSV, 
+  downloadCSV 
+} from "@/lib/csv-utils"
 
 interface ResumoOrcamentos {
   total: number
@@ -92,6 +97,48 @@ export function RelatoriosContent({ workspaceId }: RelatoriosContentProps) {
       style: 'currency',
       currency: 'BRL'
     }).format(valueInCents / 100)
+  }
+
+  const handleExportOrcamentosPorCliente = () => {
+    if (!data || data.orcamentosPorCliente.length === 0) {
+      return
+    }
+
+    try {
+      const csvData = data.orcamentosPorCliente.map(item => ({
+        clienteNome: item.clienteNome,
+        quantidadeOrcamentos: item.quantidadeOrcamentos,
+        valorTotal: item.valorTotal
+      }))
+
+      const csvContent = convertOrcamentosPorClienteToCSV(csvData)
+      const filename = `orcamentos_por_cliente_${new Date().toISOString().split('T')[0]}.csv`
+      
+      downloadCSV(csvContent, filename)
+    } catch (error) {
+      console.error('Erro ao exportar CSV:', error)
+    }
+  }
+
+  const handleExportProdutosMaisOrcados = () => {
+    if (!data || data.produtosMaisOrcados.length === 0) {
+      return
+    }
+
+    try {
+      const csvData = data.produtosMaisOrcados.map(item => ({
+        produtoNome: item.produtoNome,
+        vezesOrcado: item.vezesOrcado,
+        quantidadeTotal: item.quantidadeTotal
+      }))
+
+      const csvContent = convertProdutosMaisOrcadosToCSV(csvData)
+      const filename = `produtos_mais_orcados_${new Date().toISOString().split('T')[0]}.csv`
+      
+      downloadCSV(csvContent, filename)
+    } catch (error) {
+      console.error('Erro ao exportar CSV:', error)
+    }
   }
 
   return (
@@ -190,7 +237,13 @@ export function RelatoriosContent({ workspaceId }: RelatoriosContentProps) {
                     Top 10 clientes com mais orçamentos criados
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:border-sky-600 cursor-pointer hover:text-sky-600"
+                  onClick={handleExportOrcamentosPorCliente}
+                  disabled={!data || data.orcamentosPorCliente.length === 0}
+                >
                   Exportar CSV
                   <Download className="h-4 w-4" />
                 </Button>
@@ -245,7 +298,13 @@ export function RelatoriosContent({ workspaceId }: RelatoriosContentProps) {
                     Top 10 itens mais frequentes nos orçamentos
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:border-sky-600 cursor-pointer hover:text-sky-600"
+                  onClick={handleExportProdutosMaisOrcados}
+                  disabled={!data || data.produtosMaisOrcados.length === 0}
+                >
                   Exportar CSV
                   <Download className="h-4 w-4" />
                 </Button>
