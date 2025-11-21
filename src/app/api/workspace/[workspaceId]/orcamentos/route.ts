@@ -43,6 +43,13 @@ export async function GET(
         // Usar dados desnormalizados do cliente
         cliente_nome: true,
         cliente_cpf_cnpj: true,
+        cliente_telefone: true,
+        cliente_email: true,
+        cliente_endereco: true,
+        cliente_bairro: true,
+        cliente_cidade: true,
+        cliente_estado: true,
+        cliente_cep: true,
         usuario: {
           select: {
             name: true,

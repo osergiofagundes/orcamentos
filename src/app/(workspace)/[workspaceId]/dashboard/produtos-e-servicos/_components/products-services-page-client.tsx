@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { ProductsServicesStats } from "./products-services-stats"
 import { ProductsTable } from "./products-table"
 import { CreateProductButton } from "./create-product-button"
+import { ImportProdutosCSVModal } from "./import-produtos-csv-modal"
 import { SearchInput } from "@/components/search-input"
 import { useUserPermissions } from "@/hooks/use-user-permissions"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -21,13 +22,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CalendarIcon, Lock, X, Tag, Ruler, Package, Download, Upload, NotepadTextDashed } from "lucide-react"
+import { CalendarIcon, Lock, X, Tag, Ruler, Package, Download, Upload, NotepadTextDashed, Loader2 } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { convertProdutosToCSV, downloadCSV, generateProdutosCSVTemplate } from "@/lib/csv-utils"
+import { toast } from "sonner"
 
 interface ProductsServicesPageClientProps {
   workspaceId: string
+}
+
+interface Product {
+  id: number
+  nome: string
+  valor?: number | null
+  tipo: "PRODUTO" | "SERVICO"
+  tipo_valor: string
+  categoria_id: number | null
+  categoria: {
+    id: number
+    nome: string
+  } | null
 }
 
 export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPageClientProps) {
@@ -41,9 +57,59 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
   const [tipoValorFilter, setTipoValorFilter] = React.useState<string>("all")
   const [tiposValor, setTiposValor] = React.useState<string[]>([])
   const [tipoFilter, setTipoFilter] = React.useState<string>("all")
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const handleDataChanged = () => {
     setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleImportSuccess = () => {
+    setRefreshTrigger(prev => prev + 1)
+    setImportModalOpen(false)
+  }
+
+  const handleExportCSV = async () => {
+    setExporting(true)
+    try {
+      const response = await fetch(`/api/workspace/${workspaceId}/produtos`)
+      if (!response.ok) {
+        throw new Error('Erro ao buscar produtos')
+      }
+
+      const products: Product[] = await response.json()
+
+      if (products.length === 0) {
+        toast.info('Não há produtos para exportar')
+        return
+      }
+
+      // Converte para formato CSV
+      const csvData = products.map(product => ({
+        nome: product.nome,
+        valor: product.valor ? (product.valor / 100).toFixed(2) : '',
+        tipo: product.tipo,
+        tipo_valor: product.tipo_valor as "UNIDADE" | "METRO" | "METRO_QUADRADO" | "METRO_CUBICO" | "CENTIMETRO" | "DUZIA" | "QUILO" | "GRAMA" | "QUILOMETRO" | "LITRO" | "MINUTO" | "HORA" | "DIA" | "MES" | "ANO",
+        categoria: product.categoria?.nome || '',
+      }))
+
+      const csvContent = convertProdutosToCSV(csvData)
+      const filename = `produtos_servicos_${new Date().toISOString().split('T')[0]}.csv`
+      
+      downloadCSV(csvContent, filename)
+      toast.success('Produtos e serviços exportados com sucesso!')
+    } catch (error) {
+      console.error('Erro ao exportar CSV:', error)
+      toast.error('Erro ao exportar produtos e serviços')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleDownloadTemplate = () => {
+    const template = generateProdutosCSVTemplate()
+    downloadCSV(template, 'template_produtos_servicos.csv')
+    toast.success('Template baixado com sucesso!')
   }
 
   return (
@@ -182,22 +248,56 @@ export function ProductsServicesPageClient({ workspaceId }: ProductsServicesPage
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Exportar CSV
-          <Download className="h-4 w-4" />
-        </Button>
+      {canManageProducts && (
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={handleExportCSV}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Exportar CSV
+              </>
+            )}
+          </Button>
 
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Importar CSV
-          <Upload className="h-4 w-4" />
-        </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={() => setImportModalOpen(true)}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importar CSV
+          </Button>
 
-        <Button variant="outline" size="sm" className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto">
-          Baixar Template
-          <NotepadTextDashed className="h-4 w-4" />
-        </Button>
-      </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="hover:border-sky-600 cursor-pointer hover:text-sky-600 w-full md:w-auto"
+            onClick={handleDownloadTemplate}
+          >
+            <NotepadTextDashed className="h-4 w-4 mr-2" />
+            Baixar Template
+          </Button>
+        </div>
+      )}
+
+      <ImportProdutosCSVModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        workspaceId={workspaceId}
+        onImportSuccess={handleImportSuccess}
+      />
 
       <div className="space-y-6">
         <div>

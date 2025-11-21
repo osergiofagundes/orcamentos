@@ -14,3 +14,4 @@ export { CreateProductButton } from './create-product-button'
 // export { CreateCategoryModal } from './create-category-modal' // Comentado temporariamente
 export { ProductActions } from './product-actions'
 // export { CategoryActions } from './category-actions' // Comentado temporariamente
+export { ImportProdutosCSVModal } from './import-produtos-csv-modal'
